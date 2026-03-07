@@ -26,10 +26,25 @@ export default function SpellingPractice({
   const [isError, setIsError] = useState(false);
   const [flashSuccess, setFlashSuccess] = useState(false);
 
+  const [currentLevel, setCurrentLevel] = useState(1);
+
   const activeWord = words[currentIndex];
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Helper to play audio (Now accepts the word as a parameter)
+  // Grab the level on initial mount
+  useEffect(() => {
+    // FIX: Wrapped in setTimeout to prevent cascading render error
+    const timer = setTimeout(() => {
+      const savedExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      const rawLevel = Math.floor(savedExp / 150) + 1;
+      setCurrentLevel(Math.min(rawLevel, 8));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   const playSingleAudio = useCallback((wordToSpeak: string) => {
     setIsListening(true);
     const utterance = new SpeechSynthesisUtterance(wordToSpeak);
@@ -41,12 +56,9 @@ export default function SpellingPractice({
     window.speechSynthesis.speak(utterance);
   }, []);
 
-  // Handle setting up a completely new word
   useEffect(() => {
     if (!activeWord) return;
 
-    // FIX: Wrap the state resets in a 0ms timeout to make them asynchronous.
-    // This perfectly satisfies the React Compiler's cascading render rules!
     const timer = setTimeout(() => {
       setTypingCount(0);
       setInputValue("");
@@ -61,7 +73,6 @@ export default function SpellingPractice({
     };
   }, [activeWord, playSingleAudio]);
 
-  // Handle every keystroke
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setInputValue(val);
@@ -69,14 +80,12 @@ export default function SpellingPractice({
     const targetWord = activeWord.word.toLowerCase();
     const typedWord = val.toLowerCase().trim();
 
-    // 1. Check for Typos
     if (val.length > 0 && !targetWord.startsWith(typedWord)) {
       setIsError(true);
     } else {
       setIsError(false);
     }
 
-    // 2. Check for a Complete Match
     if (typedWord === targetWord) {
       setFeedTrigger((prev) => prev + 1);
       setFlashSuccess(true);
@@ -85,7 +94,6 @@ export default function SpellingPractice({
       setTypingCount(newCount);
 
       if (newCount >= 4) {
-        // They finished the 4th rep! Move to next word.
         setTimeout(() => {
           if (currentIndex + 1 < words.length) {
             setCurrentIndex((prev) => prev + 1);
@@ -94,7 +102,6 @@ export default function SpellingPractice({
           }
         }, 1500);
       } else {
-        // They got it right, but still have more reps.
         setTimeout(() => {
           setInputValue("");
           setFlashSuccess(false);
@@ -119,7 +126,6 @@ export default function SpellingPractice({
 
   return (
     <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-center gap-8 animate-fade-in">
-      {/* LEFT SIDE: Vocabmon */}
       <div className="w-full md:w-1/3 flex flex-col items-center">
         <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-3xl p-8 shadow-inner border border-indigo-100/50 w-full flex flex-col items-center relative h-64 justify-end">
           <div className="absolute top-6 w-full px-4 text-center">
@@ -129,11 +135,10 @@ export default function SpellingPractice({
               {FEEDBACK_MESSAGES[typingCount]}
             </p>
           </div>
-          <PixelVocabmon feedTrigger={feedTrigger} />
+          <PixelVocabmon feedTrigger={feedTrigger} level={currentLevel} />
         </div>
       </div>
 
-      {/* RIGHT SIDE: Exercise */}
       <div className="w-full md:w-2/3 flex flex-col">
         <div className="flex justify-between items-center mb-4 px-2">
           <span className="text-gray-400 font-bold uppercase tracking-wider text-sm">

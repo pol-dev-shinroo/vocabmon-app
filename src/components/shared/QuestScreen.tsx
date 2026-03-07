@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import PixelVocabmon from "./PixelVocabmon";
 
@@ -56,6 +56,21 @@ export default function QuestScreen({
 }: QuestScreenProps) {
   const colors = themeColors[theme];
 
+  const [currentLevel, setCurrentLevel] = useState(1);
+
+  useEffect(() => {
+    // FIX: Wrapped in setTimeout to prevent cascading render error
+    const timer = setTimeout(() => {
+      const savedExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      const rawLevel = Math.floor(savedExp / 150) + 1;
+      setCurrentLevel(Math.min(rawLevel, 8));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     if (audio === "none") return;
 
@@ -95,7 +110,6 @@ export default function QuestScreen({
         playNote(783.99, now + 0.3, 0.15); // G5
         playNote(1046.5, now + 0.45, 0.4); // C6
       } else if (audio === "sword") {
-        // 1. Metallic Ring
         const freqs = [1200, 2043, 3102, 4500];
         freqs.forEach((freq) => {
           const osc = ctx.createOscillator();
@@ -111,7 +125,6 @@ export default function QuestScreen({
           osc.stop(now + 0.5);
         });
 
-        // 2. Scrape/Impact (Noise)
         const bufferSize = ctx.sampleRate * 0.1;
         const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const data = buffer.getChannelData(0);
@@ -141,16 +154,14 @@ export default function QuestScreen({
     <div
       className={`w-full max-w-md text-center bg-white p-8 rounded-3xl shadow-sm border ${colors.border} animate-fade-in flex flex-col items-center`}
     >
-      {/* Dynamic Icon/Image */}
       <div
         className={`${icon === "vocabmon" ? "mb-6" : "text-7xl mb-6 animate-bounce"}`}
       >
-        {icon === "vocabmon" ? <PixelVocabmon /> : icon}
+        {icon === "vocabmon" ? <PixelVocabmon level={currentLevel} /> : icon}
       </div>
 
       <h1 className="text-3xl font-black text-gray-900 mb-2">{title}</h1>
 
-      {/* Dynamic Body Based on Type */}
       {type === "transition" ? (
         <div
           className={`${colors.bgLight} border ${colors.border} rounded-xl p-6 mb-8 w-full`}
@@ -168,7 +179,6 @@ export default function QuestScreen({
         </p>
       )}
 
-      {/* Dynamic Action Button */}
       <button
         onClick={onNext}
         className={`w-full ${colors.button} text-white font-bold py-4 px-4 rounded-xl text-xl transition-all shadow-md transform hover:scale-105`}
@@ -176,7 +186,6 @@ export default function QuestScreen({
         {buttonText}
       </button>
 
-      {/* Optional Cancel Button */}
       {showCancel && (
         <Link
           href="/"

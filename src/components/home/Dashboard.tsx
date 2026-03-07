@@ -173,15 +173,6 @@ export default function Dashboard() {
     }
   };
 
-  const devCheatLevelUp = () => {
-    // Dev cheat skips animation, just forces the new state
-    const newExp = exp + 150;
-    setExp(newExp);
-    localStorage.setItem("vocabmon_exp", newExp.toString());
-    setShowFireworks(true);
-    setTimeout(() => setShowFireworks(false), 2000);
-  };
-
   if (!isLoaded) return <div className="w-full max-w-md min-h-[50vh]"></div>;
 
   const isSetComplete = spellingDone && exerciseDone && testDone;
@@ -199,13 +190,6 @@ export default function Dashboard() {
         @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.5)); } 50% { filter: drop-shadow(0 0 20px rgba(52, 211, 153, 0.9)); } }
         .animate-evo-glow { animation: glow 2s infinite alternate; }
       `}</style>
-
-      <button
-        onClick={devCheatLevelUp}
-        className="absolute top-2 right-2 bg-gray-900 text-white text-xs font-black px-3 py-2 rounded-xl z-50 shadow-lg hover:bg-black transition-all transform hover:scale-105"
-      >
-        🛠️ Dev: +1 Level
-      </button>
 
       {showFireworks && (
         <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center overflow-hidden">
@@ -308,7 +292,6 @@ export default function Dashboard() {
                 <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 flex items-center gap-2">
                   Set {setIndex + 1}{" "}
                   <span className="text-xs font-bold text-gray-300">
-                    {/* THIS HAS BEEN UPDATED */}
                     (Words {1 + setIndex * 5} - {5 + setIndex * 5})
                   </span>
                 </h4>
