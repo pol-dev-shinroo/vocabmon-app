@@ -16,7 +16,7 @@ export default function DragDropTest({
   const [selectedBankWord, setSelectedBankWord] = useState<string | null>(null);
   const [errorId, setErrorId] = useState<number | null>(null);
   const [feedTrigger, setFeedTrigger] = useState(0);
-  const [isSpeaking, setIsSpeaking] = useState(false); // NEW STATE
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -34,6 +34,7 @@ export default function DragDropTest({
   const playAudio = (text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US"; // FIX: Force English voice
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
   };
@@ -43,7 +44,6 @@ export default function DragDropTest({
       if (placedWords[targetWord.id] || isSpeaking) return;
 
       if (droppedWordString.toLowerCase() === targetWord.word.toLowerCase()) {
-        // Instantly update UI
         setPlacedWords((prev) => ({
           ...prev,
           [targetWord.id]: targetWord.word,
@@ -52,15 +52,14 @@ export default function DragDropTest({
         setSelectedBankWord(null);
         setFeedTrigger((prev) => prev + 1);
 
-        // AUDIO LOCK MECHANIC
         setIsSpeaking(true);
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(targetWord.definition);
+        utterance.lang = "en-US"; // FIX: Force English voice
         utterance.rate = 0.85;
 
         utterance.onend = () => {
           setIsSpeaking(false);
-          // Check if finished AFTER audio ends
           if (Object.keys(placedWords).length + 1 === words.length) {
             setTimeout(onFinish, 1000);
           }

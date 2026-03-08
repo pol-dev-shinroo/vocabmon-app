@@ -17,7 +17,7 @@ export default function MeaningFlip({
   const [activeFlipId, setActiveFlipId] = useState<number | null>(null);
   const [errorId, setErrorId] = useState<number | null>(null);
   const [feedTrigger, setFeedTrigger] = useState(0);
-  const [isSpeaking, setIsSpeaking] = useState(false); // NEW STATE
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -33,7 +33,6 @@ export default function MeaningFlip({
   const activeTarget = targetOrder[currentIndex];
 
   const handleCardClick = (clickedWord: VocabWord) => {
-    // Block clicks if already animating or speaking!
     if (
       activeFlipId !== null ||
       solvedIds.includes(clickedWord.id) ||
@@ -46,13 +45,12 @@ export default function MeaningFlip({
 
     if (clickedWord.id === activeTarget.id) {
       setFeedTrigger((prev) => prev + 1);
-
-      // AUDIO LOCK MECHANIC
       setIsSpeaking(true);
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(
         `${clickedWord.word}. ${activeTarget.definition}`,
       );
+      utterance.lang = "en-US"; // FIX: Force English voice
       utterance.rate = 0.85;
 
       utterance.onend = () => {
@@ -70,6 +68,7 @@ export default function MeaningFlip({
     } else {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(clickedWord.word);
+      utterance.lang = "en-US"; // FIX: Force English voice
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
 

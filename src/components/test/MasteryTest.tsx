@@ -13,13 +13,11 @@ export default function MasteryTest({
   const [feedTrigger, setFeedTrigger] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  // Meaning State
   const [placedCount, setPlacedCount] = useState(0);
   const [shuffledBank, setShuffledBank] = useState<string[]>([]);
   const [errorId, setErrorId] = useState<string | null>(null);
   const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
 
-  // Spelling State
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -49,7 +47,6 @@ export default function MasteryTest({
           new Set(allWords.map((w) => w.toLowerCase())),
         ).slice(0, 2);
       } else if (chosenLowerWords.length === 0 && allWords.length > 0) {
-        // FIX: Added the TypeScript safety check here!
         const firstWord = allWords[0];
         targetWords = firstWord ? [firstWord.toLowerCase()] : [];
       } else {
@@ -80,7 +77,6 @@ export default function MasteryTest({
     }
   }, [activeWord]);
 
-  // Focus input automatically when meaning is complete
   const isMeaningComplete =
     placedCount > 0 && placedCount === activeKeywords.length;
   useEffect(() => {
@@ -111,10 +107,10 @@ export default function MasteryTest({
       setFeedTrigger((prev) => prev + 1);
       setIsSpeaking(true);
       window.speechSynthesis.cancel();
-      // First pronounce word, then read definition
       const utterance = new SpeechSynthesisUtterance(
         `${activeWord.word}. ${activeWord.definition}`,
       );
+      utterance.lang = "en-US"; // FIX: Force English voice
       utterance.rate = 0.85;
 
       utterance.onend = () => {
@@ -199,7 +195,6 @@ export default function MasteryTest({
     <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-center gap-8 animate-fade-in">
       <style>{`@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } } .animate-error-shake { animation: shake 0.2s ease-in-out 0s 2; }`}</style>
 
-      {/* LEFT: Vocabmon */}
       <div className="w-full md:w-1/3 flex flex-col items-center">
         <div className="bg-gradient-to-b from-indigo-50 to-blue-50 rounded-3xl p-8 shadow-inner border border-indigo-100/50 w-full flex flex-col items-center relative h-64 justify-end">
           <div className="absolute top-6 w-full px-4 text-center">
@@ -219,7 +214,6 @@ export default function MasteryTest({
         </div>
       </div>
 
-      {/* RIGHT: Combo UI */}
       <div className="w-full md:w-2/3 flex flex-col gap-6">
         <div className="flex justify-between items-center px-2">
           <span className="text-gray-400 font-bold uppercase tracking-wider text-sm">
@@ -230,7 +224,6 @@ export default function MasteryTest({
           </span>
         </div>
 
-        {/* Part 1: Meaning Completion */}
         <div
           className={`bg-white rounded-3xl shadow-md p-8 text-center border transition-all ${isMeaningComplete ? "border-emerald-200 bg-emerald-50/20 opacity-80" : "border-indigo-100 ring-4 ring-indigo-50"}`}
         >
@@ -259,7 +252,6 @@ export default function MasteryTest({
           )}
         </div>
 
-        {/* Part 2: Spelling Input */}
         <div
           className={`bg-white rounded-3xl shadow-md p-8 text-center border transition-all ${isMeaningComplete ? "border-indigo-100 ring-4 ring-indigo-50" : "border-gray-100 opacity-50 pointer-events-none"}`}
         >

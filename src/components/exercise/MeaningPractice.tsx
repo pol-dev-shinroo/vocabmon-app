@@ -27,9 +27,11 @@ export default function MeaningPractice({
     setFlashSuccess(false);
     setErrorId(null);
 
-    // NEW: Instantly pronounce the word when it appears!
     window.speechSynthesis.cancel();
     const welcomeUtterance = new SpeechSynthesisUtterance(activeWord.word);
+
+    // FIX: Force English pronunciation!
+    welcomeUtterance.lang = "en-US";
     welcomeUtterance.rate = 0.9;
     window.speechSynthesis.speak(welcomeUtterance);
 
@@ -86,13 +88,14 @@ export default function MeaningPractice({
       const shuffled = [...answersInOrder].sort(() => Math.random() - 0.5);
       setShuffledBank(shuffled);
     }
-
-    // Don't cancel audio on cleanup here or it will cut off the initial pronunciation
   }, [activeWord]);
 
   const handleWordComplete = useCallback(() => {
     setFlashSuccess(true);
     const utterance = new SpeechSynthesisUtterance(activeWord.definition);
+
+    // FIX: Force English pronunciation!
+    utterance.lang = "en-US";
     utterance.rate = 0.85;
 
     utterance.onend = () => {

@@ -16,8 +16,6 @@ export default function SpellingTest({
 
   const [isError, setIsError] = useState(false);
   const [flashSuccess, setFlashSuccess] = useState(false);
-
-  // NEW: State to track which specific letters are currently hidden
   const [hiddenIndices, setHiddenIndices] = useState<number[]>([]);
 
   const activeWord = words[currentIndex];
@@ -26,6 +24,7 @@ export default function SpellingTest({
   const playSingleAudio = useCallback((wordToSpeak: string) => {
     setIsListening(true);
     const utterance = new SpeechSynthesisUtterance(wordToSpeak);
+    utterance.lang = "en-US"; // FIX: Force English voice
     utterance.rate = 0.85;
     utterance.onend = () => {
       setIsListening(false);
@@ -75,7 +74,7 @@ export default function SpellingTest({
     if (typedWord === targetWord) {
       setFeedTrigger((prev) => prev + 1);
       setFlashSuccess(true);
-      setHiddenIndices([]); // Reveal all on success!
+      setHiddenIndices([]);
 
       setTimeout(() => {
         if (currentIndex + 1 < words.length)
@@ -85,7 +84,6 @@ export default function SpellingTest({
     }
   };
 
-  // NEW: The Hint Logic (Removes one index from the hidden array)
   const handleHintClick = () => {
     if (hiddenIndices.length > 0) {
       setHiddenIndices((prev) => prev.slice(1));
@@ -95,7 +93,6 @@ export default function SpellingTest({
 
   if (!activeWord) return null;
 
-  // Generate the UI string dynamically based on what is currently hidden
   const displayWord = activeWord.word
     .split("")
     .map((char, index) => (hiddenIndices.includes(index) ? "_" : char))
@@ -156,7 +153,6 @@ export default function SpellingTest({
             className={inputClasses}
           />
 
-          {/* NEW: Hint Button */}
           <div className="mt-6 flex justify-end h-10">
             {hiddenIndices.length > 0 && !flashSuccess && (
               <button

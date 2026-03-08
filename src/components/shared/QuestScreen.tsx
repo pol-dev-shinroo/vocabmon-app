@@ -59,7 +59,6 @@ export default function QuestScreen({
   const [currentLevel, setCurrentLevel] = useState(1);
 
   useEffect(() => {
-    // FIX: Wrapped in setTimeout to prevent cascading render error
     const timer = setTimeout(() => {
       const savedExp = parseInt(
         localStorage.getItem("vocabmon_exp") || "0",
@@ -150,6 +149,43 @@ export default function QuestScreen({
     }
   }, [audio]);
 
+  // --- NEW: THE MAGIC iOS AUDIO UNLOCKER ---
+  const handleNextClick = () => {
+    // 1. Unlock the Speech Synthesis Engine (Robot Voice)
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      const silentUtterance = new SpeechSynthesisUtterance("");
+      silentUtterance.volume = 0; // 100% silent
+      window.speechSynthesis.speak(silentUtterance);
+    }
+
+    // 2. Unlock the Web Audio API Engine (Sound effects/beeps)
+    try {
+      const AudioContextClass =
+        window.AudioContext ||
+        (
+          window as typeof window & {
+            webkitAudioContext?: typeof window.AudioContext;
+          }
+        ).webkitAudioContext;
+
+      if (AudioContextClass) {
+        const ctx = new AudioContextClass();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        gain.gain.value = 0; // 100% silent
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(0);
+        osc.stop(ctx.currentTime + 0.1);
+      }
+    } catch (e) {
+      console.log("Could not unlock audio", e);
+    }
+
+    // Now proceed to the next screen! The iPad will allow auto-play from here on out.
+    onNext();
+  };
+
   return (
     <div
       className={`w-full max-w-md text-center bg-white p-8 rounded-3xl shadow-sm border ${colors.border} animate-fade-in flex flex-col items-center`}
@@ -179,8 +215,9 @@ export default function QuestScreen({
         </p>
       )}
 
+      {/* Attach the unlocker to the button! */}
       <button
-        onClick={onNext}
+        onClick={handleNextClick}
         className={`w-full ${colors.button} text-white font-bold py-4 px-4 rounded-xl text-xl transition-all shadow-md transform hover:scale-105`}
       >
         {buttonText}

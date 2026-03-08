@@ -26,7 +26,7 @@ export default function MeaningMatch({
   const [matchedIds, setMatchedIds] = useState<number[]>([]);
   const [errorId, setErrorId] = useState<number | null>(null);
   const [feedTrigger, setFeedTrigger] = useState(0);
-  const [isSpeaking, setIsSpeaking] = useState(false); // NEW STATE
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const leftNodeRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
@@ -79,6 +79,7 @@ export default function MeaningMatch({
     if (matchedIds.includes(word.id) || isSpeaking) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(word.word);
+    utterance.lang = "en-US"; // FIX: Force English voice
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
     setSelectedWordId(word.id);
@@ -99,10 +100,10 @@ export default function MeaningMatch({
       setSelectedWordId(null);
       setFeedTrigger((prev) => prev + 1);
 
-      // AUDIO LOCK MECHANIC
       setIsSpeaking(true);
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(meaning.definition);
+      utterance.lang = "en-US"; // FIX: Force English voice
       utterance.rate = 0.85;
 
       utterance.onend = () => {

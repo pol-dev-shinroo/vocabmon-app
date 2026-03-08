@@ -16,7 +16,7 @@ export default function MeaningPuzzle({
     {},
   );
   const [feedTrigger, setFeedTrigger] = useState(0);
-  const [isSpeaking, setIsSpeaking] = useState(false); // NEW STATE
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -45,12 +45,12 @@ export default function MeaningPuzzle({
       setCompletedIndices(newCompleted);
       setFeedTrigger((prev) => prev + 1);
 
-      // AUDIO LOCK MECHANIC
       setIsSpeaking(true);
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(
         `${activeWord.word}. ${activeWord.definition}`,
       );
+      utterance.lang = "en-US"; // FIX: Force English voice
       utterance.rate = 0.9;
 
       utterance.onend = () => {
@@ -138,7 +138,6 @@ export default function MeaningPuzzle({
                 >
                   {completedIndices.includes(i) ? "✓" : i + 1}
                 </div>
-                {/* FIX: Removed line-through decoration, updated colors */}
                 <p
                   className={`flex-1 break-words whitespace-normal font-medium leading-snug mt-1 transition-colors ${completedIndices.includes(i) ? "text-emerald-700" : "text-gray-700"}`}
                 >

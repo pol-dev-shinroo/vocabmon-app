@@ -31,9 +31,7 @@ export default function SpellingPractice({
   const activeWord = words[currentIndex];
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Grab the level on initial mount
   useEffect(() => {
-    // FIX: Wrapped in setTimeout to prevent cascading render error
     const timer = setTimeout(() => {
       const savedExp = parseInt(
         localStorage.getItem("vocabmon_exp") || "0",
@@ -48,7 +46,11 @@ export default function SpellingPractice({
   const playSingleAudio = useCallback((wordToSpeak: string) => {
     setIsListening(true);
     const utterance = new SpeechSynthesisUtterance(wordToSpeak);
+
+    // FIX: Force the voice to be English regardless of the phone's language!
+    utterance.lang = "en-US";
     utterance.rate = 0.85;
+
     utterance.onend = () => {
       setIsListening(false);
       setTimeout(() => inputRef.current?.focus(), 100);

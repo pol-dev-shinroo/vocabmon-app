@@ -1,29 +1,41 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function CountdownPhase({ onFinish }: { onFinish: () => void }) {
   const [count, setCount] = useState(3);
 
+  // FIX: Save the AudioContext in a ref so we don't recreate it inside the timeout!
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
   useEffect(() => {
-    // Classic Arcade Beep Generator embedded in the effect
+    // Initialize the context exactly once when the screen loads
+    const AudioContextClass =
+      window.AudioContext ||
+      (
+        window as typeof window & {
+          webkitAudioContext?: typeof window.AudioContext;
+        }
+      ).webkitAudioContext;
+
+    if (AudioContextClass && !audioCtxRef.current) {
+      audioCtxRef.current = new AudioContextClass();
+    }
+  }, []);
+
+  useEffect(() => {
     const playBeep = (type: "short" | "long") => {
       try {
-        // FIX: Replaced `any` with a proper TypeScript intersection type
-        const AudioContextClass =
-          window.AudioContext ||
-          (
-            window as typeof window & {
-              webkitAudioContext?: typeof window.AudioContext;
-            }
-          ).webkitAudioContext;
+        const audioCtx = audioCtxRef.current;
+        if (!audioCtx) return;
 
-        if (!AudioContextClass) return;
+        // If iPad paused the context, wake it up!
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
 
-        const audioCtx = new AudioContextClass();
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
 
-        oscillator.type = "square"; // Retro 8-bit sound
-        // Low pitch for 3-2-1, High pitch for GO
+        oscillator.type = "square";
         oscillator.frequency.setValueAtTime(
           type === "short" ? 440 : 880,
           audioCtx.currentTime,
@@ -41,7 +53,6 @@ export default function CountdownPhase({ onFinish }: { onFinish: () => void }) {
       }
     };
 
-    // Trigger the appropriate sound based on the current count
     if (count > 0) {
       playBeep("short");
     } else if (count === 0) {
