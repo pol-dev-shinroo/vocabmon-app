@@ -4,7 +4,7 @@ import Link from "next/link";
 import PixelVocabmon from "../shared/PixelVocabmon";
 
 // 🚀 CHANGE THIS STRING NEXT TIME YOU WANT TO FORCE A RESET FOR A NEW LIST!
-const APP_VERSION = "v2_50words_campaign";
+const APP_VERSION = "v2.1_50words";
 
 export default function Dashboard() {
   const [exp, setExp] = useState(0);
@@ -30,18 +30,13 @@ export default function Dashboard() {
       const savedVersion = localStorage.getItem("app_version");
 
       if (savedVersion !== APP_VERSION) {
-        console.log("New update detected! Resetting progress to Level 1.");
-        localStorage.removeItem("vocabmon_exp");
-        localStorage.removeItem("current_word_set");
-        localStorage.removeItem("quest_spelling_done");
-        localStorage.removeItem("quest_exercise_done");
-        localStorage.removeItem("quest_test_done");
-        localStorage.removeItem("quest_midterm_done");
-        localStorage.removeItem("quest_final1_done");
-        localStorage.removeItem("quest_finale_done");
-        localStorage.removeItem("trigger_fireworks");
+        console.log("New update detected! Wiping all old data to start fresh.");
 
-        // Save the new version so it doesn't wipe their progress tomorrow!
+        // 💥 THE NUCLEAR OPTION: This destroys EVERYTHING saved in the browser!
+        // This includes EXP, Quest progress, AND the "has seen gift" flag.
+        localStorage.clear();
+
+        // Save the new version immediately so it doesn't wipe their progress tomorrow!
         localStorage.setItem("app_version", APP_VERSION);
       }
       // ----------------------------------------------
