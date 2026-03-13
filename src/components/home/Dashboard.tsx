@@ -3,6 +3,9 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import PixelVocabmon from "../shared/PixelVocabmon";
 
+// 🚀 CHANGE THIS STRING NEXT TIME YOU WANT TO FORCE A RESET FOR A NEW LIST!
+const APP_VERSION = "v2_50words_campaign";
+
 export default function Dashboard() {
   const [exp, setExp] = useState(0);
   const [spellingDone, setSpellingDone] = useState(false);
@@ -23,6 +26,26 @@ export default function Dashboard() {
 
   useEffect(() => {
     const initTimer = setTimeout(() => {
+      // --- NEW: VERSION CHECK & HARD RESET LOGIC ---
+      const savedVersion = localStorage.getItem("app_version");
+
+      if (savedVersion !== APP_VERSION) {
+        console.log("New update detected! Resetting progress to Level 1.");
+        localStorage.removeItem("vocabmon_exp");
+        localStorage.removeItem("current_word_set");
+        localStorage.removeItem("quest_spelling_done");
+        localStorage.removeItem("quest_exercise_done");
+        localStorage.removeItem("quest_test_done");
+        localStorage.removeItem("quest_midterm_done");
+        localStorage.removeItem("quest_final1_done");
+        localStorage.removeItem("quest_finale_done");
+        localStorage.removeItem("trigger_fireworks");
+
+        // Save the new version so it doesn't wipe their progress tomorrow!
+        localStorage.setItem("app_version", APP_VERSION);
+      }
+      // ----------------------------------------------
+
       const savedExp = parseInt(
         localStorage.getItem("vocabmon_exp") || "0",
         10,
