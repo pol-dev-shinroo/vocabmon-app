@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import PixelVocabmon from "./PixelVocabmon";
 
-type Theme = "indigo" | "emerald" | "blue";
+// FIX 1: Added purple, amber, and red to the Theme type!
+type Theme = "indigo" | "emerald" | "blue" | "purple" | "amber" | "red";
 type AudioType = "victory" | "sword" | "none";
 
 interface QuestScreenProps {
@@ -40,6 +41,28 @@ const themeColors = {
     bgLight: "bg-blue-50",
     button: "bg-blue-500 hover:bg-blue-600",
   },
+  // FIX 2: Added the color styles for the Boss Fights!
+  purple: {
+    border: "border-purple-100",
+    text: "text-purple-600",
+    textDark: "text-purple-800",
+    bgLight: "bg-purple-50",
+    button: "bg-purple-600 hover:bg-purple-700",
+  },
+  amber: {
+    border: "border-amber-100",
+    text: "text-amber-600",
+    textDark: "text-amber-800",
+    bgLight: "bg-amber-50",
+    button: "bg-amber-500 hover:bg-amber-600",
+  },
+  red: {
+    border: "border-red-100",
+    text: "text-red-600",
+    textDark: "text-red-800",
+    bgLight: "bg-red-50",
+    button: "bg-red-600 hover:bg-red-700",
+  },
 };
 
 export default function QuestScreen({
@@ -65,7 +88,8 @@ export default function QuestScreen({
         10,
       );
       const rawLevel = Math.floor(savedExp / 150) + 1;
-      setCurrentLevel(Math.min(rawLevel, 8));
+      // FIX 3: Increased the max visual level on this screen to 10
+      setCurrentLevel(Math.min(rawLevel, 10));
     }, 0);
     return () => clearTimeout(timer);
   }, []);

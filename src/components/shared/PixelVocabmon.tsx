@@ -71,7 +71,8 @@ export default function PixelVocabmon({
     return () => clearInterval(blinkInterval);
   }, []);
 
-  const safeLevel = Math.min(Math.max(level, 1), 8);
+  // UPDATED: Now supports up to Level 10
+  const safeLevel = Math.min(Math.max(level, 1), 10);
 
   const renderEyes = (
     x1: number,
@@ -227,28 +228,21 @@ export default function PixelVocabmon({
             {renderEyes(5, 9, 6)}
           </>
         );
-      case 7: // Lv7: Verdant Guardian (NEW: Proto-Dragon)
+      case 7: // Lv7: Proto-Dragon
         return (
           <>
-            {/* Proto-Wings / Mantle */}
             <g className="animate-float-slow">
               <rect x="0" y="3" width="3" height="7" fill="#34d399" />
               <rect x="13" y="3" width="3" height="7" fill="#34d399" />
               <rect x="-1" y="4" width="2" height="4" fill="#6ee7b7" />
               <rect x="15" y="4" width="2" height="4" fill="#6ee7b7" />
             </g>
-
-            {/* Massive Sweeping Horns */}
             <rect x="3" y="0" width="2" height="3" fill="#064e3b" />
             <rect x="11" y="0" width="2" height="3" fill="#064e3b" />
             <rect x="2" y="-1" width="2" height="2" fill="#064e3b" />
             <rect x="12" y="-1" width="2" height="2" fill="#064e3b" />
-
-            {/* Main Beast Body */}
             <rect x="3" y="3" width="10" height="9" fill="#10B981" />
             <rect x="2" y="5" width="12" height="6" fill="#047857" />
-
-            {/* Glowing Chest Core */}
             <rect
               x="7"
               y="9"
@@ -257,12 +251,8 @@ export default function PixelVocabmon({
               fill="#6ee7b7"
               className="animate-pulse"
             />
-
-            {/* Strong Legs */}
             <rect x="3" y="12" width="3" height="3" fill="#064e3b" />
             <rect x="10" y="12" width="3" height="3" fill="#064e3b" />
-
-            {/* Fierce Yellow Eyes */}
             {renderEyes(5, 9, 5, "#facc15", true)}
           </>
         );
@@ -297,6 +287,154 @@ export default function PixelVocabmon({
             <rect x="4" y="12" width="3" height="3" fill="#064e3b" />
             <rect x="9" y="12" width="3" height="3" fill="#064e3b" />
             {renderEyes(4, 10, 5, "#ef4444", true)}
+          </>
+        );
+      case 9: // Lv9: Astral Serpent
+        return (
+          <>
+            {/* Floating Ethereal Rings */}
+            <g className="animate-float-slow">
+              <rect
+                x="-3"
+                y="6"
+                width="2"
+                height="6"
+                fill="#38bdf8"
+                opacity="0.6"
+              />
+              <rect
+                x="-1"
+                y="4"
+                width="2"
+                height="2"
+                fill="#38bdf8"
+                opacity="0.6"
+              />
+              <rect
+                x="17"
+                y="6"
+                width="2"
+                height="6"
+                fill="#38bdf8"
+                opacity="0.6"
+              />
+              <rect
+                x="15"
+                y="4"
+                width="2"
+                height="2"
+                fill="#38bdf8"
+                opacity="0.6"
+              />
+            </g>
+
+            {/* Serpentine Body Hovering */}
+            <g className="animate-float-fast">
+              {/* Tail / Lower Body */}
+              <rect x="5" y="13" width="6" height="2" fill="#0284c7" />
+              <rect x="3" y="11" width="10" height="2" fill="#0369a1" />
+
+              {/* Main Torso */}
+              <rect x="2" y="4" width="12" height="7" fill="#0ea5e9" />
+              <rect x="4" y="2" width="8" height="2" fill="#0284c7" />
+              <rect x="6" y="0" width="4" height="2" fill="#0369a1" />
+
+              {/* Glowing Cosmic Core */}
+              <rect
+                x="6"
+                y="6"
+                width="4"
+                height="4"
+                fill="#bae6fd"
+                className="animate-pulse"
+              />
+              <rect
+                x="7"
+                y="7"
+                width="2"
+                height="2"
+                fill="#ffffff"
+                className="animate-flicker"
+              />
+
+              {/* Crown Horns */}
+              <rect x="3" y="-2" width="2" height="4" fill="#bae6fd" />
+              <rect x="11" y="-2" width="2" height="4" fill="#bae6fd" />
+
+              {/* Deep Space Eyes */}
+              {renderEyes(5, 9, 3, "#fdf08a", true)}
+            </g>
+          </>
+        );
+      case 10: // Lv10: Divine Overlord (Max Level!)
+        return (
+          <>
+            {/* 4 Majestic Wings */}
+            <g className="animate-flap" style={{ transformOrigin: "8px 8px" }}>
+              {/* Top Wings */}
+              <rect
+                x="-4"
+                y="-2"
+                width="6"
+                height="8"
+                fill="#fde047"
+                opacity="0.9"
+              />
+              <rect
+                x="14"
+                y="-2"
+                width="6"
+                height="8"
+                fill="#fde047"
+                opacity="0.9"
+              />
+              {/* Bottom Wings */}
+              <rect
+                x="-2"
+                y="7"
+                width="4"
+                height="6"
+                fill="#fef08a"
+                opacity="0.7"
+              />
+              <rect
+                x="14"
+                y="7"
+                width="4"
+                height="6"
+                fill="#fef08a"
+                opacity="0.7"
+              />
+            </g>
+
+            {/* Huge Armored Body */}
+            <rect x="2" y="3" width="12" height="10" fill="#1e1b4b" />
+            <rect x="1" y="5" width="14" height="6" fill="#312e81" />
+
+            {/* Golden Chest Plate */}
+            <rect x="5" y="6" width="6" height="5" fill="#eab308" />
+            <rect x="6" y="7" width="4" height="3" fill="#facc15" />
+            <rect
+              x="7"
+              y="8"
+              width="2"
+              height="1"
+              fill="#ffffff"
+              className="animate-pulse"
+            />
+
+            {/* Divine Crown */}
+            <rect x="4" y="-1" width="8" height="2" fill="#eab308" />
+            <rect x="4" y="-3" width="2" height="2" fill="#facc15" />
+            <rect x="7" y="-4" width="2" height="3" fill="#facc15" />
+            <rect x="10" y="-3" width="2" height="2" fill="#facc15" />
+
+            {/* Massive Stomping Legs */}
+            <rect x="2" y="13" width="4" height="3" fill="#1e1b4b" />
+            <rect x="10" y="13" width="4" height="3" fill="#1e1b4b" />
+
+            {/* Piercing Red Eyes */}
+            {renderEyes(4, 10, 4, "#ef4444", true)}
           </>
         );
       default:
@@ -342,7 +480,7 @@ export default function PixelVocabmon({
         <svg
           width="140"
           height="140"
-          viewBox="-3 -2 22 20"
+          viewBox="-5 -5 26 22" // Slightly expanded viewBox to fit massive Level 10 wings
           xmlns="http://www.w3.org/2000/svg"
           className="drop-shadow-xl overflow-visible"
         >
