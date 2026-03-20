@@ -2,11 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { VocabWord } from "@/data/vocab";
 import PixelVocabmon from "../shared/PixelVocabmon";
 
+// UPDATED: Shortened to match the new 2-repetition limit
 const FEEDBACK_MESSAGES = [
   "Listen, then type!",
-  "Yummy! Let's do it again!",
-  "He loves it! Keep going!",
-  "Wow! One more bite!",
+  "Yummy! One more bite!",
   "Perfect! He's full! 🌟",
 ];
 
@@ -38,7 +37,8 @@ export default function SpellingPractice({
         10,
       );
       const rawLevel = Math.floor(savedExp / 150) + 1;
-      setCurrentLevel(Math.min(rawLevel, 8));
+      // Updated max level to 10 to match the 50-word campaign
+      setCurrentLevel(Math.min(rawLevel, 10));
     }, 0);
     return () => clearTimeout(timer);
   }, []);
@@ -47,7 +47,7 @@ export default function SpellingPractice({
     setIsListening(true);
     const utterance = new SpeechSynthesisUtterance(wordToSpeak);
 
-    // FIX: Force the voice to be English regardless of the phone's language!
+    // Force the voice to be English regardless of the phone's language!
     utterance.lang = "en-US";
     utterance.rate = 0.85;
 
@@ -95,7 +95,8 @@ export default function SpellingPractice({
       const newCount = typingCount + 1;
       setTypingCount(newCount);
 
-      if (newCount >= 4) {
+      // UPDATED: Now triggers the next word after 2 successful types instead of 4
+      if (newCount >= 2) {
         setTimeout(() => {
           if (currentIndex + 1 < words.length) {
             setCurrentIndex((prev) => prev + 1);
@@ -148,7 +149,8 @@ export default function SpellingPractice({
           </span>
 
           <div className="flex gap-2">
-            {[0, 1, 2, 3].map((i) => (
+            {/* UPDATED: Only mapping 2 dots [0, 1] instead of 4 */}
+            {[0, 1].map((i) => (
               <div
                 key={i}
                 className={`w-4 h-4 rounded-full transition-all duration-500 ${i < typingCount ? "bg-green-500 scale-110 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-gray-200"}`}
@@ -173,7 +175,8 @@ export default function SpellingPractice({
             ref={inputRef}
             type="text"
             autoComplete="off"
-            disabled={isListening || flashSuccess || typingCount >= 4}
+            // UPDATED: Disables the input after 2 successful types
+            disabled={isListening || flashSuccess || typingCount >= 2}
             value={inputValue}
             onChange={handleInputChange}
             placeholder={isListening ? "" : "Type the word..."}
