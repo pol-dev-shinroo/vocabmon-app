@@ -1,6 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { VocabWord } from "@/data/vocab";
 import PixelVocabmon from "../shared/PixelVocabmon";
+import SandTimer from "../shared/SandTimer";
+import TimeoutScreen from "../shared/TimeoutScreen";
+
+// SET YOUR DIFFICULTY HERE (30 seconds per puzzle clue)
+const SECONDS_PER_WORD = 30;
 
 export default function MeaningPuzzle({
   words,
@@ -18,23 +23,62 @@ export default function MeaningPuzzle({
   const [feedTrigger, setFeedTrigger] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
+  // Timer & Level States
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [currentLevel, setCurrentLevel] = useState(1);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const activeWord = words[selectedWordIndex];
 
+  // Fetch Vocabmon Level
   useEffect(() => {
-    if (!isSpeaking) inputRef.current?.focus();
+    const timer = setTimeout(() => {
+      const savedExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      const rawLevel = Math.floor(savedExp / 150) + 1;
+      setCurrentLevel(Math.min(rawLevel, 10));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!isSpeaking && !hasTimedOut) inputRef.current?.focus();
     if (itemRefs.current[selectedWordIndex]) {
       itemRefs.current[selectedWordIndex]?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     }
-  }, [selectedWordIndex, isSpeaking]);
+  }, [selectedWordIndex, isSpeaking, hasTimedOut]);
+
+  const handleTimeUp = useCallback(() => {
+    setHasTimedOut(true);
+  }, []);
+
+  const handleRetry = () => {
+    setHasTimedOut(false);
+    setRetryCount((prev) => prev + 1); // Resets the timer
+
+    // Clear the current typed attempt so they start fresh
+    const newAnswers = [...answers];
+    newAnswers[selectedWordIndex] = "";
+    setAnswers(newAnswers);
+
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.toLowerCase().trim();
-    if (completedIndices.includes(selectedWordIndex) || isSpeaking) return;
+    if (
+      completedIndices.includes(selectedWordIndex) ||
+      isSpeaking ||
+      hasTimedOut
+    )
+      return;
 
     const newAnswers = [...answers];
     newAnswers[selectedWordIndex] = val;
@@ -81,6 +125,11 @@ export default function MeaningPuzzle({
     inputRef.current?.focus();
   };
 
+  // IF TIME IS UP, SHOW THE GAME OVER SCREEN!
+  if (hasTimedOut) {
+    return <TimeoutScreen onRetry={handleRetry} />;
+  }
+
   const isCurrentCorrect = completedIndices.includes(selectedWordIndex);
   const currentVal = answers[selectedWordIndex];
   const isError =
@@ -88,12 +137,12 @@ export default function MeaningPuzzle({
     !activeWord.word.toLowerCase().startsWith(currentVal);
 
   let inputClasses =
-    "w-full text-center text-3xl p-4 border-b-4 outline-none transition-all bg-transparent font-mono font-bold uppercase tracking-[0.5em] disabled:bg-transparent ";
-  if (isCurrentCorrect) inputClasses += "border-emerald-500 text-emerald-600";
+    "w-full text-center text-3xl p-4 border-b-4 outline-none transition-all bg-transparent font-mono font-bold uppercase tracking-[0.5em] disabled:bg-transparent mt-4";
+  if (isCurrentCorrect) inputClasses += " border-emerald-500 text-emerald-600";
   else if (isError)
-    inputClasses += "border-red-500 text-red-600 focus:border-red-500";
+    inputClasses += " border-red-500 text-red-600 focus:border-red-500";
   else
-    inputClasses += "border-indigo-400 focus:border-indigo-500 text-gray-900";
+    inputClasses += " border-indigo-400 focus:border-indigo-500 text-gray-900";
 
   return (
     <div className="w-full max-w-6xl animate-fade-in flex flex-col items-center">
@@ -110,6 +159,7 @@ export default function MeaningPuzzle({
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 w-full items-start">
+        {/* LEFT COLUMN: Vocabmon & Clue List */}
         <div className="flex flex-col gap-6 w-full overflow-hidden">
           <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-3xl p-8 shadow-inner border border-indigo-100/50 w-full flex flex-col items-center relative h-64 justify-end shrink-0">
             <div className="absolute top-6 w-full px-4 text-center">
@@ -121,7 +171,7 @@ export default function MeaningPuzzle({
                     : "Solve a clue to feed him!"}
               </p>
             </div>
-            <PixelVocabmon feedTrigger={feedTrigger} />
+            <PixelVocabmon feedTrigger={feedTrigger} level={currentLevel} />
           </div>
 
           <div className="max-h-[380px] overflow-y-auto overflow-x-hidden no-scrollbar rounded-xl w-full p-1 relative flex flex-col gap-4">
@@ -149,9 +199,20 @@ export default function MeaningPuzzle({
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center bg-white p-10 rounded-3xl shadow-lg border border-gray-100 sticky top-6">
-          <div className="mb-8 w-full text-center">
-            <p className="text-emerald-500 font-black mb-4 uppercase text-sm tracking-widest bg-emerald-50 py-2 rounded-lg inline-block px-6 border border-emerald-100">
+        {/* RIGHT COLUMN: The Input Area */}
+        <div className="flex flex-col items-center justify-start bg-white p-10 rounded-3xl shadow-lg border border-gray-100 sticky top-6 min-h-[400px]">
+          {/* TIMER COMPONENT - Moved to the very top and given full width */}
+          <div className="w-full mb-8">
+            <SandTimer
+              key={`${selectedWordIndex}-${retryCount}`}
+              duration={SECONDS_PER_WORD}
+              isActive={!isSpeaking && !isCurrentCorrect && !hasTimedOut}
+              onTimeUp={handleTimeUp}
+            />
+          </div>
+
+          <div className="w-full text-center flex-1 flex flex-col justify-center">
+            <p className="text-emerald-500 font-black mb-6 uppercase text-sm tracking-widest bg-emerald-50 py-2 rounded-lg inline-block px-6 border border-emerald-100">
               Solving Clue #{selectedWordIndex + 1}
             </p>
 
@@ -183,16 +244,16 @@ export default function MeaningPuzzle({
                 isCurrentCorrect ? activeWord.word : answers[selectedWordIndex]
               }
               onChange={handleInputChange}
-              disabled={isCurrentCorrect || isSpeaking}
+              disabled={isCurrentCorrect || isSpeaking || hasTimedOut}
               className={inputClasses}
               placeholder={isSpeaking ? "LISTENING..." : "TYPE HERE"}
             />
           </div>
 
-          <div className="flex w-full justify-between items-center mt-auto">
+          <div className="flex w-full justify-center items-center mt-8">
             <button
               onClick={giveHint}
-              disabled={isCurrentCorrect || isSpeaking}
+              disabled={isCurrentCorrect || isSpeaking || hasTimedOut}
               className="flex items-center gap-2 text-emerald-600 font-bold hover:bg-emerald-50 px-6 py-3 rounded-xl transition-all border border-emerald-100 disabled:opacity-50 hover:shadow-sm"
             >
               💡 Reveal Letter

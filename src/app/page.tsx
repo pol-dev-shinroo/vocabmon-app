@@ -5,8 +5,8 @@ import GiftBox from "@/components/home/GiftBox";
 import VocabmonReveal from "@/components/home/VocabmonReveal";
 import Dashboard from "@/components/home/Dashboard";
 
-// 🚀 MOVE THE VERSION STRING HERE (Must match whatever version you are on!)
-const APP_VERSION = "v2.1_50words";
+// 🚀 UPDATED: New version string forces a clean slate for the new update!
+const APP_VERSION = "v2.2_timed_edition";
 
 export default function Home() {
   const [homePhase, setHomePhase] = useState<

@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { VocabWord } from "@/data/vocab";
 import PixelVocabmon from "../shared/PixelVocabmon";
+import SandTimer from "../shared/SandTimer";
+import TimeoutScreen from "../shared/TimeoutScreen";
+
+// SET YOUR DIFFICULTY HERE
+const SECONDS_PER_MATCH = 45; // Generous time for reading definitions
 
 export default function DragDropTest({
   words,
@@ -17,6 +22,28 @@ export default function DragDropTest({
   const [errorId, setErrorId] = useState<number | null>(null);
   const [feedTrigger, setFeedTrigger] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // --- Game Phase & Timer States ---
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [currentLevel, setCurrentLevel] = useState(1);
+
+  // --- Mistake Tracking (3 Strikes Rule) ---
+  const [mistakesThisRound, setMistakesThisRound] = useState(0);
+  const [isGameOver, setIsGameOver] = useState(false);
+
+  // Fetch Vocabmon Level
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const savedExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      const rawLevel = Math.floor(savedExp / 150) + 1;
+      setCurrentLevel(Math.min(rawLevel, 10));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,11 +66,34 @@ export default function DragDropTest({
     window.speechSynthesis.speak(utterance);
   };
 
+  const handleTimeUp = useCallback(() => {
+    setHasTimedOut(true);
+  }, []);
+
+  // --- Full Quiz Restart (Used for BOTH Timeouts and Game Overs) ---
+  const handleRestartQuiz = () => {
+    setIsGameOver(false);
+    setHasTimedOut(false);
+    setMistakesThisRound(0);
+    setPlacedWords({});
+    setSelectedBankWord(null);
+    setErrorId(null);
+    setRetryCount((prev) => prev + 1); // Reset timer state
+    window.speechSynthesis.cancel();
+
+    // Reshuffle the board completely
+    setTableRows([...words].sort(() => Math.random() - 0.5));
+    setBankWords([...words].map((w) => w.word).sort(() => Math.random() - 0.5));
+  };
+
   const handlePlacement = useCallback(
     (targetWord: VocabWord, droppedWordString: string) => {
-      if (placedWords[targetWord.id] || isSpeaking) return;
+      if (placedWords[targetWord.id] || isSpeaking || hasTimedOut || isGameOver)
+        return;
 
       if (droppedWordString.toLowerCase() === targetWord.word.toLowerCase()) {
+        // --- CORRECT PLACEMENT ---
+        setMistakesThisRound(0); // Reset mistakes for the next target
         setPlacedWords((prev) => ({
           ...prev,
           [targetWord.id]: targetWord.word,
@@ -67,16 +117,34 @@ export default function DragDropTest({
 
         window.speechSynthesis.speak(utterance);
       } else {
+        // --- INCORRECT PLACEMENT ---
+        const newMistakeCount = mistakesThisRound + 1;
+        setMistakesThisRound(newMistakeCount);
         setErrorId(targetWord.id);
         setSelectedBankWord(null);
-        setTimeout(() => setErrorId(null), 500);
+
+        setTimeout(() => {
+          setErrorId(null);
+          // Trigger Game Over if they hit 3 mistakes
+          if (newMistakeCount >= 3) {
+            setIsGameOver(true);
+          }
+        }, 500);
       }
     },
-    [placedWords, words.length, isSpeaking, onFinish],
+    [
+      placedWords,
+      words.length,
+      isSpeaking,
+      hasTimedOut,
+      isGameOver,
+      onFinish,
+      mistakesThisRound,
+    ],
   );
 
   const handleDragStart = (e: React.DragEvent, wordString: string) => {
-    if (isSpeaking) {
+    if (isSpeaking || hasTimedOut || isGameOver) {
       e.preventDefault();
       return;
     }
@@ -86,7 +154,7 @@ export default function DragDropTest({
 
   const handleDrop = (e: React.DragEvent, targetWord: VocabWord) => {
     e.preventDefault();
-    if (isSpeaking) return;
+    if (isSpeaking || hasTimedOut || isGameOver) return;
     const droppedWordString = e.dataTransfer.getData("text/plain");
     handlePlacement(targetWord, droppedWordString);
   };
@@ -95,6 +163,33 @@ export default function DragDropTest({
     e.preventDefault();
   };
 
+  // IF TIME IS UP, SHOW THE TIMEOUT SCREEN!
+  if (hasTimedOut) {
+    return <TimeoutScreen onRetry={handleRestartQuiz} />;
+  }
+
+  // --- IF GAME OVER (3 Mistakes), SHOW RESTART SCREEN ---
+  if (isGameOver) {
+    return (
+      <div className="w-full max-w-2xl animate-fade-in mx-auto mt-12">
+        <div className="bg-red-50 border-2 border-red-200 rounded-3xl p-10 text-center shadow-xl flex flex-col items-center">
+          <div className="text-6xl mb-4">💥</div>
+          <h2 className="text-4xl font-black text-red-600 mb-4">Game Over!</h2>
+          <p className="text-xl text-red-900/80 font-medium mb-8">
+            You made 3 wrong drag-and-drop attempts! You have to restart the
+            puzzle.
+          </p>
+          <button
+            onClick={handleRestartQuiz}
+            className="bg-red-500 hover:bg-red-600 text-white text-xl font-bold py-4 px-10 rounded-2xl shadow-lg hover:scale-105 transition-all active:scale-95"
+          >
+            Restart Puzzle 🔄
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-6xl animate-fade-in flex flex-col items-center">
       <style>{`
@@ -102,16 +197,40 @@ export default function DragDropTest({
         .animate-error-shake { animation: shake 0.3s ease-in-out; }
       `}</style>
 
-      <div className="w-full flex justify-between items-end mb-8 px-4">
+      {/* HEADER SECTION */}
+      <div className="w-full flex justify-between items-end mb-4 px-4">
         <h2 className="text-4xl font-black text-gray-900">Drag & Drop 🧩</h2>
-        <span className="bg-emerald-100 text-emerald-800 font-bold px-4 py-2 rounded-xl">
-          {Object.keys(placedWords).length} / {words.length} Placed
-        </span>
+        <div className="flex gap-3">
+          {/* Dynamic visual indicator for mistakes */}
+          {mistakesThisRound > 0 && (
+            <span className="bg-red-100 text-red-700 font-bold px-4 py-2 rounded-xl animate-pulse">
+              {mistakesThisRound} Strike{mistakesThisRound > 1 ? "s" : ""}! ⚠️
+            </span>
+          )}
+          <span className="bg-emerald-100 text-emerald-800 font-bold px-4 py-2 rounded-xl">
+            {Object.keys(placedWords).length} / {words.length} Placed
+          </span>
+        </div>
+      </div>
+
+      {/* FULL-WIDTH TIMER SECTION (Spanning the entire container, right under header) */}
+      <div className="w-full mb-8">
+        <SandTimer
+          key={`${Object.keys(placedWords).length}-${retryCount}`}
+          duration={SECONDS_PER_MATCH}
+          isActive={
+            !isSpeaking &&
+            !hasTimedOut &&
+            Object.keys(placedWords).length < words.length
+          }
+          onTimeUp={handleTimeUp}
+        />
       </div>
 
       <div className="grid md:grid-cols-3 gap-8 w-full items-start">
         <div className="md:col-span-1 flex flex-col gap-6 sticky top-6">
           <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-3xl p-8 shadow-inner border border-indigo-100/50 w-full flex flex-col items-center relative h-64 justify-end shrink-0">
+            {/* CLEANED OUT TIMER FROM HERE */}
             <div className="absolute top-6 w-full px-4 text-center">
               <p className="font-bold text-lg text-indigo-500 transition-colors duration-300">
                 {isSpeaking
@@ -121,7 +240,7 @@ export default function DragDropTest({
                     : "Match them all!"}
               </p>
             </div>
-            <PixelVocabmon feedTrigger={feedTrigger} />
+            <PixelVocabmon feedTrigger={feedTrigger} level={currentLevel} />
           </div>
         </div>
 

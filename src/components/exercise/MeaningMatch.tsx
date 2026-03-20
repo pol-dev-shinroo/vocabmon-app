@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { VocabWord } from "@/data/vocab";
 import PixelVocabmon from "../shared/PixelVocabmon";
+import SandTimer from "../shared/SandTimer";
+import TimeoutScreen from "../shared/TimeoutScreen";
 
 type LineData = { id: number; x1: number; y1: number; x2: number; y2: number };
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -11,6 +13,9 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   }
   return shuffled;
 };
+
+// SET YOUR DIFFICULTY HERE (30 seconds per correct match)
+const SECONDS_PER_MATCH = 30;
 
 export default function MeaningMatch({
   words,
@@ -28,10 +33,32 @@ export default function MeaningMatch({
   const [feedTrigger, setFeedTrigger] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
+  // Timer & Level States
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [currentLevel, setCurrentLevel] = useState(1);
+
+  // --- Mistake Tracking (2 Strikes Rule) ---
+  const [mistakesThisRound, setMistakesThisRound] = useState(0);
+  const [isGameOver, setIsGameOver] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const leftNodeRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const rightNodeRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const [lines, setLines] = useState<LineData[]>([]);
+
+  // Fetch Vocabmon Level
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const savedExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      const rawLevel = Math.floor(savedExp / 150) + 1;
+      setCurrentLevel(Math.min(rawLevel, 10));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -75,8 +102,28 @@ export default function MeaningMatch({
     };
   }, [drawLines]);
 
+  const handleTimeUp = useCallback(() => {
+    setHasTimedOut(true);
+  }, []);
+
+  // --- Full Quiz Restart (Used for BOTH Timeouts and Game Overs) ---
+  const handleRestartQuiz = () => {
+    setIsGameOver(false);
+    setHasTimedOut(false);
+    setMistakesThisRound(0);
+    setMatchedIds([]);
+    setSelectedWordId(null);
+    setLines([]);
+    setRetryCount((prev) => prev + 1); // Reset timer
+
+    // Reshuffle the board completely
+    setLeftWords(shuffleArray(words));
+    setRightMeanings(shuffleArray(words));
+  };
+
   const handleWordClick = (word: VocabWord) => {
-    if (matchedIds.includes(word.id) || isSpeaking) return;
+    if (matchedIds.includes(word.id) || isSpeaking || hasTimedOut || isGameOver)
+      return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(word.word);
     utterance.lang = "en-US"; // FIX: Force English voice
@@ -86,15 +133,24 @@ export default function MeaningMatch({
   };
 
   const handleMeaningClick = (meaning: VocabWord) => {
-    if (matchedIds.includes(meaning.id) || isSpeaking) return;
+    if (
+      matchedIds.includes(meaning.id) ||
+      isSpeaking ||
+      hasTimedOut ||
+      isGameOver
+    )
+      return;
 
     if (selectedWordId === null) {
+      // If they click a meaning without picking a word first, just show an error flash (doesn't count as a strike)
       setErrorId(meaning.id);
       setTimeout(() => setErrorId(null), 400);
       return;
     }
 
     if (meaning.id === selectedWordId) {
+      // --- CORRECT MATCH ---
+      setMistakesThisRound(0); // Reset strikes for the next attempt
       const newMatched = [...matchedIds, meaning.id];
       setMatchedIds(newMatched);
       setSelectedWordId(null);
@@ -115,10 +171,47 @@ export default function MeaningMatch({
 
       window.speechSynthesis.speak(utterance);
     } else {
+      // --- INCORRECT MATCH ---
+      const newMistakes = mistakesThisRound + 1;
+      setMistakesThisRound(newMistakes);
       setErrorId(meaning.id);
-      setTimeout(() => setErrorId(null), 400);
+
+      setTimeout(() => {
+        setErrorId(null);
+        // Trigger Game Over if they hit 2 mistakes
+        if (newMistakes >= 2) {
+          setIsGameOver(true);
+        }
+      }, 400); // Wait for the error shake animation to finish
     }
   };
+
+  // IF TIME IS UP, SHOW THE TIMEOUT SCREEN! (Now triggers a full restart)
+  if (hasTimedOut) {
+    return <TimeoutScreen onRetry={handleRestartQuiz} />;
+  }
+
+  // IF GAME OVER (2 Mistakes), SHOW RESTART SCREEN
+  if (isGameOver) {
+    return (
+      <div className="w-full max-w-2xl animate-fade-in mx-auto mt-12">
+        <div className="bg-red-50 border-2 border-red-200 rounded-3xl p-10 text-center shadow-xl flex flex-col items-center">
+          <div className="text-6xl mb-4">💥</div>
+          <h2 className="text-4xl font-black text-red-600 mb-4">Game Over!</h2>
+          <p className="text-xl text-red-900/80 font-medium mb-8">
+            You made 2 wrong connection attempts. You have to restart the
+            puzzle!
+          </p>
+          <button
+            onClick={handleRestartQuiz}
+            className="bg-red-500 hover:bg-red-600 text-white text-xl font-bold py-4 px-10 rounded-2xl shadow-lg hover:scale-105 transition-all active:scale-95"
+          >
+            Restart Puzzle 🔄
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   let instructionText = "Step 1: Click a word on the left.";
   if (isSpeaking) instructionText = "Listen closely! 🎧";
@@ -146,7 +239,13 @@ export default function MeaningMatch({
           </p>
         </div>
         <div className="flex items-center gap-6 z-10 h-full">
-          <div className="text-right">
+          {/* Dynamic visual indicator for mistakes next to Link count */}
+          <div className="text-right flex items-center gap-3">
+            {mistakesThisRound > 0 && (
+              <span className="bg-red-100 text-red-700 font-bold px-4 py-2 rounded-xl shadow-sm border border-red-200 animate-pulse">
+                {mistakesThisRound} Strike{mistakesThisRound > 1 ? "s" : ""}! ⚠️
+              </span>
+            )}
             <span className="bg-white/80 text-indigo-800 font-bold px-4 py-2 rounded-xl shadow-sm border border-indigo-100">
               {matchedIds.length} / {words.length} Linked
             </span>
@@ -154,6 +253,7 @@ export default function MeaningMatch({
           <div className="w-24 h-full flex items-end justify-center pb-2">
             <PixelVocabmon
               feedTrigger={feedTrigger}
+              level={currentLevel}
               className="transform scale-[0.7] origin-bottom"
             />
           </div>
@@ -161,9 +261,21 @@ export default function MeaningMatch({
       </div>
 
       <div
-        className="relative w-full bg-white p-10 rounded-3xl shadow-lg border border-gray-100"
+        className="relative w-full bg-white p-10 pt-14 rounded-3xl shadow-lg border border-gray-100"
         ref={containerRef}
       >
+        {/* TIMER COMPONENT - Absolutely positioned so it doesn't shift the buttons/lines */}
+        <div className="absolute top-0 left-0 w-full px-10 pt-4 z-30">
+          <SandTimer
+            key={`${matchedIds.length}-${retryCount}`}
+            duration={SECONDS_PER_MATCH}
+            isActive={
+              !isSpeaking && !hasTimedOut && matchedIds.length < words.length
+            }
+            onTimeUp={handleTimeUp}
+          />
+        </div>
+
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
           {lines.map((line) => (
             <path
