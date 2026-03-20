@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { VocabWord } from "@/data/vocab";
 import PixelVocabmon from "../shared/PixelVocabmon";
+import SandTimer from "../shared/SandTimer";
+import TimeoutScreen from "../shared/TimeoutScreen";
 
-// UPDATED: Shortened to match the new 2-repetition limit
 const FEEDBACK_MESSAGES = [
   "Listen, then type!",
   "Yummy! One more bite!",
   "Perfect! He's full! 🌟",
 ];
+
+// SET YOUR DIFFICULTY HERE
+const SECONDS_PER_WORD = 20;
 
 export default function SpellingPractice({
   words,
@@ -24,6 +28,7 @@ export default function SpellingPractice({
 
   const [isError, setIsError] = useState(false);
   const [flashSuccess, setFlashSuccess] = useState(false);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
 
   const [currentLevel, setCurrentLevel] = useState(1);
 
@@ -37,7 +42,6 @@ export default function SpellingPractice({
         10,
       );
       const rawLevel = Math.floor(savedExp / 150) + 1;
-      // Updated max level to 10 to match the 50-word campaign
       setCurrentLevel(Math.min(rawLevel, 10));
     }, 0);
     return () => clearTimeout(timer);
@@ -47,7 +51,6 @@ export default function SpellingPractice({
     setIsListening(true);
     const utterance = new SpeechSynthesisUtterance(wordToSpeak);
 
-    // Force the voice to be English regardless of the phone's language!
     utterance.lang = "en-US";
     utterance.rate = 0.85;
 
@@ -66,6 +69,7 @@ export default function SpellingPractice({
       setInputValue("");
       setFlashSuccess(false);
       setIsError(false);
+      setHasTimedOut(false);
       playSingleAudio(activeWord.word);
     }, 0);
 
@@ -74,6 +78,19 @@ export default function SpellingPractice({
       window.speechSynthesis.cancel();
     };
   }, [activeWord, playSingleAudio]);
+
+  const handleTimeUp = useCallback(() => {
+    setHasTimedOut(true);
+  }, []);
+
+  const handleRetry = () => {
+    setHasTimedOut(false);
+    setTypingCount(0); // Restart the current word from 0 repetitions
+    setInputValue("");
+    setIsError(false);
+    setFlashSuccess(false);
+    playSingleAudio(activeWord.word);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -95,7 +112,6 @@ export default function SpellingPractice({
       const newCount = typingCount + 1;
       setTypingCount(newCount);
 
-      // UPDATED: Now triggers the next word after 2 successful types instead of 4
       if (newCount >= 2) {
         setTimeout(() => {
           if (currentIndex + 1 < words.length) {
@@ -113,6 +129,11 @@ export default function SpellingPractice({
       }
     }
   };
+
+  // IF TIME IS UP, SHOW THE GAME OVER SCREEN!
+  if (hasTimedOut) {
+    return <TimeoutScreen onRetry={handleRetry} />;
+  }
 
   if (!activeWord) return null;
 
@@ -149,7 +170,6 @@ export default function SpellingPractice({
           </span>
 
           <div className="flex gap-2">
-            {/* UPDATED: Only mapping 2 dots [0, 1] instead of 4 */}
             {[0, 1].map((i) => (
               <div
                 key={i}
@@ -160,8 +180,17 @@ export default function SpellingPractice({
         </div>
 
         <div className="bg-white rounded-3xl shadow-md p-8 text-center border border-gray-100 relative overflow-hidden">
+          {/* THE NEW TIMER LIVES HERE! */}
+          {/* The key property forces the timer to reset when moving to the next word or typing repetition! */}
+          <SandTimer
+            key={`${currentIndex}-${typingCount}`}
+            duration={SECONDS_PER_WORD}
+            isActive={!isListening && !flashSuccess && !hasTimedOut}
+            onTimeUp={handleTimeUp}
+          />
+
           {isListening && (
-            <div className="absolute top-0 left-0 w-full bg-indigo-500 text-white text-xs font-bold py-1 animate-pulse tracking-widest uppercase">
+            <div className="absolute top-0 left-0 w-full bg-indigo-500 text-white text-xs font-bold py-1 animate-pulse tracking-widest uppercase z-10">
               Listening...
             </div>
           )}
@@ -175,8 +204,9 @@ export default function SpellingPractice({
             ref={inputRef}
             type="text"
             autoComplete="off"
-            // UPDATED: Disables the input after 2 successful types
-            disabled={isListening || flashSuccess || typingCount >= 2}
+            disabled={
+              isListening || flashSuccess || typingCount >= 2 || hasTimedOut
+            }
             value={inputValue}
             onChange={handleInputChange}
             placeholder={isListening ? "" : "Type the word..."}

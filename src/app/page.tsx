@@ -5,15 +5,25 @@ import GiftBox from "@/components/home/GiftBox";
 import VocabmonReveal from "@/components/home/VocabmonReveal";
 import Dashboard from "@/components/home/Dashboard";
 
+// 🚀 MOVE THE VERSION STRING HERE (Must match whatever version you are on!)
+const APP_VERSION = "v2.1_50words";
+
 export default function Home() {
   const [homePhase, setHomePhase] = useState<
     "loading" | "gift" | "reveal" | "dashboard"
   >("loading");
 
   useEffect(() => {
-    // FIX: Wrapping the localStorage check in a 0ms timeout makes it asynchronous.
-    // This perfectly satisfies the React Compiler's cascading render rules.
     const timer = setTimeout(() => {
+      // 1. RUN THE NUCLEAR VERSION CHECK FIRST
+      const savedVersion = localStorage.getItem("app_version");
+      if (savedVersion !== APP_VERSION) {
+        console.log("New update detected! Wiping all old data to start fresh.");
+        localStorage.clear();
+        localStorage.setItem("app_version", APP_VERSION);
+      }
+
+      // 2. NOW CHECK IF THEY HAVE SEEN THE GIFT
       const hasUnlocked = localStorage.getItem("vocabmon_unlocked");
       if (hasUnlocked === "true") {
         setHomePhase("dashboard");

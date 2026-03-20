@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { VocabWord } from "@/data/vocab";
 import PixelVocabmon from "../shared/PixelVocabmon";
+import SandTimer from "../shared/SandTimer";
+import TimeoutScreen from "../shared/TimeoutScreen";
+
+// SET YOUR DIFFICULTY HERE FOR THE SPELLING TEST (e.g., 15 seconds)
+const SECONDS_PER_WORD = 15;
 
 export default function SpellingTest({
   words,
@@ -18,8 +23,26 @@ export default function SpellingTest({
   const [flashSuccess, setFlashSuccess] = useState(false);
   const [hiddenIndices, setHiddenIndices] = useState<number[]>([]);
 
+  // Timer states
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [currentLevel, setCurrentLevel] = useState(1);
+
   const activeWord = words[currentIndex];
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch Vocabmon Level so the new Fire theme shows up!
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const savedExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      const rawLevel = Math.floor(savedExp / 150) + 1;
+      setCurrentLevel(Math.min(rawLevel, 10));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const playSingleAudio = useCallback((wordToSpeak: string) => {
     setIsListening(true);
@@ -49,6 +72,7 @@ export default function SpellingTest({
     setInputValue("");
     setFlashSuccess(false);
     setIsError(false);
+    setHasTimedOut(false);
     playSingleAudio(activeWord.word);
   }, [activeWord, playSingleAudio]);
 
@@ -60,6 +84,17 @@ export default function SpellingTest({
       window.speechSynthesis.cancel();
     };
   }, [activeWord, setupWord]);
+
+  // Timer callbacks
+  const handleTimeUp = useCallback(() => {
+    setHasTimedOut(true);
+  }, []);
+
+  const handleRetry = () => {
+    setHasTimedOut(false);
+    setRetryCount((prev) => prev + 1); // Changes the timer's key to reset the bar to 100%
+    setupWord();
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -91,6 +126,11 @@ export default function SpellingTest({
     }
   };
 
+  // IF TIME IS UP, SHOW THE GAME OVER SCREEN!
+  if (hasTimedOut) {
+    return <TimeoutScreen onRetry={handleRetry} />;
+  }
+
   if (!activeWord) return null;
 
   const displayWord = activeWord.word
@@ -103,7 +143,7 @@ export default function SpellingTest({
   if (flashSuccess) inputClasses += "border-green-500 text-green-600";
   else if (isError)
     inputClasses += "border-red-500 text-red-600 focus:border-red-500";
-  else inputClasses += "border-gray-200 focus:border-indigo-500 text-gray-900";
+  else inputClasses += "border-gray-200 focus:border-purple-500 text-gray-900";
 
   return (
     <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-center gap-8 animate-fade-in">
@@ -116,7 +156,7 @@ export default function SpellingTest({
               {flashSuccess ? "Nailed it! 🌟" : "What's the missing letter?"}
             </p>
           </div>
-          <PixelVocabmon feedTrigger={feedTrigger} />
+          <PixelVocabmon feedTrigger={feedTrigger} level={currentLevel} />
         </div>
       </div>
 
@@ -131,8 +171,16 @@ export default function SpellingTest({
         </div>
 
         <div className="bg-white rounded-3xl shadow-md p-8 text-center border border-gray-100 relative overflow-hidden">
+          {/* TIMER COMPONENT */}
+          <SandTimer
+            key={`${currentIndex}-${retryCount}`}
+            duration={SECONDS_PER_WORD}
+            isActive={!isListening && !flashSuccess && !hasTimedOut}
+            onTimeUp={handleTimeUp}
+          />
+
           {isListening && (
-            <div className="absolute top-0 left-0 w-full bg-purple-500 text-white text-xs font-bold py-1 animate-pulse tracking-widest uppercase">
+            <div className="absolute top-0 left-0 w-full bg-purple-500 text-white text-xs font-bold py-1 animate-pulse tracking-widest uppercase z-10">
               Listening...
             </div>
           )}
@@ -146,7 +194,7 @@ export default function SpellingTest({
             ref={inputRef}
             type="text"
             autoComplete="off"
-            disabled={isListening || flashSuccess}
+            disabled={isListening || flashSuccess || hasTimedOut}
             value={inputValue}
             onChange={handleInputChange}
             placeholder={isListening ? "" : "Type the full word..."}
