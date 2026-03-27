@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import PixelVocabmon from "../shared/PixelVocabmon";
+import { triggerSilentSync } from "@/lib/syncHelper";
+import { logoutUser } from "@/actions/logout";
 
 export default function Dashboard() {
   const [exp, setExp] = useState(0);
@@ -170,6 +172,9 @@ export default function Dashboard() {
       setExerciseDone(false);
       setTestDone(false);
 
+      // 🚀 NEW: Sync the new Set ID and cleared quests to MongoDB!
+      triggerSilentSync();
+
       try {
         // PROPER TYPESCRIPT FIX HERE TOO:
         const AudioContextClass =
@@ -238,16 +243,37 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* 🚀 NEW: Top Utility Bar for Logout */}
+      <div className="w-full flex justify-end px-6 pt-6 z-20 relative">
+        <button
+          onClick={() => logoutUser()}
+          className="text-sm font-bold text-gray-400 hover:text-gray-700 transition-colors flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200"
+        >
+          Log Out
+        </button>
+      </div>
+
       {/* Header & Stats */}
-      <div className="p-6 pb-2 z-20">
+      <div className="p-6 pb-2 z-20 -mt-4">
         <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100 relative">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-black text-gray-800">
-              Jay&apos;s Partner
-            </h2>
-            <span className="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-sm">
-              Lv. {levelStats.level}
-            </span>
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="text-2xl font-black text-gray-800 mb-2">
+                Jay&apos;s Partner
+              </h2>
+              <span className="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-sm">
+                Lv. {levelStats.level}
+              </span>
+            </div>
+
+            {/* Just the Trophy Button now! */}
+            <Link
+              href="/collection"
+              className="bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
+              title="View Hall of Fame"
+            >
+              <span className="text-xl">🏆</span>
+            </Link>
           </div>
 
           <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl p-6 flex justify-center mb-6 border border-indigo-100/50 relative overflow-visible">

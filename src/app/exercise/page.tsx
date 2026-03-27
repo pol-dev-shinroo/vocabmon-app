@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { vocabData, VocabWord } from "@/data/vocab";
+import { triggerSilentSync } from "@/lib/syncHelper";
 
 import QuestScreen from "@/components/shared/QuestScreen";
 import CountdownPhase from "@/components/feed/CountdownPhase";
@@ -58,6 +59,9 @@ export default function ExercisePage() {
       localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
       localStorage.setItem("quest_exercise_done", "true");
       localStorage.setItem("trigger_fireworks", "true");
+
+      // 🚀 NEW: Silently back up to MongoDB!
+      triggerSilentSync();
     }
   }, [phase]);
 

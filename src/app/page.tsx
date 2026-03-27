@@ -4,9 +4,7 @@ import { useState, useEffect } from "react";
 import GiftBox from "@/components/home/GiftBox";
 import VocabmonReveal from "@/components/home/VocabmonReveal";
 import Dashboard from "@/components/home/Dashboard";
-
-// 🚀 UPDATED: New version string forces a clean slate for the new update!
-const APP_VERSION = "v2.2_timed_edition";
+import { getStudentProgress } from "@/actions/loadProgress";
 
 export default function Home() {
   const [homePhase, setHomePhase] = useState<
@@ -14,25 +12,58 @@ export default function Home() {
   >("loading");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // 1. RUN THE NUCLEAR VERSION CHECK FIRST
-      const savedVersion = localStorage.getItem("app_version");
-      if (savedVersion !== APP_VERSION) {
-        console.log("New update detected! Wiping all old data to start fresh.");
-        localStorage.clear();
-        localStorage.setItem("app_version", APP_VERSION);
-      }
+    async function loadDataAndStart() {
+      try {
+        // 1. FETCH DATA FROM MONGODB
+        const dbProgress = await getStudentProgress();
 
-      // 2. NOW CHECK IF THEY HAVE SEEN THE GIFT
-      const hasUnlocked = localStorage.getItem("vocabmon_unlocked");
-      if (hasUnlocked === "true") {
-        setHomePhase("dashboard");
-      } else {
-        setHomePhase("gift");
-      }
-    }, 0);
+        if (dbProgress) {
+          // 2. INJECT DB DATA INTO LOCAL STORAGE (Overwriting any local mismatches)
+          localStorage.setItem("vocabmon_exp", dbProgress.exp.toString());
+          localStorage.setItem(
+            "current_word_set",
+            dbProgress.currentSet.toString(),
+          );
 
-    return () => clearTimeout(timer);
+          // Clear old quest flags
+          const questKeys = [
+            "quest_spelling_done",
+            "quest_exercise_done",
+            "quest_test_done",
+            "quest_midterm_done",
+            "quest_final1_done",
+            "quest_finale_done",
+          ];
+          questKeys.forEach((key) => localStorage.removeItem(key));
+
+          // Re-apply completed flags from the database
+          if (dbProgress.completedQuests) {
+            dbProgress.completedQuests.forEach((quest: string) => {
+              localStorage.setItem(quest, "true");
+            });
+          }
+
+          console.log("☁️ Cloud save downloaded and applied!");
+        }
+
+        // 3. DECIDE WHICH SCREEN TO SHOW
+        const hasUnlocked = localStorage.getItem("vocabmon_unlocked");
+        if (hasUnlocked === "true" || (dbProgress && dbProgress.exp > 0)) {
+          // If he has EXP in the DB, he definitely already opened the gift!
+          localStorage.setItem("vocabmon_unlocked", "true");
+          setHomePhase("dashboard");
+        } else {
+          setHomePhase("gift");
+        }
+      } catch (error) {
+        console.error("Failed to sync from cloud:", error);
+        // Fallback: If offline, just use whatever is currently in localStorage
+        const hasUnlocked = localStorage.getItem("vocabmon_unlocked");
+        setHomePhase(hasUnlocked === "true" ? "dashboard" : "gift");
+      }
+    }
+
+    loadDataAndStart();
   }, []);
 
   const handleFinishReveal = () => {
@@ -41,7 +72,15 @@ export default function Home() {
   };
 
   if (homePhase === "loading") {
-    return <main className="flex min-h-screen bg-gray-50" />;
+    // A fun loading screen so he knows it's fetching his save file!
+    return (
+      <main className="flex min-h-screen bg-gray-50 flex-col items-center justify-center">
+        <div className="text-6xl animate-bounce mb-4">☁️</div>
+        <h2 className="text-xl font-bold text-gray-500 animate-pulse">
+          Syncing with server...
+        </h2>
+      </main>
+    );
   }
 
   return (
