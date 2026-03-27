@@ -10,7 +10,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
       <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🐉</div>
+          <div className="text-6xl mb-4"></div>
           <h1 className="text-3xl font-black text-gray-800">Vocabmon</h1>
           <p className="text-gray-500 font-medium mt-2">
             Welcome back, Partner!
