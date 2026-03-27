@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
+// 👇 We changed the function name here from "middleware" to "proxy"!
+export function proxy(request: NextRequest) {
   // 1. Check if the user is trying to access the login page
   const isLoginPage = request.nextUrl.pathname === "/login";
 
@@ -24,9 +25,8 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  // This tells Next.js exactly which routes the middleware should protect.
+  // This tells Next.js exactly which routes the proxy should protect.
   // We exclude api routes, static files (_next/static), images, and favicons.
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
