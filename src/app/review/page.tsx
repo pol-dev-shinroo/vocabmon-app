@@ -1,14 +1,17 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { vocabData, VocabWord } from "@/data/vocab";
 import { triggerSilentSync } from "@/lib/syncHelper";
+import { archiveWeekProgress } from "@/actions/progress";
 
 import QuestScreen from "@/components/shared/QuestScreen";
 import CountdownPhase from "@/components/feed/CountdownPhase";
 import MasteryTest from "@/components/test/MasteryTest";
 
 export default function ReviewPage() {
+  const router = useRouter();
   const [phase, setPhase] = useState<
     "intro" | "countdown" | "mastery" | "complete"
   >("intro");
@@ -41,19 +44,51 @@ export default function ReviewPage() {
   useEffect(() => {
     if (phase === "complete" && !hasAwarded.current && reviewType) {
       hasAwarded.current = true;
-      if (reviewType === "midterm")
-        localStorage.setItem("quest_midterm_done", "true");
-      if (reviewType === "final1")
-        localStorage.setItem("quest_final1_done", "true");
-      if (reviewType === "finale")
-        localStorage.setItem("quest_finale_done", "true");
+      
+      const runArchive = async () => {
+        if (reviewType === "midterm")
+          localStorage.setItem("quest_midterm_done", "true");
+        if (reviewType === "final1")
+          localStorage.setItem("quest_final1_done", "true");
+        
+        if (reviewType === "finale") {
+          localStorage.setItem("quest_finale_done", "true");
+          
+          // 🏆 ARCHIVE WEEK: Move current stats to Hall of Fame & Reset
+          const activeWeek = localStorage.getItem("active_week_id") || "week_1";
+          await archiveWeekProgress(activeWeek);
 
-      localStorage.setItem("trigger_fireworks", "true");
+          // Clear local progress so next week starts fresh
+          const keysToClear = [
+            "vocabmon_exp",
+            "current_word_set",
+            "quest_spelling_done",
+            "quest_exercise_done",
+            "quest_test_done",
+            "quest_midterm_done",
+            "quest_final1_done",
+            "quest_finale_done",
+            "completedQuests"
+          ];
+          keysToClear.forEach(key => localStorage.removeItem(key));
+          
+          // Redirect to Hall of Fame after fireworks
+          setTimeout(() => {
+            router.push("/collection");
+          }, 3500);
+        }
 
-      // 🚀 NEW: Silently back up to MongoDB!
-      triggerSilentSync();
+        localStorage.setItem("trigger_fireworks", "true");
+
+        // 🚀 NEW: Silently back up to MongoDB (if not finale, otherwise it's already reset)
+        if (reviewType !== "finale") {
+          triggerSilentSync();
+        }
+      };
+
+      runArchive();
     }
-  }, [phase, reviewType]);
+  }, [phase, reviewType, router]);
 
   if (!isLoaded || !reviewType)
     return (
