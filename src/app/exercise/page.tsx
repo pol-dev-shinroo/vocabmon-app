@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { vocabData, VocabWord } from "@/data/vocab";
 import { triggerSilentSync } from "@/lib/syncHelper";
 
@@ -12,6 +13,7 @@ import MeaningFlip from "@/components/exercise/MeaningFlip";
 import MeaningMatch from "@/components/exercise/MeaningMatch";
 
 export default function ExercisePage() {
+  const router = useRouter();
   const [phase, setPhase] = useState<
     | "intro"
     | "countdown"
@@ -60,10 +62,23 @@ export default function ExercisePage() {
       localStorage.setItem("quest_exercise_done", "true");
       localStorage.setItem("trigger_fireworks", "true");
 
+      // Handle the completedQuests array
+      const storedQuests = localStorage.getItem("completedQuests");
+      const completedQuests: string[] = storedQuests ? JSON.parse(storedQuests) : [];
+      if (!completedQuests.includes("exercise")) {
+        completedQuests.push("exercise");
+      }
+      localStorage.setItem("completedQuests", JSON.stringify(completedQuests));
+
       // 🚀 NEW: Silently back up to MongoDB!
       triggerSilentSync();
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
     }
-  }, [phase]);
+  }, [phase, router]);
 
   if (!isLoaded)
     return (
