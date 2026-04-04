@@ -9,6 +9,8 @@ export async function syncProgressToDB(
   exp: number,
   currentSet: number,
   completedQuests: string[],
+  unlockedStickers: number[] = [],
+  hideStickerPopupUntil: Date | null = null,
 ) {
   try {
     // 1. Figure out who is logged in
@@ -28,6 +30,8 @@ export async function syncProgressToDB(
           exp,
           currentSet,
           completedQuests,
+          unlockedStickers,
+          hideStickerPopupUntil,
         },
       },
       { upsert: true, new: true }, // If he doesn't have a save file yet, make one!

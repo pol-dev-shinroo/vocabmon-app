@@ -22,6 +22,8 @@ export interface IProgress extends Document {
   exp: number;
   currentSet: number;
   completedQuests: string[];
+  unlockedStickers: number[];
+  hideStickerPopupUntil: Date | null;
   history: IHistory[]; // <--- No more 'any'! It expects our exact History shape.
 }
 
@@ -32,6 +34,8 @@ const ProgressSchema: Schema = new Schema(
     exp: { type: Number, default: 0 },
     currentSet: { type: Number, default: 0 },
     completedQuests: { type: [String], default: [] },
+    unlockedStickers: { type: [Number], default: [] },
+    hideStickerPopupUntil: { type: Date, default: null },
     history: [HistorySchema],
   },
   { timestamps: true },

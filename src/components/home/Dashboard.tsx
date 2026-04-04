@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import PixelVocabmon from "../shared/PixelVocabmon";
+import StickerPopup from "./StickerPopup";
+import StickerUnlockCelebration from "./StickerUnlockCelebration";
 import { triggerSilentSync } from "@/lib/syncHelper";
 import { logoutUser } from "@/actions/logout";
 
@@ -12,6 +14,7 @@ export default function Dashboard() {
   const [testDone, setTestDone] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const [currentSet, setCurrentSet] = useState(0);
   const totalSets = 10;
@@ -78,7 +81,6 @@ export default function Dashboard() {
         setExp(Math.max(0, savedExp - 50));
         setTimeout(() => setExp(savedExp), 600);
         try {
-          // PROPER TYPESCRIPT FIX HERE:
           const AudioContextClass =
             window.AudioContext ||
             (
@@ -172,11 +174,9 @@ export default function Dashboard() {
       setExerciseDone(false);
       setTestDone(false);
 
-      // 🚀 NEW: Sync the new Set ID and cleared quests to MongoDB!
       triggerSilentSync();
 
       try {
-        // PROPER TYPESCRIPT FIX HERE TOO:
         const AudioContextClass =
           window.AudioContext ||
           (
@@ -207,6 +207,15 @@ export default function Dashboard() {
   if (!isLoaded) return <div className="w-full max-w-md min-h-[50vh]"></div>;
 
   const isSetComplete = spellingDone && exerciseDone && testDone;
+
+  // Logic to find the current active day index
+  const activeDayIndex = weeklyPlan.findIndex((dayPlan) =>
+    dayPlan.sets.includes(currentSet)
+  ) !== -1 ? weeklyPlan.findIndex((dayPlan) =>
+    dayPlan.sets.includes(currentSet)
+  ) : weeklyPlan.length - 1;
+
+  const renderedPlan = isExpanded ? weeklyPlan : [weeklyPlan[activeDayIndex]];
 
   return (
     <div className="w-full max-w-md min-h-screen flex flex-col mx-auto bg-gray-50 relative animate-fade-in pb-16">
@@ -243,7 +252,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* 🚀 NEW: Top Utility Bar for Logout */}
+      {/* Logout button */}
       <div className="w-full flex justify-end px-6 pt-6 z-20 relative">
         <button
           onClick={() => logoutUser()}
@@ -266,14 +275,22 @@ export default function Dashboard() {
               </span>
             </div>
 
-            {/* Just the Trophy Button now! */}
-            <Link
-              href="/collection"
-              className="bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
-              title="View Hall of Fame"
-            >
-              <span className="text-xl">🏆</span>
-            </Link>
+            <div className="flex gap-2">
+              <Link
+                href="/stickers"
+                className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
+                title="View Sticker Collection"
+              >
+                <span className="text-xl">🪄</span>
+              </Link>
+              <Link
+                href="/collection"
+                className="bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
+                title="View Hall of Fame"
+              >
+                <span className="text-xl">🏆</span>
+              </Link>
+            </div>
           </div>
 
           <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl p-6 flex justify-center mb-6 border border-indigo-100/50 relative overflow-visible">
@@ -311,23 +328,28 @@ export default function Dashboard() {
 
       {/* Quest List Grouped By Day */}
       <div className="px-6 pb-12 pt-4 relative z-10">
-        <h3 className="text-2xl font-black text-gray-800 mb-6 px-2">
-          Weekly Schedule
-        </h3>
+        <div className="flex justify-between items-center mb-6 px-2">
+          <h3 className="text-2xl font-black text-gray-800">
+            {isExpanded ? "Weekly Schedule" : "Today's Quests"}
+          </h3>
+          {!isExpanded && (
+            <span className="text-xs font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-tighter">
+              Active Focus
+            </span>
+          )}
+        </div>
 
         <div className="space-y-12">
-          {weeklyPlan.map((dayPlan) => (
+          {renderedPlan.map((dayPlan) => (
             <div
               key={dayPlan.day}
               className="bg-white rounded-3xl shadow-sm border border-gray-200 p-5 relative overflow-hidden"
             >
-              {/* Day Header */}
               <h3 className="text-xl font-black text-gray-800 border-b-2 border-gray-100 pb-3 mb-6 flex items-center gap-2">
                 📅 {dayPlan.day}
               </h3>
 
               <div className="space-y-10">
-                {/* Loop over the Sets assigned to this Day */}
                 {dayPlan.sets.map((setIndex) => {
                   const isPastSet = setIndex < currentSet;
                   const isActiveSet = setIndex === currentSet;
@@ -365,7 +387,6 @@ export default function Dashboard() {
                       </h4>
 
                       <div className="space-y-4">
-                        {/* Quest 1 */}
                         <div
                           ref={isQ1Active ? activeQuestRef : null}
                           className="relative"
@@ -403,7 +424,6 @@ export default function Dashboard() {
                           </Link>
                         </div>
 
-                        {/* Quest 2 */}
                         <div
                           ref={isQ2Active ? activeQuestRef : null}
                           className="relative"
@@ -443,7 +463,6 @@ export default function Dashboard() {
                           </Link>
                         </div>
 
-                        {/* Quest 3 */}
                         <div
                           ref={isQ3Active ? activeQuestRef : null}
                           className="relative"
@@ -484,7 +503,6 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      {/* Normal Evolve Button (For Sets 1-4, and Sets 6-9) */}
                       {isActiveSet &&
                         isQ3Done &&
                         setIndex !== 4 &&
@@ -512,10 +530,9 @@ export default function Dashboard() {
                   );
                 })}
 
-                {/* SPECIAL BOSS: Midterm (Inject at bottom of Sunday) */}
                 {dayPlan.hasMidterm &&
                   (() => {
-                    const setIndex = 4; // Midterm belongs to Set 4
+                    const setIndex = 4;
                     const isActiveSet = setIndex === currentSet;
                     const isFutureSet = setIndex > currentSet;
                     const isQ3Done =
@@ -586,7 +603,6 @@ export default function Dashboard() {
                           );
                         })()}
 
-                        {/* Show Evolve button ONLY if midterm is done */}
                         {isActiveSet && midtermDone && (
                           <div className="mt-8 bg-emerald-50 border-4 border-emerald-400 rounded-3xl p-6 text-center animate-fade-in shadow-xl">
                             <div className="text-4xl mb-2 animate-bounce">
@@ -611,10 +627,9 @@ export default function Dashboard() {
                     );
                   })()}
 
-                {/* SPECIAL BOSSES: Finals (Inject at bottom of Wednesday) */}
                 {dayPlan.hasFinals &&
                   (() => {
-                    const setIndex = 9; // Finals belong to Set 9
+                    const setIndex = 9;
                     const isActiveSet = setIndex === currentSet;
                     const isQ3Done =
                       setIndex < currentSet || (isActiveSet && testDone);
@@ -679,7 +694,6 @@ export default function Dashboard() {
                           );
                         })()}
 
-                        {/* Finale Component */}
                         <div
                           className={`relative ${!final1Done ? "opacity-60" : ""}`}
                         >
@@ -750,7 +764,23 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+
+        {/* Toggle Button for Schedule */}
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="bg-white border-2 border-gray-200 hover:border-indigo-400 text-gray-600 hover:text-indigo-600 font-black py-4 px-8 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center gap-3 group"
+          >
+            <span className="text-xl transition-transform group-hover:scale-125">
+              {isExpanded ? "🎯" : "📅"}
+            </span>
+            {isExpanded ? "Hide Future Quests" : "Show Full Week"}
+          </button>
+        </div>
       </div>
+
+      <StickerPopup />
+      <StickerUnlockCelebration />
     </div>
   );
 }

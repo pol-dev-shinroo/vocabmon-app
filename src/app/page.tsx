@@ -43,6 +43,20 @@ export default function Home() {
             });
           }
 
+          // Inject stickers and popup preferences
+          localStorage.setItem(
+            "unlocked_stickers",
+            JSON.stringify(dbProgress.unlockedStickers || []),
+          );
+          if (dbProgress.hideStickerPopupUntil) {
+            localStorage.setItem(
+              "hideStickerPopupUntil",
+              dbProgress.hideStickerPopupUntil,
+            );
+          } else {
+            localStorage.removeItem("hideStickerPopupUntil");
+          }
+
           console.log("☁️ Cloud save downloaded and applied!");
         }
 
