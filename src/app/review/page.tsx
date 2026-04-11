@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getVocabForWeek, VocabWord } from "@/data/vocab";
 import { triggerSilentSync } from "@/lib/syncHelper";
 import { archiveWeekProgress } from "@/actions/progress";
+import { getStudentProgress } from "@/actions/loadProgress";
 
 import QuestScreen from "@/components/shared/QuestScreen";
 import CountdownPhase from "@/components/feed/CountdownPhase";
@@ -23,10 +24,11 @@ export default function ReviewPage() {
   const hasAwarded = useRef(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+    async function fetchVocab() {
+      const progress = await getStudentProgress();
+      const activeWeekId = progress?.activeWeekId || "week_1";
       const vocabData = getVocabForWeek(activeWeekId);
-      
+
       const params = new URLSearchParams(window.location.search);
       const t = params.get("type") as "midterm" | "final1" | "finale";
       setReviewType(t);
@@ -40,8 +42,8 @@ export default function ReviewPage() {
         setSessionWords(vocabData.slice(0, 50)); // All 50 Words
       }
       setIsLoaded(true);
-    }, 0);
-    return () => clearTimeout(timer);
+    }
+    fetchVocab();
   }, []);
 
   useEffect(() => {

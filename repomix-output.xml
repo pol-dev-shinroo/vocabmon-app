@@ -96,6 +96,8 @@ src/components/shared/TimeoutScreen.tsx
 src/components/test/DragDropTest.tsx
 src/components/test/MasteryTest.tsx
 src/data/vocab.ts
+src/data/week2.ts
+src/data/week3.ts
 src/lib/mongodb.ts
 src/lib/syncHelper.ts
 src/models/Progress.ts
@@ -1451,6 +1453,116 @@ export default function TimeoutScreen({ onRetry }: TimeoutScreenProps) {
 }
 </file>
 
+<file path="src/data/week2.ts">
+export const newVocabularySet = [
+  { id: 1, word: "consequence", pos: "noun", definition: "(noun) something that happens as a result of a particular action or set of conditions", sentence: "The slightest error can have serious consequences." },
+  { id: 2, word: "plague", pos: "noun", definition: "(noun) a disease that causes death and that spreads quickly to a large number of people", sentence: "Thousands of people died during the plague." },
+  { id: 3, word: "prey", pos: "noun", definition: "(noun) an animal that is hunted or killed by another animal for food", sentence: "The bird circled above looking for prey." },
+  { id: 4, word: "physician", pos: "noun", definition: "(noun) a medical doctor", sentence: "A physician is a doctor who treats people with medicine." },
+  { id: 5, word: "mercy", pos: "noun", definition: "(noun) kind or forgiving treatment of someone who could be treated harshly", sentence: "She fell to her knees and asked for mercy." },
+  { id: 6, word: "fatigue", pos: "noun", definition: "(noun) the state of being very tired : extreme weariness", sentence: "We were overcome by fatigue after the long journey." },
+  { id: 7, word: "affection", pos: "noun", definition: "(noun) a feeling of liking and caring for someone or something", sentence: "She has deep affection for her parents." },
+  { id: 8, word: "fraction", pos: "noun", definition: "(noun) ① a number (such as 1/2 or 3/4) which indicates that one number is being divided by another ② a part or amount of something", sentence: "We've described only a small fraction of the available options." },
+  { id: 9, word: "district", pos: "noun", definition: "(noun) an area or section of a country, city, or town such as an area established by a government for official government business", sentence: "Six police officers are in charge of the district." },
+  { id: 10, word: "faculty", pos: "noun", definition: "(noun) the group of teachers in a school or college", sentence: "She's a member of the Harvard faculty." },
+  { id: 11, word: "luxury", pos: "noun", definition: "(noun) a condition or situation of great comfort, ease, and wealth", sentence: "Eating dinner at the fancy restaurant was a luxury for our family." },
+  { id: 12, word: "minimum", pos: "noun", definition: "(noun) the lowest number or amount that is possible or allowed", sentence: "I will need a minimum of three weeks to finish my report." },
+  { id: 13, word: "sermon", pos: "noun", definition: "(noun) a speech about a moral or religious subject that is usually given by a religious leader", sentence: "He preached a sermon on the importance of kindness." },
+  { id: 14, word: "core", pos: "noun", definition: "(noun) the central part of something", sentence: "The core of his lecture has to do with the improvement of quality." },
+  { id: 15, word: "vice", pos: "noun", definition: "(noun) bad or immoral behavior or habits", sentence: "Gambling and drug abuse are vices." },
+  { id: 16, word: "impact", pos: "noun", definition: "(noun) a powerful or major influence or effect / the act or force of one thing hitting another", sentence: "The book had a huge impact when it first came out." },
+  { id: 17, word: "charity", pos: "noun", definition: "(noun) the act of giving money, food, or other kinds of help to people who are poor, sick, etc.", sentence: "The holidays are a time for charity and good will." },
+  { id: 18, word: "defect", pos: "noun", definition: "(noun) a problem or fault that makes someone or something not perfect", sentence: "This small defect greatly reduces the diamond's value." },
+  { id: 19, word: "virtue", pos: "noun", definition: "(noun) morally good behavior or character", sentence: "I urge you all to lead lives of virtue." },
+  { id: 20, word: "cliff", pos: "noun", definition: "(noun) a high, steep surface of rock, earth, or ice", sentence: "Standing at the edge of the cliff, we watched the waves crash on the shore far below." },
+  { id: 21, word: "peninsula", pos: "noun", definition: "(noun) a piece of land that is almost entirely surrounded by water and is attached to a larger land area", sentence: "They built their house on a narrow peninsula." },
+  { id: 22, word: "specimen", pos: "noun", definition: "(noun) something such as an animal or plant collected as an example of a particular kind of thing", sentence: "The doctor took a specimen of my blood." },
+  { id: 23, word: "mass", pos: "noun", definition: "(noun) a usually large amount of a substance that has no particular shape", sentence: "The slush froze into an icy mass." },
+  { id: 24, word: "inhabitant", pos: "noun", definition: "(noun) a person or animal that lives in a particular place", sentence: "The city has more than a million inhabitants." },
+  { id: 25, word: "scenery", pos: "noun", definition: "(noun) a view of natural features such as mountains, hills, valleys, etc that is pleasing to look at", sentence: "We went for a drive to enjoy the scenery." },
+  { id: 26, word: "vogue", pos: "noun", definition: "(noun) something such as a way of dressing or behaving that is fashionable or popular in a particular time and place", sentence: "Short skirts are in vogue right now." },
+  { id: 27, word: "dialect", pos: "noun", definition: "(noun) a form of a language that is spoken in a particular area and that uses some of its own words, grammar, and pronunciations", sentence: "They speak a southern dialect of French." },
+  { id: 28, word: "merit", pos: "noun", definition: "(noun) a good quality or feature that deserves to be praised", sentence: "The great merit of this plan is its simplicity." },
+  { id: 29, word: "ritual", pos: "noun", definition: "(noun) a formal ceremony or series of acts that is always performed in the same way", sentence: "The priest will perform the ritual." },
+  { id: 30, word: "theme", pos: "noun", definition: "(noun) the main subject that is being discussed or described in a piece of writing, a movie, etc.", sentence: "A constant theme in his novels is religion." },
+  { id: 31, word: "interval", pos: "noun", definition: "(noun) a period of time between events", sentence: "There might be long intervals during which nothing happens." },
+  { id: 32, word: "emigrant", pos: "noun", definition: "(noun) a person who leaves a country or region to live in another one", sentence: "Millions of European emigrants came to America in the 19th century." },
+  { id: 33, word: "destination", pos: "noun", definition: "(noun) a place to which a person is going or something is being sent", sentence: "After stopping for lunch, we continued on toward our destination." },
+  { id: 34, word: "grief", pos: "noun", definition: "(noun) deep sadness caused especially by someone's death", sentence: "He has been unable to recover from his grief at his son's death." },
+  { id: 35, word: "reception", pos: "noun", definition: "(noun) the kind of welcome that someone or something is given", sentence: "The performers did not get the warm reception they had hoped for." },
+  { id: 36, word: "extent", pos: "noun", definition: "(noun) the range, distance, or space that is covered or affected by something or included in something", sentence: "She tried to determine the extent of the damage." },
+  { id: 37, word: "resume", pos: "verb", definition: "(verb) to begin again after stopping", sentence: "The game resumed after the rain stopped." },
+  { id: 38, word: "sustain", pos: "verb", definition: "(verb) to provide what is needed for something or someone to exist, continue, etc.", sentence: "There is not enough oxygen to sustain life at very high altitudes." },
+  { id: 39, word: "paralyze", pos: "verb", definition: "(verb) to make a person or animal unable to move or feel all or part of the body", sentence: "The accident paralyzed him from the neck down." },
+  { id: 40, word: "linger", pos: "verb", definition: "(verb) to stay somewhere beyond the usual or expected time", sentence: "The tourists didn't linger very long." },
+  { id: 41, word: "stammer", pos: "verb", definition: "(verb) to speak with many pauses and repetitions because you have a speech problem or because you are very nervous, frightened, etc.", sentence: "He stammers when he's nervous." },
+  { id: 42, word: "exceed", pos: "verb", definition: "(verb) to be greater or more than something", sentence: "The cost must not exceed 10 dollars." },
+  { id: 43, word: "detect", pos: "verb", definition: "(verb) to discover or notice the presence of something that is hidden or hard to see, hear, taste, etc.", sentence: "The test is used to detect the presence of alcohol in the blood." },
+  { id: 44, word: "misuse", pos: "verb", definition: "(verb) to use something incorrectly", sentence: "She's charged with misusing company funds." },
+  { id: 45, word: "resolve", pos: "verb", definition: "(verb) to find an answer or solution to something", sentence: "The brothers finally resolved their conflict." },
+  { id: 46, word: "surpass", pos: "verb", definition: "(verb) to be better or greater than someone or something", sentence: "She soon surpassed her teacher in skill and proficiency." },
+  { id: 47, word: "wither", pos: "verb", definition: "(verb) to become dry and weak", sentence: "The plants withered and died." },
+  { id: 48, word: "refine", pos: "verb", definition: "(verb) to remove the unwanted substances in something / to improve something by making small changes", sentence: "The inventor of the machine spent years refining the design." },
+  { id: 49, word: "transplant", pos: "verb", definition: "(verb) to remove a plant from the ground or from a pot and move it to another place", sentence: "The bush was transplanted to a different part of the garden." },
+  { id: 50, word: "console", pos: "verb", definition: "(verb) to try to make someone feel less sadness or disappointment", sentence: "She consoled him after his wife died." }
+];
+</file>
+
+<file path="src/data/week3.ts">
+export const newVocabularySet = [
+  { id: 1, word: "consequence", pos: "noun", definition: "(noun) something that happens as a result of a particular action or set of conditions", sentence: "The slightest error can have serious consequences." },
+  { id: 2, word: "plague", pos: "noun", definition: "(noun) a disease that causes death and that spreads quickly to a large number of people", sentence: "Thousands of people died during the plague." },
+  { id: 3, word: "prey", pos: "noun", definition: "(noun) an animal that is hunted or killed by another animal for food", sentence: "The bird circled above looking for prey." },
+  { id: 4, word: "physician", pos: "noun", definition: "(noun) a medical doctor", sentence: "A physician is a doctor who treats people with medicine." },
+  { id: 5, word: "mercy", pos: "noun", definition: "(noun) kind or forgiving treatment of someone who could be treated harshly", sentence: "She fell to her knees and asked for mercy." },
+  { id: 6, word: "fatigue", pos: "noun", definition: "(noun) the state of being very tired : extreme weariness", sentence: "We were overcome by fatigue after the long journey." },
+  { id: 7, word: "affection", pos: "noun", definition: "(noun) a feeling of liking and caring for someone or something", sentence: "She has deep affection for her parents." },
+  { id: 8, word: "fraction", pos: "noun", definition: "(noun) ① a number (such as 1/2 or 3/4) which indicates that one number is being divided by another ② a part or amount of something", sentence: "We've described only a small fraction of the available options." },
+  { id: 9, word: "district", pos: "noun", definition: "(noun) an area or section of a country, city, or town such as an area established by a government for official government business", sentence: "Six police officers are in charge of the district." },
+  { id: 10, word: "faculty", pos: "noun", definition: "(noun) the group of teachers in a school or college", sentence: "She's a member of the Harvard faculty." },
+  { id: 11, word: "luxury", pos: "noun", definition: "(noun) a condition or situation of great comfort, ease, and wealth", sentence: "Eating dinner at the fancy restaurant was a luxury for our family." },
+  { id: 12, word: "minimum", pos: "noun", definition: "(noun) the lowest number or amount that is possible or allowed", sentence: "I will need a minimum of three weeks to finish my report." },
+  { id: 13, word: "sermon", pos: "noun", definition: "(noun) a speech about a moral or religious subject that is usually given by a religious leader", sentence: "He preached a sermon on the importance of kindness." },
+  { id: 14, word: "core", pos: "noun", definition: "(noun) the central part of something", sentence: "The core of his lecture has to do with the improvement of quality." },
+  { id: 15, word: "vice", pos: "noun", definition: "(noun) bad or immoral behavior or habits", sentence: "Gambling and drug abuse are vices." },
+  { id: 16, word: "impact", pos: "noun", definition: "(noun) a powerful or major influence or effect / the act or force of one thing hitting another", sentence: "The book had a huge impact when it first came out." },
+  { id: 17, word: "charity", pos: "noun", definition: "(noun) the act of giving money, food, or other kinds of help to people who are poor, sick, etc.", sentence: "The holidays are a time for charity and good will." },
+  { id: 18, word: "defect", pos: "noun", definition: "(noun) a problem or fault that makes someone or something not perfect", sentence: "This small defect greatly reduces the diamond's value." },
+  { id: 19, word: "virtue", pos: "noun", definition: "(noun) morally good behavior or character", sentence: "I urge you all to lead lives of virtue." },
+  { id: 20, word: "cliff", pos: "noun", definition: "(noun) a high, steep surface of rock, earth, or ice", sentence: "Standing at the edge of the cliff, we watched the waves crash on the shore far below." },
+  { id: 21, word: "peninsula", pos: "noun", definition: "(noun) a piece of land that is almost entirely surrounded by water and is attached to a larger land area", sentence: "They built their house on a narrow peninsula." },
+  { id: 22, word: "specimen", pos: "noun", definition: "(noun) something such as an animal or plant collected as an example of a particular kind of thing", sentence: "The doctor took a specimen of my blood." },
+  { id: 23, word: "mass", pos: "noun", definition: "(noun) a usually large amount of a substance that has no particular shape", sentence: "The slush froze into an icy mass." },
+  { id: 24, word: "inhabitant", pos: "noun", definition: "(noun) a person or animal that lives in a particular place", sentence: "The city has more than a million inhabitants." },
+  { id: 25, word: "scenery", pos: "noun", definition: "(noun) a view of natural features such as mountains, hills, valleys, etc that is pleasing to look at", sentence: "We went for a drive to enjoy the scenery." },
+  { id: 26, word: "vogue", pos: "noun", definition: "(noun) something such as a way of dressing or behaving that is fashionable or popular in a particular time and place", sentence: "Short skirts are in vogue right now." },
+  { id: 27, word: "dialect", pos: "noun", definition: "(noun) a form of a language that is spoken in a particular area and that uses some of its own words, grammar, and pronunciations", sentence: "They speak a southern dialect of French." },
+  { id: 28, word: "merit", pos: "noun", definition: "(noun) a good quality or feature that deserves to be praised", sentence: "The great merit of this plan is its simplicity." },
+  { id: 29, word: "ritual", pos: "noun", definition: "(noun) a formal ceremony or series of acts that is always performed in the same way", sentence: "The priest will perform the ritual." },
+  { id: 30, word: "theme", pos: "noun", definition: "(noun) the main subject that is being discussed or described in a piece of writing, a movie, etc.", sentence: "A constant theme in his novels is religion." },
+  { id: 31, word: "interval", pos: "noun", definition: "(noun) a period of time between events", sentence: "There might be long intervals during which nothing happens." },
+  { id: 32, word: "emigrant", pos: "noun", definition: "(noun) a person who leaves a country or region to live in another one", sentence: "Millions of European emigrants came to America in the 19th century." },
+  { id: 33, word: "destination", pos: "noun", definition: "(noun) a place to which a person is going or something is being sent", sentence: "After stopping for lunch, we continued on toward our destination." },
+  { id: 34, word: "grief", pos: "noun", definition: "(noun) deep sadness caused especially by someone's death", sentence: "He has been unable to recover from his grief at his son's death." },
+  { id: 35, word: "reception", pos: "noun", definition: "(noun) the kind of welcome that someone or something is given", sentence: "The performers did not get the warm reception they had hoped for." },
+  { id: 36, word: "extent", pos: "noun", definition: "(noun) the range, distance, or space that is covered or affected by something or included in something", sentence: "She tried to determine the extent of the damage." },
+  { id: 37, word: "resume", pos: "verb", definition: "(verb) to begin again after stopping", sentence: "The game resumed after the rain stopped." },
+  { id: 38, word: "sustain", pos: "verb", definition: "(verb) to provide what is needed for something or someone to exist, continue, etc.", sentence: "There is not enough oxygen to sustain life at very high altitudes." },
+  { id: 39, word: "paralyze", pos: "verb", definition: "(verb) to make a person or animal unable to move or feel all or part of the body", sentence: "The accident paralyzed him from the neck down." },
+  { id: 40, word: "linger", pos: "verb", definition: "(verb) to stay somewhere beyond the usual or expected time", sentence: "The tourists didn't linger very long." },
+  { id: 41, word: "stammer", pos: "verb", definition: "(verb) to speak with many pauses and repetitions because you have a speech problem or because you are very nervous, frightened, etc.", sentence: "He stammers when he's nervous." },
+  { id: 42, word: "exceed", pos: "verb", definition: "(verb) to be greater or more than something", sentence: "The cost must not exceed 10 dollars." },
+  { id: 43, word: "detect", pos: "verb", definition: "(verb) to discover or notice the presence of something that is hidden or hard to see, hear, taste, etc.", sentence: "The test is used to detect the presence of alcohol in the blood." },
+  { id: 44, word: "misuse", pos: "verb", definition: "(verb) to use something incorrectly", sentence: "She's charged with misusing company funds." },
+  { id: 45, word: "resolve", pos: "verb", definition: "(verb) to find an answer or solution to something", sentence: "The brothers finally resolved their conflict." },
+  { id: 46, word: "surpass", pos: "verb", definition: "(verb) to be better or greater than someone or something", sentence: "She soon surpassed her teacher in skill and proficiency." },
+  { id: 47, word: "wither", pos: "verb", definition: "(verb) to become dry and weak", sentence: "The plants withered and died." },
+  { id: 48, word: "refine", pos: "verb", definition: "(verb) to remove the unwanted substances in something / to improve something by making small changes", sentence: "The inventor of the machine spent years refining the design." },
+  { id: 49, word: "transplant", pos: "verb", definition: "(verb) to remove a plant from the ground or from a pot and move it to another place", sentence: "The bush was transplanted to a different part of the garden." },
+  { id: 50, word: "console", pos: "verb", definition: "(verb) to try to make someone feel less sadness or disappointment", sentence: "She consoled him after his wife died." }
+];
+</file>
+
 <file path="src/lib/mongodb.ts">
 import mongoose from "mongoose";
 
@@ -1598,160 +1710,6 @@ export default User;
 }
 </file>
 
-<file path="src/app/feed/page.tsx">
-"use client";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { vocabData, VocabWord } from "@/data/vocab";
-import { triggerSilentSync } from "@/lib/syncHelper";
-
-import QuestScreen from "@/components/shared/QuestScreen";
-import CountdownPhase from "@/components/feed/CountdownPhase";
-import SpellingPractice from "@/components/feed/SpellingPractice";
-import SpellingTest from "@/components/feed/SpellingTest";
-
-export default function FeedPage() {
-  const [feedPhase, setFeedPhase] = useState<
-    | "intro"
-    | "countdown"
-    | "spelling"
-    | "encouragement"
-    | "transition"
-    | "test_countdown"
-    | "test"
-    | "complete"
-  >("intro");
-
-  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const hasAwardedExp = useRef(false);
-
-  useEffect(() => {
-    const initTimer = setTimeout(() => {
-      const currentSet = parseInt(
-        localStorage.getItem("current_word_set") || "0",
-        10,
-      );
-      // FIX: Removed the "10 +" offset! Set 0 now starts at index 0.
-      const startIndex = currentSet * 5;
-      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
-      setIsLoaded(true);
-    }, 0);
-
-    return () => clearTimeout(initTimer);
-  }, []);
-
-  useEffect(() => {
-    if (feedPhase === "complete" && !hasAwardedExp.current) {
-      hasAwardedExp.current = true;
-      const currentExp = parseInt(
-        localStorage.getItem("vocabmon_exp") || "0",
-        10,
-      );
-      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
-      localStorage.setItem("quest_spelling_done", "true");
-      localStorage.setItem("trigger_fireworks", "true");
-
-      // 🚀 NEW: Silently back up to MongoDB!
-      triggerSilentSync();
-    }
-  }, [feedPhase]);
-
-  if (!isLoaded)
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
-    );
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
-      {feedPhase === "intro" && (
-        <QuestScreen
-          type="intro"
-          theme="indigo"
-          icon="vocabmon"
-          title="Vocabmon is hungry!"
-          description={
-            <>
-              Let&apos;s feed Vocabmon by practicing our spelling.
-              <br />
-              Type the words correctly to give him EXP!
-            </>
-          }
-          buttonText="Let's Feed Him! 🍎"
-          onNext={() => setFeedPhase("countdown")}
-          showCancel={true}
-        />
-      )}
-
-      {feedPhase === "countdown" && (
-        <CountdownPhase onFinish={() => setFeedPhase("spelling")} />
-      )}
-      {feedPhase === "spelling" && (
-        <SpellingPractice
-          words={sessionWords}
-          onFinish={() => setFeedPhase("encouragement")}
-        />
-      )}
-
-      {feedPhase === "encouragement" && (
-        <QuestScreen
-          type="encouragement"
-          theme="emerald"
-          icon="🔥"
-          title="Amazing Job!"
-          description="You're doing incredible! Take a deep breath before the next challenge."
-          buttonText="Continue"
-          onNext={() => setFeedPhase("transition")}
-          audio="victory"
-        />
-      )}
-
-      {feedPhase === "transition" && (
-        <QuestScreen
-          type="transition"
-          theme="indigo"
-          icon="⚔️"
-          title="Next Quest Ready"
-          subtitle="Spelling Test"
-          description="Fill in the missing letters from the words you just learned. No training wheels this time!"
-          buttonText="Start Test!"
-          onNext={() => setFeedPhase("test_countdown")}
-          audio="sword"
-        />
-      )}
-
-      {feedPhase === "test_countdown" && (
-        <CountdownPhase onFinish={() => setFeedPhase("test")} />
-      )}
-      {feedPhase === "test" && (
-        <SpellingTest
-          words={sessionWords}
-          onFinish={() => setFeedPhase("complete")}
-        />
-      )}
-
-      {feedPhase === "complete" && (
-        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-          <div className="text-6xl mb-6">🏆</div>
-          <h2 className="text-3xl font-black text-gray-900 mb-2">
-            Quest Complete!
-          </h2>
-          <p className="text-gray-500 mb-8 font-medium">
-            Amazing job! You passed the test and earned tons of EXP.
-          </p>
-          <Link
-            href="/"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
-          >
-            Return to Dashboard
-          </Link>
-        </div>
-      )}
-    </main>
-  );
-}
-</file>
-
 <file path="src/app/layout.tsx">
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -1798,221 +1756,6 @@ export default function RootLayout({
         {children}
       </body>
     </html>
-  );
-}
-</file>
-
-<file path="src/app/login/page.tsx">
-"use client";
-
-import { useActionState } from "react";
-import { loginUser } from "@/actions/auth";
-
-export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(loginUser, null);
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4"></div>
-          <h1 className="text-3xl font-black text-gray-800">Vocabmon</h1>
-          <p className="text-gray-500 font-medium mt-2">
-            Welcome back, Partner!
-          </p>
-        </div>
-
-        <form action={formAction} className="space-y-6">
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-              Trainer ID
-            </label>
-            <input
-              type="text"
-              name="username"
-              placeholder="Enter your ID..."
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none font-medium text-gray-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-              Secret Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter password..."
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none font-medium text-gray-900"
-              required
-            />
-          </div>
-
-          {state?.error && (
-            <div className="bg-red-50 text-red-600 font-bold p-3 rounded-xl text-center text-sm border border-red-200 animate-pulse">
-              {state.error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isPending}
-            className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-4 rounded-xl text-lg transition-all shadow-md ${isPending ? "opacity-70 cursor-not-allowed" : "transform hover:scale-[1.02]"}`}
-          >
-            {isPending ? "Connecting..." : "Enter World 🚀"}
-          </button>
-        </form>
-      </div>
-    </main>
-  );
-}
-</file>
-
-<file path="src/app/test/page.tsx">
-"use client";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { vocabData, VocabWord } from "@/data/vocab";
-import { triggerSilentSync } from "@/lib/syncHelper";
-
-import QuestScreen from "@/components/shared/QuestScreen";
-import CountdownPhase from "@/components/feed/CountdownPhase";
-import DragDropTest from "@/components/test/DragDropTest";
-import MasteryTest from "@/components/test/MasteryTest";
-
-export default function TestPage() {
-  const [phase, setPhase] = useState<
-    | "intro"
-    | "countdown"
-    | "dragdrop"
-    | "encouragement"
-    | "trans_mastery"
-    | "mastery_countdown"
-    | "mastery"
-    | "complete"
-  >("intro");
-
-  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const hasAwardedExp = useRef(false);
-
-  useEffect(() => {
-    const initTimer = setTimeout(() => {
-      const currentSet = parseInt(
-        localStorage.getItem("current_word_set") || "0",
-        10,
-      );
-      // FIX: Removed the "10 +" offset! Set 0 now starts exactly at index 0.
-      const startIndex = currentSet * 5;
-      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
-      setIsLoaded(true);
-    }, 0);
-
-    return () => clearTimeout(initTimer);
-  }, []);
-
-  useEffect(() => {
-    if (phase === "complete" && !hasAwardedExp.current) {
-      hasAwardedExp.current = true;
-      const currentExp = parseInt(
-        localStorage.getItem("vocabmon_exp") || "0",
-        10,
-      );
-      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
-      localStorage.setItem("quest_test_done", "true");
-      localStorage.setItem("trigger_fireworks", "true");
-
-      // 🚀 NEW: Silently back up to MongoDB!
-      triggerSilentSync();
-    }
-  }, [phase]);
-
-  if (!isLoaded)
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
-    );
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
-      {phase === "intro" && (
-        <QuestScreen
-          type="intro"
-          theme="indigo"
-          icon="📝"
-          title="The Final Test"
-          description="Prove your mastery of today's words to unlock the final EXP bonus."
-          buttonText="Start Final Exam"
-          onNext={() => setPhase("countdown")}
-          showCancel={true}
-        />
-      )}
-
-      {phase === "countdown" && (
-        <CountdownPhase onFinish={() => setPhase("dragdrop")} />
-      )}
-      {phase === "dragdrop" && (
-        <DragDropTest
-          words={sessionWords}
-          onFinish={() => setPhase("encouragement")}
-        />
-      )}
-
-      {phase === "encouragement" && (
-        <QuestScreen
-          type="encouragement"
-          theme="indigo"
-          icon="🔥"
-          title="Great Job!"
-          description="You crushed the Drag & Drop! Brace yourself for the Final Boss..."
-          buttonText="Face the Final Test"
-          onNext={() => setPhase("trans_mastery")}
-          audio="victory"
-        />
-      )}
-
-      {phase === "trans_mastery" && (
-        <QuestScreen
-          type="transition"
-          theme="blue"
-          icon="⚔️"
-          title="Next Quest Ready"
-          subtitle="The Final Boss"
-          description="Complete the meaning, then spell the word from memory!"
-          buttonText="Start Test!"
-          onNext={() => setPhase("mastery_countdown")}
-          audio="sword"
-        />
-      )}
-
-      {phase === "mastery_countdown" && (
-        <CountdownPhase onFinish={() => setPhase("mastery")} />
-      )}
-      {phase === "mastery" && (
-        <MasteryTest
-          words={sessionWords}
-          onFinish={() => setPhase("complete")}
-        />
-      )}
-
-      {phase === "complete" && (
-        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-          <div className="text-6xl mb-6">🏆</div>
-          <h2 className="text-3xl font-black text-gray-900 mb-2">
-            Flawless Victory!
-          </h2>
-          <p className="text-gray-500 mb-8 font-medium">
-            You dominated the final test and earned +50 EXP!
-          </p>
-          <Link
-            href="/"
-            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
-          >
-            Return to Dashboard
-          </Link>
-        </div>
-      )}
-    </main>
   );
 }
 </file>
@@ -2283,128 +2026,27 @@ const nextConfig = {
 export default nextConfig;
 </file>
 
-<file path="src/actions/progress.ts">
-"use server";
-
-import { connectToDatabase } from "@/lib/mongodb";
-import Progress from "@/models/Progress";
-import { cookies } from "next/headers";
-
-// This function silently saves the current state to the database
-export async function syncProgressToDB(
-  exp: number,
-  currentSet: number,
-  completedQuests: string[],
-  unlockedStickers: number[] = [],
-  hideStickerPopupUntil: Date | null = null,
-) {
-  try {
-    // 1. Figure out who is logged in
-    const cookieStore = await cookies();
-    const username = cookieStore.get("vocabmon_session")?.value;
-
-    if (!username) return { success: false, error: "Not logged in" };
-
-    // 2. Connect to the database
-    await connectToDatabase();
-
-    // 3. Update their progress file (using $set so we don't accidentally erase his history!)
-    await Progress.findOneAndUpdate(
-      { username }, // Find Jay
-      {
-        $set: {
-          exp,
-          currentSet,
-          completedQuests,
-          unlockedStickers,
-          hideStickerPopupUntil,
-        },
-      },
-      { upsert: true, new: true }, // If he doesn't have a save file yet, make one!
-    );
-
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to sync progress:", error);
-    return { success: false, error: "Database sync failed" };
-  }
-}
-
-// NEW: This function archives the current week into the History array and resets stats
-export async function archiveWeekProgress(weekId: string) {
-  try {
-    // 1. Authenticate the user
-    const cookieStore = await cookies();
-    const username = cookieStore.get("vocabmon_session")?.value;
-
-    if (!username) return { success: false, error: "Not logged in" };
-
-    // 2. Connect to the database
-    await connectToDatabase();
-
-    // 3. Find the user's current progress
-    const progress = await Progress.findOne({ username });
-    if (!progress) return { success: false, error: "No progress found to archive" };
-
-    // 4. Calculate their final level (matching the frontend logic: 150 EXP per level, max 10)
-    const rawLevel = Math.floor(progress.exp / 150) + 1;
-    const finalLevel = Math.min(rawLevel, 10);
-
-    // 5. Push the new snapshot into the history array
-    progress.history.push({
-      weekId,
-      finalLevel,
-      totalExp: progress.exp,
-      completedAt: new Date(),
-    });
-
-    // 6. Reset their active stats for the next week
-    progress.exp = 0;
-    progress.currentSet = 0;
-    progress.completedQuests = [];
-    // Optional: We could also update progress.activeWeekId if we wanted to increment it here
-
-    // 7. Save the updated document
-    await progress.save();
-
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to archive week progress:", error);
-    return { success: false, error: "Database archive failed" };
-  }
-}
-</file>
-
-<file path="src/app/exercise/page.tsx">
+<file path="src/app/feed/page.tsx">
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { vocabData, VocabWord } from "@/data/vocab";
+import { getVocabForWeek, VocabWord } from "@/data/vocab";
 import { triggerSilentSync } from "@/lib/syncHelper";
 
 import QuestScreen from "@/components/shared/QuestScreen";
 import CountdownPhase from "@/components/feed/CountdownPhase";
-import MeaningPractice from "@/components/exercise/MeaningPractice";
-import MeaningPuzzle from "@/components/exercise/MeaningPuzzle";
-import MeaningFlip from "@/components/exercise/MeaningFlip";
-import MeaningMatch from "@/components/exercise/MeaningMatch";
+import SpellingPractice from "@/components/feed/SpellingPractice";
+import SpellingTest from "@/components/feed/SpellingTest";
 
-export default function ExercisePage() {
-  const router = useRouter();
-  const [phase, setPhase] = useState<
+export default function FeedPage() {
+  const [feedPhase, setFeedPhase] = useState<
     | "intro"
     | "countdown"
-    | "practice"
-    | "trans_puzzle"
-    | "puzzle_countdown"
-    | "puzzle"
-    | "trans_flip"
-    | "flip_countdown"
-    | "flip"
-    | "trans_match"
-    | "match_countdown"
-    | "match"
+    | "spelling"
+    | "encouragement"
+    | "transition"
+    | "test_countdown"
+    | "test"
     | "complete"
   >("intro");
 
@@ -2413,14 +2055,243 @@ export default function ExercisePage() {
   const hasAwardedExp = useRef(false);
 
   useEffect(() => {
-    // FIX: Wrapping the local storage read in a 0ms timeout makes it asynchronous.
-    // This perfectly bypasses the Next.js "cascading render" warning!
     const initTimer = setTimeout(() => {
+      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+      const vocabData = getVocabForWeek(activeWeekId);
+
       const currentSet = parseInt(
         localStorage.getItem("current_word_set") || "0",
         10,
       );
       // FIX: Removed the "10 +" offset! Set 0 now starts at index 0.
+      const startIndex = currentSet * 5;
+      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
+      setIsLoaded(true);
+    }, 0);
+
+    return () => clearTimeout(initTimer);
+  }, []);
+
+  useEffect(() => {
+    if (feedPhase === "complete" && !hasAwardedExp.current) {
+      hasAwardedExp.current = true;
+      const currentExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
+      localStorage.setItem("quest_spelling_done", "true");
+      localStorage.setItem("trigger_fireworks", "true");
+
+      // 🚀 NEW: Silently back up to MongoDB!
+      triggerSilentSync();
+    }
+  }, [feedPhase]);
+
+  if (!isLoaded)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
+    );
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
+      {feedPhase === "intro" && (
+        <QuestScreen
+          type="intro"
+          theme="indigo"
+          icon="vocabmon"
+          title="Vocabmon is hungry!"
+          description={
+            <>
+              Let&apos;s feed Vocabmon by practicing our spelling.
+              <br />
+              Type the words correctly to give him EXP!
+            </>
+          }
+          buttonText="Let's Feed Him! 🍎"
+          onNext={() => setFeedPhase("countdown")}
+          showCancel={true}
+        />
+      )}
+
+      {feedPhase === "countdown" && (
+        <CountdownPhase onFinish={() => setFeedPhase("spelling")} />
+      )}
+      {feedPhase === "spelling" && (
+        <SpellingPractice
+          words={sessionWords}
+          onFinish={() => setFeedPhase("encouragement")}
+        />
+      )}
+
+      {feedPhase === "encouragement" && (
+        <QuestScreen
+          type="encouragement"
+          theme="emerald"
+          icon="🔥"
+          title="Amazing Job!"
+          description="You're doing incredible! Take a deep breath before the next challenge."
+          buttonText="Continue"
+          onNext={() => setFeedPhase("transition")}
+          audio="victory"
+        />
+      )}
+
+      {feedPhase === "transition" && (
+        <QuestScreen
+          type="transition"
+          theme="indigo"
+          icon="⚔️"
+          title="Next Quest Ready"
+          subtitle="Spelling Test"
+          description="Fill in the missing letters from the words you just learned. No training wheels this time!"
+          buttonText="Start Test!"
+          onNext={() => setFeedPhase("test_countdown")}
+          audio="sword"
+        />
+      )}
+
+      {feedPhase === "test_countdown" && (
+        <CountdownPhase onFinish={() => setFeedPhase("test")} />
+      )}
+      {feedPhase === "test" && (
+        <SpellingTest
+          words={sessionWords}
+          onFinish={() => setFeedPhase("complete")}
+        />
+      )}
+
+      {feedPhase === "complete" && (
+        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
+          <div className="text-6xl mb-6">🏆</div>
+          <h2 className="text-3xl font-black text-gray-900 mb-2">
+            Quest Complete!
+          </h2>
+          <p className="text-gray-500 mb-8 font-medium">
+            Amazing job! You passed the test and earned tons of EXP.
+          </p>
+          <Link
+            href="/"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
+          >
+            Return to Dashboard
+          </Link>
+        </div>
+      )}
+    </main>
+  );
+}
+</file>
+
+<file path="src/app/login/page.tsx">
+"use client";
+
+import { useActionState, useEffect } from "react";
+import { loginUser } from "@/actions/auth";
+
+export default function LoginPage() {
+  const [state, formAction, isPending] = useActionState(loginUser, null);
+
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+        <div className="text-center mb-8">
+          <div className="text-6xl mb-4"></div>
+          <h1 className="text-3xl font-black text-gray-800">Vocabmon</h1>
+          <p className="text-gray-500 font-medium mt-2">
+            Welcome back, Partner!
+          </p>
+        </div>
+
+        <form action={formAction} className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
+              Trainer ID
+            </label>
+            <input
+              type="text"
+              name="username"
+              placeholder="Enter your ID..."
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none font-medium text-gray-900"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
+              Secret Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter password..."
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none font-medium text-gray-900"
+              required
+            />
+          </div>
+
+          {state?.error && (
+            <div className="bg-red-50 text-red-600 font-bold p-3 rounded-xl text-center text-sm border border-red-200 animate-pulse">
+              {state.error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isPending}
+            className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-4 rounded-xl text-lg transition-all shadow-md ${isPending ? "opacity-70 cursor-not-allowed" : "transform hover:scale-[1.02]"}`}
+          >
+            {isPending ? "Connecting..." : "Enter World 🚀"}
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}
+</file>
+
+<file path="src/app/test/page.tsx">
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { getVocabForWeek, VocabWord } from "@/data/vocab";
+import { triggerSilentSync } from "@/lib/syncHelper";
+
+import QuestScreen from "@/components/shared/QuestScreen";
+import CountdownPhase from "@/components/feed/CountdownPhase";
+import DragDropTest from "@/components/test/DragDropTest";
+import MasteryTest from "@/components/test/MasteryTest";
+
+export default function TestPage() {
+  const [phase, setPhase] = useState<
+    | "intro"
+    | "countdown"
+    | "dragdrop"
+    | "encouragement"
+    | "trans_mastery"
+    | "mastery_countdown"
+    | "mastery"
+    | "complete"
+  >("intro");
+
+  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const hasAwardedExp = useRef(false);
+
+  useEffect(() => {
+    const initTimer = setTimeout(() => {
+      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+      const vocabData = getVocabForWeek(activeWeekId);
+      
+      const currentSet = parseInt(
+        localStorage.getItem("current_word_set") || "0",
+        10,
+      );
+      // FIX: Removed the "10 +" offset! Set 0 now starts exactly at index 0.
       const startIndex = currentSet * 5;
       setSessionWords(vocabData.slice(startIndex, startIndex + 5));
       setIsLoaded(true);
@@ -2437,26 +2308,13 @@ export default function ExercisePage() {
         10,
       );
       localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
-      localStorage.setItem("quest_exercise_done", "true");
+      localStorage.setItem("quest_test_done", "true");
       localStorage.setItem("trigger_fireworks", "true");
-
-      // Handle the completedQuests array
-      const storedQuests = localStorage.getItem("completedQuests");
-      const completedQuests: string[] = storedQuests ? JSON.parse(storedQuests) : [];
-      if (!completedQuests.includes("exercise")) {
-        completedQuests.push("exercise");
-      }
-      localStorage.setItem("completedQuests", JSON.stringify(completedQuests));
 
       // 🚀 NEW: Silently back up to MongoDB!
       triggerSilentSync();
-
-      // Redirect after 2 seconds
-      setTimeout(() => {
-        router.push("/");
-      }, 2000);
     }
-  }, [phase, router]);
+  }, [phase]);
 
   if (!isLoaded)
     return (
@@ -2468,257 +2326,56 @@ export default function ExercisePage() {
       {phase === "intro" && (
         <QuestScreen
           type="intro"
-          theme="emerald"
-          icon="📖"
-          title="Exercise Time!"
-          description="Master the meanings to evolve Vocabmon. Let's go!"
-          buttonText="Start Training"
+          theme="indigo"
+          icon="📝"
+          title="The Final Test"
+          description="Prove your mastery of today's words to unlock the final EXP bonus."
+          buttonText="Start Final Exam"
           onNext={() => setPhase("countdown")}
           showCancel={true}
         />
       )}
 
       {phase === "countdown" && (
-        <CountdownPhase onFinish={() => setPhase("practice")} />
+        <CountdownPhase onFinish={() => setPhase("dragdrop")} />
       )}
-      {phase === "practice" && (
-        <MeaningPractice
+      {phase === "dragdrop" && (
+        <DragDropTest
           words={sessionWords}
-          onFinish={() => setPhase("trans_puzzle")}
+          onFinish={() => setPhase("encouragement")}
         />
       )}
 
-      {phase === "trans_puzzle" && (
+      {phase === "encouragement" && (
+        <QuestScreen
+          type="encouragement"
+          theme="indigo"
+          icon="🔥"
+          title="Great Job!"
+          description="You crushed the Drag & Drop! Brace yourself for the Final Boss..."
+          buttonText="Face the Final Test"
+          onNext={() => setPhase("trans_mastery")}
+          audio="victory"
+        />
+      )}
+
+      {phase === "trans_mastery" && (
         <QuestScreen
           type="transition"
-          theme="emerald"
+          theme="blue"
           icon="⚔️"
           title="Next Quest Ready"
-          subtitle="Meaning Puzzle"
-          description="Recall the exact words."
+          subtitle="The Final Boss"
+          description="Complete the meaning, then spell the word from memory!"
           buttonText="Start Test!"
-          onNext={() => setPhase("puzzle_countdown")}
+          onNext={() => setPhase("mastery_countdown")}
           audio="sword"
         />
       )}
-      {phase === "puzzle_countdown" && (
-        <CountdownPhase onFinish={() => setPhase("puzzle")} />
-      )}
-      {phase === "puzzle" && (
-        <MeaningPuzzle
-          words={sessionWords}
-          onFinish={() => setPhase("trans_flip")}
-        />
-      )}
 
-      {phase === "trans_flip" && (
-        <QuestScreen
-          type="transition"
-          theme="emerald"
-          icon="⚔️"
-          title="Next Quest Ready"
-          subtitle="Tile Flip Memory"
-          description="Find the hidden tiles."
-          buttonText="Start Test!"
-          onNext={() => setPhase("flip_countdown")}
-          audio="sword"
-        />
-      )}
-      {phase === "flip_countdown" && (
-        <CountdownPhase onFinish={() => setPhase("flip")} />
-      )}
-      {phase === "flip" && (
-        <MeaningFlip
-          words={sessionWords}
-          onFinish={() => setPhase("trans_match")}
-        />
-      )}
-
-      {phase === "trans_match" && (
-        <QuestScreen
-          type="transition"
-          theme="emerald"
-          icon="⚔️"
-          title="Next Quest Ready"
-          subtitle="Meaning Match"
-          description="Draw the lines! Match the word to the exact meaning."
-          buttonText="Start Test!"
-          onNext={() => setPhase("match_countdown")}
-          audio="sword"
-        />
-      )}
-      {phase === "match_countdown" && (
-        <CountdownPhase onFinish={() => setPhase("match")} />
-      )}
-      {phase === "match" && (
-        <MeaningMatch
-          words={sessionWords}
-          onFinish={() => setPhase("complete")}
-        />
-      )}
-
-      {phase === "complete" && (
-        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-          <div className="text-6xl mb-6">🎓</div>
-          <h2 className="text-3xl font-black text-gray-900 mb-2">
-            Quest Mastered!
-          </h2>
-          <p className="text-gray-500 mb-8 font-medium">
-            You crushed all tests and earned +50 EXP!
-          </p>
-          <Link
-            href="/"
-            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
-          >
-            Return to Dashboard
-          </Link>
-        </div>
-      )}
-    </main>
-  );
-}
-</file>
-
-<file path="src/app/review/page.tsx">
-"use client";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { vocabData, VocabWord } from "@/data/vocab";
-import { triggerSilentSync } from "@/lib/syncHelper";
-import { archiveWeekProgress } from "@/actions/progress";
-
-import QuestScreen from "@/components/shared/QuestScreen";
-import CountdownPhase from "@/components/feed/CountdownPhase";
-import MasteryTest from "@/components/test/MasteryTest";
-
-export default function ReviewPage() {
-  const router = useRouter();
-  const [phase, setPhase] = useState<
-    "intro" | "countdown" | "mastery" | "complete"
-  >("intro");
-  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
-  const [reviewType, setReviewType] = useState<
-    "midterm" | "final1" | "finale" | ""
-  >("");
-  const [isLoaded, setIsLoaded] = useState(false);
-  const hasAwarded = useRef(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const params = new URLSearchParams(window.location.search);
-      const t = params.get("type") as "midterm" | "final1" | "finale";
-      setReviewType(t);
-
-      // EXACT SLICES FOR THE 50 WORD CAMPAIGN
-      if (t === "midterm") {
-        setSessionWords(vocabData.slice(0, 25)); // Words 1 - 25
-      } else if (t === "final1") {
-        setSessionWords(vocabData.slice(25, 50)); // Words 26 - 50
-      } else if (t === "finale") {
-        setSessionWords(vocabData.slice(0, 50)); // All 50 Words
-      }
-      setIsLoaded(true);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (phase === "complete" && !hasAwarded.current && reviewType) {
-      hasAwarded.current = true;
-      
-      const runArchive = async () => {
-        if (reviewType === "midterm")
-          localStorage.setItem("quest_midterm_done", "true");
-        if (reviewType === "final1")
-          localStorage.setItem("quest_final1_done", "true");
-        
-        if (reviewType === "finale") {
-          localStorage.setItem("quest_finale_done", "true");
-          
-          // 🏆 ARCHIVE WEEK: Move current stats to Hall of Fame & Reset
-          const activeWeek = localStorage.getItem("active_week_id") || "week_1";
-          await archiveWeekProgress(activeWeek);
-
-          // Clear local progress so next week starts fresh
-          const keysToClear = [
-            "vocabmon_exp",
-            "current_word_set",
-            "quest_spelling_done",
-            "quest_exercise_done",
-            "quest_test_done",
-            "quest_midterm_done",
-            "quest_final1_done",
-            "quest_finale_done",
-            "completedQuests"
-          ];
-          keysToClear.forEach(key => localStorage.removeItem(key));
-          
-          // Redirect to Hall of Fame after fireworks
-          setTimeout(() => {
-            router.push("/collection");
-          }, 3500);
-        }
-
-        localStorage.setItem("trigger_fireworks", "true");
-
-        // 🚀 NEW: Silently back up to MongoDB (if not finale, otherwise it's already reset)
-        if (reviewType !== "finale") {
-          triggerSilentSync();
-        }
-      };
-
-      runArchive();
-    }
-  }, [phase, reviewType, router]);
-
-  if (!isLoaded || !reviewType)
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
-    );
-
-  const config = {
-    midterm: {
-      theme: "purple" as const,
-      icon: "👾",
-      title: "Midterm Boss Fight",
-      desc: "A massive test of the first 25 words. Prove your mastery!",
-    },
-    final1: {
-      theme: "amber" as const,
-      icon: "🔥",
-      title: "Final Boss: Part 1",
-      desc: "A grueling test of the last 25 words. Focus up!",
-    },
-    finale: {
-      theme: "red" as const,
-      icon: "👑",
-      title: "The Grand Finale",
-      desc: "The ultimate challenge. ALL 50 WORDS. Leave nothing behind!",
-    },
-  };
-
-  const currentConfig = config[reviewType];
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
-      {phase === "intro" && (
-        <QuestScreen
-          type="intro"
-          theme={currentConfig.theme}
-          icon={currentConfig.icon}
-          title={currentConfig.title}
-          description={currentConfig.desc}
-          buttonText="Enter the Arena ⚔️"
-          onNext={() => setPhase("countdown")}
-          showCancel={true}
-        />
-      )}
-
-      {phase === "countdown" && (
+      {phase === "mastery_countdown" && (
         <CountdownPhase onFinish={() => setPhase("mastery")} />
       )}
-
       {phase === "mastery" && (
         <MasteryTest
           words={sessionWords}
@@ -2728,24 +2385,16 @@ export default function ReviewPage() {
 
       {phase === "complete" && (
         <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-          <div className="text-6xl mb-6">🎖️</div>
+          <div className="text-6xl mb-6">🏆</div>
           <h2 className="text-3xl font-black text-gray-900 mb-2">
-            Boss Defeated!
+            Flawless Victory!
           </h2>
           <p className="text-gray-500 mb-8 font-medium">
-            Absolutely incredible. You proved you know these words by heart!
+            You dominated the final test and earned +50 EXP!
           </p>
           <Link
             href="/"
-            className={`text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block bg-${currentConfig.theme}-500 hover:bg-${currentConfig.theme}-600`}
-            style={{
-              backgroundColor:
-                currentConfig.theme === "purple"
-                  ? "#a855f7"
-                  : currentConfig.theme === "amber"
-                    ? "#f59e0b"
-                    : "#ef4444",
-            }}
+            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
           >
             Return to Dashboard
           </Link>
@@ -5727,6 +5376,515 @@ export default function MasteryTest({
 }
 </file>
 
+<file path="src/actions/progress.ts">
+"use server";
+
+import { connectToDatabase } from "@/lib/mongodb";
+import Progress from "@/models/Progress";
+import { cookies } from "next/headers";
+
+// This function silently saves the current state to the database
+export async function syncProgressToDB(
+  exp: number,
+  currentSet: number,
+  completedQuests: string[],
+  unlockedStickers: number[] = [],
+  hideStickerPopupUntil: Date | null = null,
+) {
+  try {
+    // 1. Figure out who is logged in
+    const cookieStore = await cookies();
+    const username = cookieStore.get("vocabmon_session")?.value;
+
+    if (!username) return { success: false, error: "Not logged in" };
+
+    // 2. Connect to the database
+    await connectToDatabase();
+
+    // 3. Update their progress file (using $set so we don't accidentally erase his history!)
+    await Progress.findOneAndUpdate(
+      { username }, // Find Jay
+      {
+        $set: {
+          exp,
+          currentSet,
+          completedQuests,
+          unlockedStickers,
+          hideStickerPopupUntil,
+        },
+      },
+      { upsert: true, new: true }, // If he doesn't have a save file yet, make one!
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to sync progress:", error);
+    return { success: false, error: "Database sync failed" };
+  }
+}
+
+// NEW: This function archives the current week into the History array and resets stats
+export async function archiveWeekProgress(weekId: string) {
+  try {
+    // 1. Authenticate the user
+    const cookieStore = await cookies();
+    const username = cookieStore.get("vocabmon_session")?.value;
+
+    if (!username) return { success: false, error: "Not logged in" };
+
+    // 2. Connect to the database
+    await connectToDatabase();
+
+    // 3. Find the user's current progress
+    const progress = await Progress.findOne({ username });
+    if (!progress) return { success: false, error: "No progress found to archive" };
+
+    // 4. Calculate their final level (matching the frontend logic: 150 EXP per level, max 10)
+    const rawLevel = Math.floor(progress.exp / 150) + 1;
+    const finalLevel = Math.min(rawLevel, 10);
+
+    // 5. Push the new snapshot into the history array
+    progress.history.push({
+      weekId,
+      finalLevel,
+      totalExp: progress.exp,
+      completedAt: new Date(),
+    });
+
+    // 6. Reset their active stats for the next week
+    progress.exp = 0;
+    progress.currentSet = 0;
+    progress.completedQuests = [];
+    // Optional: We could also update progress.activeWeekId if we wanted to increment it here
+
+    // 7. Save the updated document
+    await progress.save();
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to archive week progress:", error);
+    return { success: false, error: "Database archive failed" };
+  }
+}
+
+export async function startNewWeek(username: string, newWeekId: string) {
+  try {
+    await connectToDatabase();
+    const progress = await Progress.findOne({ username });
+    if (!progress) return { success: false, error: "No progress found" };
+
+    // B) Archive the current week
+    const finalLevel = Math.min(Math.floor(progress.exp / 150) + 1, 10);
+    progress.history.push({
+      weekId: progress.activeWeekId,
+      finalLevel,
+      totalExp: progress.exp,
+      completedAt: new Date(),
+    });
+
+    // C) Reset the state for the new week
+    progress.activeWeekId = newWeekId;
+    progress.currentSet = 0;
+    progress.completedQuests = [];
+
+    // CRITICAL: Do not modify the exp, unlockedStickers, or hideStickerPopupUntil fields.
+    await progress.save();
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to start new week:", error);
+    return { success: false, error: "Failed to start new week" };
+  }
+}
+</file>
+
+<file path="src/app/exercise/page.tsx">
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getVocabForWeek, VocabWord } from "@/data/vocab";
+import { triggerSilentSync } from "@/lib/syncHelper";
+
+import QuestScreen from "@/components/shared/QuestScreen";
+import CountdownPhase from "@/components/feed/CountdownPhase";
+import MeaningPractice from "@/components/exercise/MeaningPractice";
+import MeaningPuzzle from "@/components/exercise/MeaningPuzzle";
+import MeaningFlip from "@/components/exercise/MeaningFlip";
+import MeaningMatch from "@/components/exercise/MeaningMatch";
+
+export default function ExercisePage() {
+  const router = useRouter();
+  const [phase, setPhase] = useState<
+    | "intro"
+    | "countdown"
+    | "practice"
+    | "trans_puzzle"
+    | "puzzle_countdown"
+    | "puzzle"
+    | "trans_flip"
+    | "flip_countdown"
+    | "flip"
+    | "trans_match"
+    | "match_countdown"
+    | "match"
+    | "complete"
+  >("intro");
+
+  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const hasAwardedExp = useRef(false);
+
+  useEffect(() => {
+    // FIX: Wrapping the local storage read in a 0ms timeout makes it asynchronous.
+    // This perfectly bypasses the Next.js "cascading render" warning!
+    const initTimer = setTimeout(() => {
+      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+      const vocabData = getVocabForWeek(activeWeekId);
+
+      const currentSet = parseInt(
+        localStorage.getItem("current_word_set") || "0",
+        10,
+      );
+      // FIX: Removed the "10 +" offset! Set 0 now starts at index 0.
+      const startIndex = currentSet * 5;
+      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
+      setIsLoaded(true);
+    }, 0);
+
+    return () => clearTimeout(initTimer);
+  }, []);
+
+  useEffect(() => {
+    if (phase === "complete" && !hasAwardedExp.current) {
+      hasAwardedExp.current = true;
+      const currentExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
+      localStorage.setItem("quest_exercise_done", "true");
+      localStorage.setItem("trigger_fireworks", "true");
+
+      // Handle the completedQuests array
+      const storedQuests = localStorage.getItem("completedQuests");
+      const completedQuests: string[] = storedQuests ? JSON.parse(storedQuests) : [];
+      if (!completedQuests.includes("exercise")) {
+        completedQuests.push("exercise");
+      }
+      localStorage.setItem("completedQuests", JSON.stringify(completedQuests));
+
+      // 🚀 NEW: Silently back up to MongoDB!
+      triggerSilentSync();
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
+    }
+  }, [phase, router]);
+
+  if (!isLoaded)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
+    );
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
+      {phase === "intro" && (
+        <QuestScreen
+          type="intro"
+          theme="emerald"
+          icon="📖"
+          title="Exercise Time!"
+          description="Master the meanings to evolve Vocabmon. Let's go!"
+          buttonText="Start Training"
+          onNext={() => setPhase("countdown")}
+          showCancel={true}
+        />
+      )}
+
+      {phase === "countdown" && (
+        <CountdownPhase onFinish={() => setPhase("practice")} />
+      )}
+      {phase === "practice" && (
+        <MeaningPractice
+          words={sessionWords}
+          onFinish={() => setPhase("trans_puzzle")}
+        />
+      )}
+
+      {phase === "trans_puzzle" && (
+        <QuestScreen
+          type="transition"
+          theme="emerald"
+          icon="⚔️"
+          title="Next Quest Ready"
+          subtitle="Meaning Puzzle"
+          description="Recall the exact words."
+          buttonText="Start Test!"
+          onNext={() => setPhase("puzzle_countdown")}
+          audio="sword"
+        />
+      )}
+      {phase === "puzzle_countdown" && (
+        <CountdownPhase onFinish={() => setPhase("puzzle")} />
+      )}
+      {phase === "puzzle" && (
+        <MeaningPuzzle
+          words={sessionWords}
+          onFinish={() => setPhase("trans_flip")}
+        />
+      )}
+
+      {phase === "trans_flip" && (
+        <QuestScreen
+          type="transition"
+          theme="emerald"
+          icon="⚔️"
+          title="Next Quest Ready"
+          subtitle="Tile Flip Memory"
+          description="Find the hidden tiles."
+          buttonText="Start Test!"
+          onNext={() => setPhase("flip_countdown")}
+          audio="sword"
+        />
+      )}
+      {phase === "flip_countdown" && (
+        <CountdownPhase onFinish={() => setPhase("flip")} />
+      )}
+      {phase === "flip" && (
+        <MeaningFlip
+          words={sessionWords}
+          onFinish={() => setPhase("trans_match")}
+        />
+      )}
+
+      {phase === "trans_match" && (
+        <QuestScreen
+          type="transition"
+          theme="emerald"
+          icon="⚔️"
+          title="Next Quest Ready"
+          subtitle="Meaning Match"
+          description="Draw the lines! Match the word to the exact meaning."
+          buttonText="Start Test!"
+          onNext={() => setPhase("match_countdown")}
+          audio="sword"
+        />
+      )}
+      {phase === "match_countdown" && (
+        <CountdownPhase onFinish={() => setPhase("match")} />
+      )}
+      {phase === "match" && (
+        <MeaningMatch
+          words={sessionWords}
+          onFinish={() => setPhase("complete")}
+        />
+      )}
+
+      {phase === "complete" && (
+        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
+          <div className="text-6xl mb-6">🎓</div>
+          <h2 className="text-3xl font-black text-gray-900 mb-2">
+            Quest Mastered!
+          </h2>
+          <p className="text-gray-500 mb-8 font-medium">
+            You crushed all tests and earned +50 EXP!
+          </p>
+          <Link
+            href="/"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
+          >
+            Return to Dashboard
+          </Link>
+        </div>
+      )}
+    </main>
+  );
+}
+</file>
+
+<file path="src/app/review/page.tsx">
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getVocabForWeek, VocabWord } from "@/data/vocab";
+import { triggerSilentSync } from "@/lib/syncHelper";
+import { archiveWeekProgress } from "@/actions/progress";
+
+import QuestScreen from "@/components/shared/QuestScreen";
+import CountdownPhase from "@/components/feed/CountdownPhase";
+import MasteryTest from "@/components/test/MasteryTest";
+
+export default function ReviewPage() {
+  const router = useRouter();
+  const [phase, setPhase] = useState<
+    "intro" | "countdown" | "mastery" | "complete"
+  >("intro");
+  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
+  const [reviewType, setReviewType] = useState<
+    "midterm" | "final1" | "finale" | ""
+  >("");
+  const [isLoaded, setIsLoaded] = useState(false);
+  const hasAwarded = useRef(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+      const vocabData = getVocabForWeek(activeWeekId);
+      
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("type") as "midterm" | "final1" | "finale";
+      setReviewType(t);
+
+      // EXACT SLICES FOR THE 50 WORD CAMPAIGN
+      if (t === "midterm") {
+        setSessionWords(vocabData.slice(0, 25)); // Words 1 - 25
+      } else if (t === "final1") {
+        setSessionWords(vocabData.slice(25, 50)); // Words 26 - 50
+      } else if (t === "finale") {
+        setSessionWords(vocabData.slice(0, 50)); // All 50 Words
+      }
+      setIsLoaded(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (phase === "complete" && !hasAwarded.current && reviewType) {
+      hasAwarded.current = true;
+      
+      const runArchive = async () => {
+        if (reviewType === "midterm")
+          localStorage.setItem("quest_midterm_done", "true");
+        if (reviewType === "final1")
+          localStorage.setItem("quest_final1_done", "true");
+        
+        if (reviewType === "finale") {
+          localStorage.setItem("quest_finale_done", "true");
+          
+          // 🏆 ARCHIVE WEEK: Move current stats to Hall of Fame & Reset
+          const activeWeek = localStorage.getItem("active_week_id") || "week_1";
+          await archiveWeekProgress(activeWeek);
+
+          // Clear local progress so next week starts fresh
+          const keysToClear = [
+            "vocabmon_exp",
+            "current_word_set",
+            "quest_spelling_done",
+            "quest_exercise_done",
+            "quest_test_done",
+            "quest_midterm_done",
+            "quest_final1_done",
+            "quest_finale_done",
+            "completedQuests"
+          ];
+          keysToClear.forEach(key => localStorage.removeItem(key));
+          
+          // Redirect to Hall of Fame after fireworks
+          setTimeout(() => {
+            router.push("/collection");
+          }, 3500);
+        }
+
+        localStorage.setItem("trigger_fireworks", "true");
+
+        // 🚀 NEW: Silently back up to MongoDB (if not finale, otherwise it's already reset)
+        if (reviewType !== "finale") {
+          triggerSilentSync();
+        }
+      };
+
+      runArchive();
+    }
+  }, [phase, reviewType, router]);
+
+  if (!isLoaded || !reviewType)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
+    );
+
+  const config = {
+    midterm: {
+      theme: "purple" as const,
+      icon: "👾",
+      title: "Midterm Boss Fight",
+      desc: "A massive test of the first 25 words. Prove your mastery!",
+    },
+    final1: {
+      theme: "amber" as const,
+      icon: "🔥",
+      title: "Final Boss: Part 1",
+      desc: "A grueling test of the last 25 words. Focus up!",
+    },
+    finale: {
+      theme: "red" as const,
+      icon: "👑",
+      title: "The Grand Finale",
+      desc: "The ultimate challenge. ALL 50 WORDS. Leave nothing behind!",
+    },
+  };
+
+  const currentConfig = config[reviewType];
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
+      {phase === "intro" && (
+        <QuestScreen
+          type="intro"
+          theme={currentConfig.theme}
+          icon={currentConfig.icon}
+          title={currentConfig.title}
+          description={currentConfig.desc}
+          buttonText="Enter the Arena ⚔️"
+          onNext={() => setPhase("countdown")}
+          showCancel={true}
+        />
+      )}
+
+      {phase === "countdown" && (
+        <CountdownPhase onFinish={() => setPhase("mastery")} />
+      )}
+
+      {phase === "mastery" && (
+        <MasteryTest
+          words={sessionWords}
+          onFinish={() => setPhase("complete")}
+        />
+      )}
+
+      {phase === "complete" && (
+        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
+          <div className="text-6xl mb-6">🎖️</div>
+          <h2 className="text-3xl font-black text-gray-900 mb-2">
+            Boss Defeated!
+          </h2>
+          <p className="text-gray-500 mb-8 font-medium">
+            Absolutely incredible. You proved you know these words by heart!
+          </p>
+          <Link
+            href="/"
+            className={`text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block bg-${currentConfig.theme}-500 hover:bg-${currentConfig.theme}-600`}
+            style={{
+              backgroundColor:
+                currentConfig.theme === "purple"
+                  ? "#a855f7"
+                  : currentConfig.theme === "amber"
+                    ? "#f59e0b"
+                    : "#ef4444",
+            }}
+          >
+            Return to Dashboard
+          </Link>
+        </div>
+      )}
+    </main>
+  );
+}
+</file>
+
 <file path="src/components/shared/QuestScreen.tsx">
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -5990,15 +6148,247 @@ export default function QuestScreen({
 }
 </file>
 
+<file path="src/components/feed/SpellingPractice.tsx">
+import { useState, useEffect, useRef, useCallback } from "react";
+import { VocabWord } from "@/data/vocab";
+import PixelVocabmon from "../shared/PixelVocabmon";
+import SandTimer from "../shared/SandTimer";
+import TimeoutScreen from "../shared/TimeoutScreen";
+
+const FEEDBACK_MESSAGES = [
+  "Listen, then type!",
+  "Yummy! One more bite!",
+  "Perfect! He's full! 🌟",
+];
+
+// SET YOUR DIFFICULTY HERE
+const SECONDS_PER_WORD = 20;
+
+export default function SpellingPractice({
+  words,
+  onFinish,
+}: {
+  words: VocabWord[];
+  onFinish: () => void;
+}) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isListening, setIsListening] = useState(true);
+  const [typingCount, setTypingCount] = useState(0);
+  const [inputValue, setInputValue] = useState("");
+  const [feedTrigger, setFeedTrigger] = useState(0);
+
+  const [isError, setIsError] = useState(false);
+  const [flashSuccess, setFlashSuccess] = useState(false);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+
+  const [currentLevel, setCurrentLevel] = useState(1);
+
+  const activeWord = words[currentIndex];
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const savedExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      const rawLevel = Math.floor(savedExp / 150) + 1;
+      setCurrentLevel(Math.min(rawLevel, 10));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const playSingleAudio = useCallback((wordToSpeak: string) => {
+    setIsListening(true);
+    const utterance = new SpeechSynthesisUtterance(wordToSpeak);
+
+    utterance.lang = "en-US";
+    utterance.rate = 0.85;
+
+    utterance.onend = () => {
+      setIsListening(false);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    };
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  useEffect(() => {
+    if (!activeWord) return;
+
+    const timer = setTimeout(() => {
+      setTypingCount(0);
+      setInputValue("");
+      setFlashSuccess(false);
+      setIsError(false);
+      setHasTimedOut(false);
+      playSingleAudio(activeWord.word);
+    }, 0);
+
+    return () => {
+      clearTimeout(timer);
+      window.speechSynthesis.cancel();
+    };
+  }, [activeWord, playSingleAudio]);
+
+  const handleTimeUp = useCallback(() => {
+    setHasTimedOut(true);
+  }, []);
+
+  const handleRetry = () => {
+    setHasTimedOut(false);
+    setTypingCount(0); // Restart the current word from 0 repetitions
+    setInputValue("");
+    setIsError(false);
+    setFlashSuccess(false);
+    playSingleAudio(activeWord.word);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInputValue(val);
+
+    const targetWord = activeWord.word.toLowerCase();
+    const typedWord = val.toLowerCase().trim();
+
+    if (val.length > 0 && !targetWord.startsWith(typedWord)) {
+      setIsError(true);
+    } else {
+      setIsError(false);
+    }
+
+    if (typedWord === targetWord) {
+      setFeedTrigger((prev) => prev + 1);
+      setFlashSuccess(true);
+
+      const newCount = typingCount + 1;
+      setTypingCount(newCount);
+
+      if (newCount >= 2) {
+        setTimeout(() => {
+          if (currentIndex + 1 < words.length) {
+            setCurrentIndex((prev) => prev + 1);
+          } else {
+            onFinish();
+          }
+        }, 1500);
+      } else {
+        setTimeout(() => {
+          setInputValue("");
+          setFlashSuccess(false);
+          playSingleAudio(activeWord.word);
+        }, 600);
+      }
+    }
+  };
+
+  // IF TIME IS UP, SHOW THE GAME OVER SCREEN!
+  if (hasTimedOut) {
+    return <TimeoutScreen onRetry={handleRetry} />;
+  }
+
+  if (!activeWord) return null;
+
+  let inputClasses =
+    "w-full text-center text-3xl p-4 border-b-4 outline-none transition-all bg-transparent font-mono font-bold disabled:bg-transparent ";
+
+  if (flashSuccess) {
+    inputClasses += "border-green-500 text-green-600";
+  } else if (isError) {
+    inputClasses += "border-red-500 text-red-600 focus:border-red-500";
+  } else {
+    inputClasses += "border-gray-200 focus:border-indigo-500 text-gray-900";
+  }
+
+  return (
+    <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-center gap-8 animate-fade-in">
+      <div className="w-full md:w-1/3 flex flex-col items-center">
+        <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-3xl p-8 shadow-inner border border-indigo-100/50 w-full flex flex-col items-center relative h-64 justify-end">
+          <div className="absolute top-6 w-full px-4 text-center">
+            <p
+              className={`font-bold text-lg transition-colors duration-300 ${typingCount > 0 ? "text-green-600" : "text-indigo-500"}`}
+            >
+              {FEEDBACK_MESSAGES[typingCount]}
+            </p>
+          </div>
+          <PixelVocabmon feedTrigger={feedTrigger} level={currentLevel} />
+        </div>
+      </div>
+
+      <div className="w-full md:w-2/3 flex flex-col">
+        <div className="flex justify-between items-center mb-4 px-2">
+          <span className="text-gray-400 font-bold uppercase tracking-wider text-sm">
+            Word {currentIndex + 1} of {words.length}
+          </span>
+
+          <div className="flex gap-2">
+            {[0, 1].map((i) => (
+              <div
+                key={i}
+                className={`w-4 h-4 rounded-full transition-all duration-500 ${i < typingCount ? "bg-green-500 scale-110 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-gray-200"}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-md p-8 text-center border border-gray-100 relative overflow-hidden">
+          {/* THE NEW TIMER LIVES HERE! */}
+          {/* The key property forces the timer to reset when moving to the next word or typing repetition! */}
+          <SandTimer
+            key={`${currentIndex}-${typingCount}`}
+            duration={SECONDS_PER_WORD}
+            isActive={!isListening && !flashSuccess && !hasTimedOut}
+            onTimeUp={handleTimeUp}
+          />
+
+          {isListening && (
+            <div className="absolute top-0 left-0 w-full bg-indigo-500 text-white text-xs font-bold py-1 animate-pulse tracking-widest uppercase z-10">
+              Listening...
+            </div>
+          )}
+
+          <h2 className="text-5xl font-black text-gray-900 mb-2 mt-4">
+            {activeWord.word}
+          </h2>
+          <p className="text-gray-500 italic mb-8">({activeWord.pos})</p>
+
+          <input
+            ref={inputRef}
+            type="text"
+            autoComplete="off"
+            disabled={
+              isListening || flashSuccess || typingCount >= 2 || hasTimedOut
+            }
+            value={inputValue}
+            onChange={handleInputChange}
+            placeholder={isListening ? "" : "Type the word..."}
+            className={inputClasses}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+</file>
+
 <file path="src/data/vocab.ts">
+import { newVocabularySet as week2Vocab } from "./week2";
+import { newVocabularySet as week3Vocab } from "./week3";
+
 export type VocabWord = {
   id: number;
   word: string;
   pos: string;
   definition: string;
+  sentence?: string;
   keywords?: string[];
   imageUrl?: string;
 };
+
+export function getVocabForWeek(weekId: string): VocabWord[] {
+  if (weekId === "week_2") return week2Vocab;
+  if (weekId === "week_3") return week3Vocab;
+  return vocabData;
+}
 
 export const vocabData: VocabWord[] = [
   {
@@ -6391,228 +6781,6 @@ export const vocabData: VocabWord[] = [
 ];
 </file>
 
-<file path="src/components/feed/SpellingPractice.tsx">
-import { useState, useEffect, useRef, useCallback } from "react";
-import { VocabWord } from "@/data/vocab";
-import PixelVocabmon from "../shared/PixelVocabmon";
-import SandTimer from "../shared/SandTimer";
-import TimeoutScreen from "../shared/TimeoutScreen";
-
-const FEEDBACK_MESSAGES = [
-  "Listen, then type!",
-  "Yummy! One more bite!",
-  "Perfect! He's full! 🌟",
-];
-
-// SET YOUR DIFFICULTY HERE
-const SECONDS_PER_WORD = 20;
-
-export default function SpellingPractice({
-  words,
-  onFinish,
-}: {
-  words: VocabWord[];
-  onFinish: () => void;
-}) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isListening, setIsListening] = useState(true);
-  const [typingCount, setTypingCount] = useState(0);
-  const [inputValue, setInputValue] = useState("");
-  const [feedTrigger, setFeedTrigger] = useState(0);
-
-  const [isError, setIsError] = useState(false);
-  const [flashSuccess, setFlashSuccess] = useState(false);
-  const [hasTimedOut, setHasTimedOut] = useState(false);
-
-  const [currentLevel, setCurrentLevel] = useState(1);
-
-  const activeWord = words[currentIndex];
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const savedExp = parseInt(
-        localStorage.getItem("vocabmon_exp") || "0",
-        10,
-      );
-      const rawLevel = Math.floor(savedExp / 150) + 1;
-      setCurrentLevel(Math.min(rawLevel, 10));
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const playSingleAudio = useCallback((wordToSpeak: string) => {
-    setIsListening(true);
-    const utterance = new SpeechSynthesisUtterance(wordToSpeak);
-
-    utterance.lang = "en-US";
-    utterance.rate = 0.85;
-
-    utterance.onend = () => {
-      setIsListening(false);
-      setTimeout(() => inputRef.current?.focus(), 100);
-    };
-    window.speechSynthesis.speak(utterance);
-  }, []);
-
-  useEffect(() => {
-    if (!activeWord) return;
-
-    const timer = setTimeout(() => {
-      setTypingCount(0);
-      setInputValue("");
-      setFlashSuccess(false);
-      setIsError(false);
-      setHasTimedOut(false);
-      playSingleAudio(activeWord.word);
-    }, 0);
-
-    return () => {
-      clearTimeout(timer);
-      window.speechSynthesis.cancel();
-    };
-  }, [activeWord, playSingleAudio]);
-
-  const handleTimeUp = useCallback(() => {
-    setHasTimedOut(true);
-  }, []);
-
-  const handleRetry = () => {
-    setHasTimedOut(false);
-    setTypingCount(0); // Restart the current word from 0 repetitions
-    setInputValue("");
-    setIsError(false);
-    setFlashSuccess(false);
-    playSingleAudio(activeWord.word);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setInputValue(val);
-
-    const targetWord = activeWord.word.toLowerCase();
-    const typedWord = val.toLowerCase().trim();
-
-    if (val.length > 0 && !targetWord.startsWith(typedWord)) {
-      setIsError(true);
-    } else {
-      setIsError(false);
-    }
-
-    if (typedWord === targetWord) {
-      setFeedTrigger((prev) => prev + 1);
-      setFlashSuccess(true);
-
-      const newCount = typingCount + 1;
-      setTypingCount(newCount);
-
-      if (newCount >= 2) {
-        setTimeout(() => {
-          if (currentIndex + 1 < words.length) {
-            setCurrentIndex((prev) => prev + 1);
-          } else {
-            onFinish();
-          }
-        }, 1500);
-      } else {
-        setTimeout(() => {
-          setInputValue("");
-          setFlashSuccess(false);
-          playSingleAudio(activeWord.word);
-        }, 600);
-      }
-    }
-  };
-
-  // IF TIME IS UP, SHOW THE GAME OVER SCREEN!
-  if (hasTimedOut) {
-    return <TimeoutScreen onRetry={handleRetry} />;
-  }
-
-  if (!activeWord) return null;
-
-  let inputClasses =
-    "w-full text-center text-3xl p-4 border-b-4 outline-none transition-all bg-transparent font-mono font-bold disabled:bg-transparent ";
-
-  if (flashSuccess) {
-    inputClasses += "border-green-500 text-green-600";
-  } else if (isError) {
-    inputClasses += "border-red-500 text-red-600 focus:border-red-500";
-  } else {
-    inputClasses += "border-gray-200 focus:border-indigo-500 text-gray-900";
-  }
-
-  return (
-    <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-center gap-8 animate-fade-in">
-      <div className="w-full md:w-1/3 flex flex-col items-center">
-        <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-3xl p-8 shadow-inner border border-indigo-100/50 w-full flex flex-col items-center relative h-64 justify-end">
-          <div className="absolute top-6 w-full px-4 text-center">
-            <p
-              className={`font-bold text-lg transition-colors duration-300 ${typingCount > 0 ? "text-green-600" : "text-indigo-500"}`}
-            >
-              {FEEDBACK_MESSAGES[typingCount]}
-            </p>
-          </div>
-          <PixelVocabmon feedTrigger={feedTrigger} level={currentLevel} />
-        </div>
-      </div>
-
-      <div className="w-full md:w-2/3 flex flex-col">
-        <div className="flex justify-between items-center mb-4 px-2">
-          <span className="text-gray-400 font-bold uppercase tracking-wider text-sm">
-            Word {currentIndex + 1} of {words.length}
-          </span>
-
-          <div className="flex gap-2">
-            {[0, 1].map((i) => (
-              <div
-                key={i}
-                className={`w-4 h-4 rounded-full transition-all duration-500 ${i < typingCount ? "bg-green-500 scale-110 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-gray-200"}`}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-3xl shadow-md p-8 text-center border border-gray-100 relative overflow-hidden">
-          {/* THE NEW TIMER LIVES HERE! */}
-          {/* The key property forces the timer to reset when moving to the next word or typing repetition! */}
-          <SandTimer
-            key={`${currentIndex}-${typingCount}`}
-            duration={SECONDS_PER_WORD}
-            isActive={!isListening && !flashSuccess && !hasTimedOut}
-            onTimeUp={handleTimeUp}
-          />
-
-          {isListening && (
-            <div className="absolute top-0 left-0 w-full bg-indigo-500 text-white text-xs font-bold py-1 animate-pulse tracking-widest uppercase z-10">
-              Listening...
-            </div>
-          )}
-
-          <h2 className="text-5xl font-black text-gray-900 mb-2 mt-4">
-            {activeWord.word}
-          </h2>
-          <p className="text-gray-500 italic mb-8">({activeWord.pos})</p>
-
-          <input
-            ref={inputRef}
-            type="text"
-            autoComplete="off"
-            disabled={
-              isListening || flashSuccess || typingCount >= 2 || hasTimedOut
-            }
-            value={inputValue}
-            onChange={handleInputChange}
-            placeholder={isListening ? "" : "Type the word..."}
-            className={inputClasses}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-</file>
-
 <file path="src/app/page.tsx">
 "use client";
 
@@ -6640,6 +6808,7 @@ export default function Home() {
             "current_word_set",
             dbProgress.currentSet.toString(),
           );
+          localStorage.setItem("active_week_id", dbProgress.activeWeekId);
 
           // Clear old quest flags
           const questKeys = [
@@ -6791,6 +6960,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     const initTimer = setTimeout(() => {
+      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+      const localActiveWeekId = localStorage.getItem("local_activeWeekId");
+
+      if (localActiveWeekId !== activeWeekId) {
+        // Roll over! Clear quest data and current set.
+        const questKeys = [
+          "current_word_set",
+          "quest_spelling_done",
+          "quest_exercise_done",
+          "quest_test_done",
+          "quest_midterm_done",
+          "quest_final1_done",
+          "quest_finale_done",
+          "completedQuests",
+        ];
+        questKeys.forEach((key) => localStorage.removeItem(key));
+        localStorage.setItem("local_activeWeekId", activeWeekId);
+      }
+
       const savedExp = parseInt(
         localStorage.getItem("vocabmon_exp") || "0",
         10,

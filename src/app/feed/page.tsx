@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { getVocabForWeek, VocabWord } from "@/data/vocab";
 import { triggerSilentSync } from "@/lib/syncHelper";
+import { getStudentProgress } from "@/actions/loadProgress";
 
 import QuestScreen from "@/components/shared/QuestScreen";
 import CountdownPhase from "@/components/feed/CountdownPhase";
@@ -26,21 +27,17 @@ export default function FeedPage() {
   const hasAwardedExp = useRef(false);
 
   useEffect(() => {
-    const initTimer = setTimeout(() => {
-      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+    async function fetchVocab() {
+      const progress = await getStudentProgress();
+      const activeWeekId = progress?.activeWeekId || "week_1";
+      const currentSet = progress?.currentSet || 0;
       const vocabData = getVocabForWeek(activeWeekId);
 
-      const currentSet = parseInt(
-        localStorage.getItem("current_word_set") || "0",
-        10,
-      );
-      // FIX: Removed the "10 +" offset! Set 0 now starts at index 0.
       const startIndex = currentSet * 5;
       setSessionWords(vocabData.slice(startIndex, startIndex + 5));
       setIsLoaded(true);
-    }, 0);
-
-    return () => clearTimeout(initTimer);
+    }
+    fetchVocab();
   }, []);
 
   useEffect(() => {
