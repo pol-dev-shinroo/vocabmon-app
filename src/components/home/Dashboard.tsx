@@ -51,6 +51,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     const initTimer = setTimeout(() => {
+      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+      const localActiveWeekId = localStorage.getItem("local_activeWeekId");
+
+      if (localActiveWeekId !== activeWeekId) {
+        // Roll over! Clear quest data and current set.
+        const questKeys = [
+          "current_word_set",
+          "quest_spelling_done",
+          "quest_exercise_done",
+          "quest_test_done",
+          "quest_midterm_done",
+          "quest_final1_done",
+          "quest_finale_done",
+          "completedQuests",
+        ];
+        questKeys.forEach((key) => localStorage.removeItem(key));
+        localStorage.setItem("local_activeWeekId", activeWeekId);
+      }
+
       const savedExp = parseInt(
         localStorage.getItem("vocabmon_exp") || "0",
         10,

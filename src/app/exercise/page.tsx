@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { vocabData, VocabWord } from "@/data/vocab";
+import { getVocabForWeek, VocabWord } from "@/data/vocab";
 import { triggerSilentSync } from "@/lib/syncHelper";
 
 import QuestScreen from "@/components/shared/QuestScreen";
@@ -38,6 +38,9 @@ export default function ExercisePage() {
     // FIX: Wrapping the local storage read in a 0ms timeout makes it asynchronous.
     // This perfectly bypasses the Next.js "cascading render" warning!
     const initTimer = setTimeout(() => {
+      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+      const vocabData = getVocabForWeek(activeWeekId);
+
       const currentSet = parseInt(
         localStorage.getItem("current_word_set") || "0",
         10,

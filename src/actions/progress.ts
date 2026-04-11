@@ -87,3 +87,33 @@ export async function archiveWeekProgress(weekId: string) {
     return { success: false, error: "Database archive failed" };
   }
 }
+
+export async function startNewWeek(username: string, newWeekId: string) {
+  try {
+    await connectToDatabase();
+    const progress = await Progress.findOne({ username });
+    if (!progress) return { success: false, error: "No progress found" };
+
+    // B) Archive the current week
+    const finalLevel = Math.min(Math.floor(progress.exp / 150) + 1, 10);
+    progress.history.push({
+      weekId: progress.activeWeekId,
+      finalLevel,
+      totalExp: progress.exp,
+      completedAt: new Date(),
+    });
+
+    // C) Reset the state for the new week
+    progress.activeWeekId = newWeekId;
+    progress.currentSet = 0;
+    progress.completedQuests = [];
+
+    // CRITICAL: Do not modify the exp, unlockedStickers, or hideStickerPopupUntil fields.
+    await progress.save();
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to start new week:", error);
+    return { success: false, error: "Failed to start new week" };
+  }
+}

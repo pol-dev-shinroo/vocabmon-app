@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { vocabData, VocabWord } from "@/data/vocab";
+import { getVocabForWeek, VocabWord } from "@/data/vocab";
 import { triggerSilentSync } from "@/lib/syncHelper";
 
 import QuestScreen from "@/components/shared/QuestScreen";
@@ -27,6 +27,9 @@ export default function TestPage() {
 
   useEffect(() => {
     const initTimer = setTimeout(() => {
+      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
+      const vocabData = getVocabForWeek(activeWeekId);
+      
       const currentSet = parseInt(
         localStorage.getItem("current_word_set") || "0",
         10,

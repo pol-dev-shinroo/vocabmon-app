@@ -1,11 +1,21 @@
+import { newVocabularySet as week2Vocab } from "./week2";
+import { newVocabularySet as week3Vocab } from "./week3";
+
 export type VocabWord = {
   id: number;
   word: string;
   pos: string;
   definition: string;
+  sentence?: string;
   keywords?: string[];
   imageUrl?: string;
 };
+
+export function getVocabForWeek(weekId: string): VocabWord[] {
+  if (weekId === "week_2") return week2Vocab;
+  if (weekId === "week_3") return week3Vocab;
+  return vocabData;
+}
 
 export const vocabData: VocabWord[] = [
   {

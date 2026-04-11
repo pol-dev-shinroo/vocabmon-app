@@ -24,6 +24,7 @@ export default function Home() {
             "current_word_set",
             dbProgress.currentSet.toString(),
           );
+          localStorage.setItem("active_week_id", dbProgress.activeWeekId);
 
           // Clear old quest flags
           const questKeys = [
