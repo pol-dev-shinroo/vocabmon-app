@@ -96,8 +96,6 @@ src/components/shared/TimeoutScreen.tsx
 src/components/test/DragDropTest.tsx
 src/components/test/MasteryTest.tsx
 src/data/vocab.ts
-src/data/week2.ts
-src/data/week3.ts
 src/lib/mongodb.ts
 src/lib/syncHelper.ts
 src/models/Progress.ts
@@ -1453,116 +1451,6 @@ export default function TimeoutScreen({ onRetry }: TimeoutScreenProps) {
 }
 </file>
 
-<file path="src/data/week2.ts">
-export const newVocabularySet = [
-  { id: 1, word: "consequence", pos: "noun", definition: "(noun) something that happens as a result of a particular action or set of conditions", sentence: "The slightest error can have serious consequences." },
-  { id: 2, word: "plague", pos: "noun", definition: "(noun) a disease that causes death and that spreads quickly to a large number of people", sentence: "Thousands of people died during the plague." },
-  { id: 3, word: "prey", pos: "noun", definition: "(noun) an animal that is hunted or killed by another animal for food", sentence: "The bird circled above looking for prey." },
-  { id: 4, word: "physician", pos: "noun", definition: "(noun) a medical doctor", sentence: "A physician is a doctor who treats people with medicine." },
-  { id: 5, word: "mercy", pos: "noun", definition: "(noun) kind or forgiving treatment of someone who could be treated harshly", sentence: "She fell to her knees and asked for mercy." },
-  { id: 6, word: "fatigue", pos: "noun", definition: "(noun) the state of being very tired : extreme weariness", sentence: "We were overcome by fatigue after the long journey." },
-  { id: 7, word: "affection", pos: "noun", definition: "(noun) a feeling of liking and caring for someone or something", sentence: "She has deep affection for her parents." },
-  { id: 8, word: "fraction", pos: "noun", definition: "(noun) ① a number (such as 1/2 or 3/4) which indicates that one number is being divided by another ② a part or amount of something", sentence: "We've described only a small fraction of the available options." },
-  { id: 9, word: "district", pos: "noun", definition: "(noun) an area or section of a country, city, or town such as an area established by a government for official government business", sentence: "Six police officers are in charge of the district." },
-  { id: 10, word: "faculty", pos: "noun", definition: "(noun) the group of teachers in a school or college", sentence: "She's a member of the Harvard faculty." },
-  { id: 11, word: "luxury", pos: "noun", definition: "(noun) a condition or situation of great comfort, ease, and wealth", sentence: "Eating dinner at the fancy restaurant was a luxury for our family." },
-  { id: 12, word: "minimum", pos: "noun", definition: "(noun) the lowest number or amount that is possible or allowed", sentence: "I will need a minimum of three weeks to finish my report." },
-  { id: 13, word: "sermon", pos: "noun", definition: "(noun) a speech about a moral or religious subject that is usually given by a religious leader", sentence: "He preached a sermon on the importance of kindness." },
-  { id: 14, word: "core", pos: "noun", definition: "(noun) the central part of something", sentence: "The core of his lecture has to do with the improvement of quality." },
-  { id: 15, word: "vice", pos: "noun", definition: "(noun) bad or immoral behavior or habits", sentence: "Gambling and drug abuse are vices." },
-  { id: 16, word: "impact", pos: "noun", definition: "(noun) a powerful or major influence or effect / the act or force of one thing hitting another", sentence: "The book had a huge impact when it first came out." },
-  { id: 17, word: "charity", pos: "noun", definition: "(noun) the act of giving money, food, or other kinds of help to people who are poor, sick, etc.", sentence: "The holidays are a time for charity and good will." },
-  { id: 18, word: "defect", pos: "noun", definition: "(noun) a problem or fault that makes someone or something not perfect", sentence: "This small defect greatly reduces the diamond's value." },
-  { id: 19, word: "virtue", pos: "noun", definition: "(noun) morally good behavior or character", sentence: "I urge you all to lead lives of virtue." },
-  { id: 20, word: "cliff", pos: "noun", definition: "(noun) a high, steep surface of rock, earth, or ice", sentence: "Standing at the edge of the cliff, we watched the waves crash on the shore far below." },
-  { id: 21, word: "peninsula", pos: "noun", definition: "(noun) a piece of land that is almost entirely surrounded by water and is attached to a larger land area", sentence: "They built their house on a narrow peninsula." },
-  { id: 22, word: "specimen", pos: "noun", definition: "(noun) something such as an animal or plant collected as an example of a particular kind of thing", sentence: "The doctor took a specimen of my blood." },
-  { id: 23, word: "mass", pos: "noun", definition: "(noun) a usually large amount of a substance that has no particular shape", sentence: "The slush froze into an icy mass." },
-  { id: 24, word: "inhabitant", pos: "noun", definition: "(noun) a person or animal that lives in a particular place", sentence: "The city has more than a million inhabitants." },
-  { id: 25, word: "scenery", pos: "noun", definition: "(noun) a view of natural features such as mountains, hills, valleys, etc that is pleasing to look at", sentence: "We went for a drive to enjoy the scenery." },
-  { id: 26, word: "vogue", pos: "noun", definition: "(noun) something such as a way of dressing or behaving that is fashionable or popular in a particular time and place", sentence: "Short skirts are in vogue right now." },
-  { id: 27, word: "dialect", pos: "noun", definition: "(noun) a form of a language that is spoken in a particular area and that uses some of its own words, grammar, and pronunciations", sentence: "They speak a southern dialect of French." },
-  { id: 28, word: "merit", pos: "noun", definition: "(noun) a good quality or feature that deserves to be praised", sentence: "The great merit of this plan is its simplicity." },
-  { id: 29, word: "ritual", pos: "noun", definition: "(noun) a formal ceremony or series of acts that is always performed in the same way", sentence: "The priest will perform the ritual." },
-  { id: 30, word: "theme", pos: "noun", definition: "(noun) the main subject that is being discussed or described in a piece of writing, a movie, etc.", sentence: "A constant theme in his novels is religion." },
-  { id: 31, word: "interval", pos: "noun", definition: "(noun) a period of time between events", sentence: "There might be long intervals during which nothing happens." },
-  { id: 32, word: "emigrant", pos: "noun", definition: "(noun) a person who leaves a country or region to live in another one", sentence: "Millions of European emigrants came to America in the 19th century." },
-  { id: 33, word: "destination", pos: "noun", definition: "(noun) a place to which a person is going or something is being sent", sentence: "After stopping for lunch, we continued on toward our destination." },
-  { id: 34, word: "grief", pos: "noun", definition: "(noun) deep sadness caused especially by someone's death", sentence: "He has been unable to recover from his grief at his son's death." },
-  { id: 35, word: "reception", pos: "noun", definition: "(noun) the kind of welcome that someone or something is given", sentence: "The performers did not get the warm reception they had hoped for." },
-  { id: 36, word: "extent", pos: "noun", definition: "(noun) the range, distance, or space that is covered or affected by something or included in something", sentence: "She tried to determine the extent of the damage." },
-  { id: 37, word: "resume", pos: "verb", definition: "(verb) to begin again after stopping", sentence: "The game resumed after the rain stopped." },
-  { id: 38, word: "sustain", pos: "verb", definition: "(verb) to provide what is needed for something or someone to exist, continue, etc.", sentence: "There is not enough oxygen to sustain life at very high altitudes." },
-  { id: 39, word: "paralyze", pos: "verb", definition: "(verb) to make a person or animal unable to move or feel all or part of the body", sentence: "The accident paralyzed him from the neck down." },
-  { id: 40, word: "linger", pos: "verb", definition: "(verb) to stay somewhere beyond the usual or expected time", sentence: "The tourists didn't linger very long." },
-  { id: 41, word: "stammer", pos: "verb", definition: "(verb) to speak with many pauses and repetitions because you have a speech problem or because you are very nervous, frightened, etc.", sentence: "He stammers when he's nervous." },
-  { id: 42, word: "exceed", pos: "verb", definition: "(verb) to be greater or more than something", sentence: "The cost must not exceed 10 dollars." },
-  { id: 43, word: "detect", pos: "verb", definition: "(verb) to discover or notice the presence of something that is hidden or hard to see, hear, taste, etc.", sentence: "The test is used to detect the presence of alcohol in the blood." },
-  { id: 44, word: "misuse", pos: "verb", definition: "(verb) to use something incorrectly", sentence: "She's charged with misusing company funds." },
-  { id: 45, word: "resolve", pos: "verb", definition: "(verb) to find an answer or solution to something", sentence: "The brothers finally resolved their conflict." },
-  { id: 46, word: "surpass", pos: "verb", definition: "(verb) to be better or greater than someone or something", sentence: "She soon surpassed her teacher in skill and proficiency." },
-  { id: 47, word: "wither", pos: "verb", definition: "(verb) to become dry and weak", sentence: "The plants withered and died." },
-  { id: 48, word: "refine", pos: "verb", definition: "(verb) to remove the unwanted substances in something / to improve something by making small changes", sentence: "The inventor of the machine spent years refining the design." },
-  { id: 49, word: "transplant", pos: "verb", definition: "(verb) to remove a plant from the ground or from a pot and move it to another place", sentence: "The bush was transplanted to a different part of the garden." },
-  { id: 50, word: "console", pos: "verb", definition: "(verb) to try to make someone feel less sadness or disappointment", sentence: "She consoled him after his wife died." }
-];
-</file>
-
-<file path="src/data/week3.ts">
-export const newVocabularySet = [
-  { id: 1, word: "consequence", pos: "noun", definition: "(noun) something that happens as a result of a particular action or set of conditions", sentence: "The slightest error can have serious consequences." },
-  { id: 2, word: "plague", pos: "noun", definition: "(noun) a disease that causes death and that spreads quickly to a large number of people", sentence: "Thousands of people died during the plague." },
-  { id: 3, word: "prey", pos: "noun", definition: "(noun) an animal that is hunted or killed by another animal for food", sentence: "The bird circled above looking for prey." },
-  { id: 4, word: "physician", pos: "noun", definition: "(noun) a medical doctor", sentence: "A physician is a doctor who treats people with medicine." },
-  { id: 5, word: "mercy", pos: "noun", definition: "(noun) kind or forgiving treatment of someone who could be treated harshly", sentence: "She fell to her knees and asked for mercy." },
-  { id: 6, word: "fatigue", pos: "noun", definition: "(noun) the state of being very tired : extreme weariness", sentence: "We were overcome by fatigue after the long journey." },
-  { id: 7, word: "affection", pos: "noun", definition: "(noun) a feeling of liking and caring for someone or something", sentence: "She has deep affection for her parents." },
-  { id: 8, word: "fraction", pos: "noun", definition: "(noun) ① a number (such as 1/2 or 3/4) which indicates that one number is being divided by another ② a part or amount of something", sentence: "We've described only a small fraction of the available options." },
-  { id: 9, word: "district", pos: "noun", definition: "(noun) an area or section of a country, city, or town such as an area established by a government for official government business", sentence: "Six police officers are in charge of the district." },
-  { id: 10, word: "faculty", pos: "noun", definition: "(noun) the group of teachers in a school or college", sentence: "She's a member of the Harvard faculty." },
-  { id: 11, word: "luxury", pos: "noun", definition: "(noun) a condition or situation of great comfort, ease, and wealth", sentence: "Eating dinner at the fancy restaurant was a luxury for our family." },
-  { id: 12, word: "minimum", pos: "noun", definition: "(noun) the lowest number or amount that is possible or allowed", sentence: "I will need a minimum of three weeks to finish my report." },
-  { id: 13, word: "sermon", pos: "noun", definition: "(noun) a speech about a moral or religious subject that is usually given by a religious leader", sentence: "He preached a sermon on the importance of kindness." },
-  { id: 14, word: "core", pos: "noun", definition: "(noun) the central part of something", sentence: "The core of his lecture has to do with the improvement of quality." },
-  { id: 15, word: "vice", pos: "noun", definition: "(noun) bad or immoral behavior or habits", sentence: "Gambling and drug abuse are vices." },
-  { id: 16, word: "impact", pos: "noun", definition: "(noun) a powerful or major influence or effect / the act or force of one thing hitting another", sentence: "The book had a huge impact when it first came out." },
-  { id: 17, word: "charity", pos: "noun", definition: "(noun) the act of giving money, food, or other kinds of help to people who are poor, sick, etc.", sentence: "The holidays are a time for charity and good will." },
-  { id: 18, word: "defect", pos: "noun", definition: "(noun) a problem or fault that makes someone or something not perfect", sentence: "This small defect greatly reduces the diamond's value." },
-  { id: 19, word: "virtue", pos: "noun", definition: "(noun) morally good behavior or character", sentence: "I urge you all to lead lives of virtue." },
-  { id: 20, word: "cliff", pos: "noun", definition: "(noun) a high, steep surface of rock, earth, or ice", sentence: "Standing at the edge of the cliff, we watched the waves crash on the shore far below." },
-  { id: 21, word: "peninsula", pos: "noun", definition: "(noun) a piece of land that is almost entirely surrounded by water and is attached to a larger land area", sentence: "They built their house on a narrow peninsula." },
-  { id: 22, word: "specimen", pos: "noun", definition: "(noun) something such as an animal or plant collected as an example of a particular kind of thing", sentence: "The doctor took a specimen of my blood." },
-  { id: 23, word: "mass", pos: "noun", definition: "(noun) a usually large amount of a substance that has no particular shape", sentence: "The slush froze into an icy mass." },
-  { id: 24, word: "inhabitant", pos: "noun", definition: "(noun) a person or animal that lives in a particular place", sentence: "The city has more than a million inhabitants." },
-  { id: 25, word: "scenery", pos: "noun", definition: "(noun) a view of natural features such as mountains, hills, valleys, etc that is pleasing to look at", sentence: "We went for a drive to enjoy the scenery." },
-  { id: 26, word: "vogue", pos: "noun", definition: "(noun) something such as a way of dressing or behaving that is fashionable or popular in a particular time and place", sentence: "Short skirts are in vogue right now." },
-  { id: 27, word: "dialect", pos: "noun", definition: "(noun) a form of a language that is spoken in a particular area and that uses some of its own words, grammar, and pronunciations", sentence: "They speak a southern dialect of French." },
-  { id: 28, word: "merit", pos: "noun", definition: "(noun) a good quality or feature that deserves to be praised", sentence: "The great merit of this plan is its simplicity." },
-  { id: 29, word: "ritual", pos: "noun", definition: "(noun) a formal ceremony or series of acts that is always performed in the same way", sentence: "The priest will perform the ritual." },
-  { id: 30, word: "theme", pos: "noun", definition: "(noun) the main subject that is being discussed or described in a piece of writing, a movie, etc.", sentence: "A constant theme in his novels is religion." },
-  { id: 31, word: "interval", pos: "noun", definition: "(noun) a period of time between events", sentence: "There might be long intervals during which nothing happens." },
-  { id: 32, word: "emigrant", pos: "noun", definition: "(noun) a person who leaves a country or region to live in another one", sentence: "Millions of European emigrants came to America in the 19th century." },
-  { id: 33, word: "destination", pos: "noun", definition: "(noun) a place to which a person is going or something is being sent", sentence: "After stopping for lunch, we continued on toward our destination." },
-  { id: 34, word: "grief", pos: "noun", definition: "(noun) deep sadness caused especially by someone's death", sentence: "He has been unable to recover from his grief at his son's death." },
-  { id: 35, word: "reception", pos: "noun", definition: "(noun) the kind of welcome that someone or something is given", sentence: "The performers did not get the warm reception they had hoped for." },
-  { id: 36, word: "extent", pos: "noun", definition: "(noun) the range, distance, or space that is covered or affected by something or included in something", sentence: "She tried to determine the extent of the damage." },
-  { id: 37, word: "resume", pos: "verb", definition: "(verb) to begin again after stopping", sentence: "The game resumed after the rain stopped." },
-  { id: 38, word: "sustain", pos: "verb", definition: "(verb) to provide what is needed for something or someone to exist, continue, etc.", sentence: "There is not enough oxygen to sustain life at very high altitudes." },
-  { id: 39, word: "paralyze", pos: "verb", definition: "(verb) to make a person or animal unable to move or feel all or part of the body", sentence: "The accident paralyzed him from the neck down." },
-  { id: 40, word: "linger", pos: "verb", definition: "(verb) to stay somewhere beyond the usual or expected time", sentence: "The tourists didn't linger very long." },
-  { id: 41, word: "stammer", pos: "verb", definition: "(verb) to speak with many pauses and repetitions because you have a speech problem or because you are very nervous, frightened, etc.", sentence: "He stammers when he's nervous." },
-  { id: 42, word: "exceed", pos: "verb", definition: "(verb) to be greater or more than something", sentence: "The cost must not exceed 10 dollars." },
-  { id: 43, word: "detect", pos: "verb", definition: "(verb) to discover or notice the presence of something that is hidden or hard to see, hear, taste, etc.", sentence: "The test is used to detect the presence of alcohol in the blood." },
-  { id: 44, word: "misuse", pos: "verb", definition: "(verb) to use something incorrectly", sentence: "She's charged with misusing company funds." },
-  { id: 45, word: "resolve", pos: "verb", definition: "(verb) to find an answer or solution to something", sentence: "The brothers finally resolved their conflict." },
-  { id: 46, word: "surpass", pos: "verb", definition: "(verb) to be better or greater than someone or something", sentence: "She soon surpassed her teacher in skill and proficiency." },
-  { id: 47, word: "wither", pos: "verb", definition: "(verb) to become dry and weak", sentence: "The plants withered and died." },
-  { id: 48, word: "refine", pos: "verb", definition: "(verb) to remove the unwanted substances in something / to improve something by making small changes", sentence: "The inventor of the machine spent years refining the design." },
-  { id: 49, word: "transplant", pos: "verb", definition: "(verb) to remove a plant from the ground or from a pot and move it to another place", sentence: "The bush was transplanted to a different part of the garden." },
-  { id: 50, word: "console", pos: "verb", definition: "(verb) to try to make someone feel less sadness or disappointment", sentence: "She consoled him after his wife died." }
-];
-</file>
-
 <file path="src/lib/mongodb.ts">
 import mongoose from "mongoose";
 
@@ -1866,18 +1754,23 @@ export async function triggerSilentSync() {
     10,
   );
 
-  // 2. Calculate current level and unlock stickers accordingly
-  // Level 1: 0-149 EXP, Level 2: 150-299 EXP, etc.
-  const currentLevel = Math.min(Math.floor(exp / 150) + 1, 10);
+  // 2. Calculate lifetime EXP and unlock stickers accordingly
+  const baseExp = parseInt(localStorage.getItem("lifetime_base_exp") || "0", 10);
+  const totalLifetimeExp = baseExp + exp;
+
+  // Determine how many total stickers they should own (1 sticker per 150 EXP)
+  const totalEarnedStickers = Math.floor(totalLifetimeExp / 150);
+  // Cap it at 10 (the max number of characters)
+  const maxStickerId = Math.min(totalEarnedStickers, 10);
   
-  // Unlock stickers 1 through level - 1
+  // Unlock stickers
   const unlockedStickers: number[] = JSON.parse(
     localStorage.getItem("unlocked_stickers") || "[]",
   );
   
   const newlyUnlocked: number[] = [];
   let changed = false;
-  for (let id = 1; id < currentLevel; id++) {
+  for (let id = 1; id <= maxStickerId; id++) {
     if (!unlockedStickers.includes(id)) {
       unlockedStickers.push(id);
       newlyUnlocked.push(id);
@@ -2026,163 +1919,6 @@ const nextConfig = {
 export default nextConfig;
 </file>
 
-<file path="src/app/feed/page.tsx">
-"use client";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { getVocabForWeek, VocabWord } from "@/data/vocab";
-import { triggerSilentSync } from "@/lib/syncHelper";
-
-import QuestScreen from "@/components/shared/QuestScreen";
-import CountdownPhase from "@/components/feed/CountdownPhase";
-import SpellingPractice from "@/components/feed/SpellingPractice";
-import SpellingTest from "@/components/feed/SpellingTest";
-
-export default function FeedPage() {
-  const [feedPhase, setFeedPhase] = useState<
-    | "intro"
-    | "countdown"
-    | "spelling"
-    | "encouragement"
-    | "transition"
-    | "test_countdown"
-    | "test"
-    | "complete"
-  >("intro");
-
-  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const hasAwardedExp = useRef(false);
-
-  useEffect(() => {
-    const initTimer = setTimeout(() => {
-      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
-      const vocabData = getVocabForWeek(activeWeekId);
-
-      const currentSet = parseInt(
-        localStorage.getItem("current_word_set") || "0",
-        10,
-      );
-      // FIX: Removed the "10 +" offset! Set 0 now starts at index 0.
-      const startIndex = currentSet * 5;
-      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
-      setIsLoaded(true);
-    }, 0);
-
-    return () => clearTimeout(initTimer);
-  }, []);
-
-  useEffect(() => {
-    if (feedPhase === "complete" && !hasAwardedExp.current) {
-      hasAwardedExp.current = true;
-      const currentExp = parseInt(
-        localStorage.getItem("vocabmon_exp") || "0",
-        10,
-      );
-      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
-      localStorage.setItem("quest_spelling_done", "true");
-      localStorage.setItem("trigger_fireworks", "true");
-
-      // 🚀 NEW: Silently back up to MongoDB!
-      triggerSilentSync();
-    }
-  }, [feedPhase]);
-
-  if (!isLoaded)
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
-    );
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
-      {feedPhase === "intro" && (
-        <QuestScreen
-          type="intro"
-          theme="indigo"
-          icon="vocabmon"
-          title="Vocabmon is hungry!"
-          description={
-            <>
-              Let&apos;s feed Vocabmon by practicing our spelling.
-              <br />
-              Type the words correctly to give him EXP!
-            </>
-          }
-          buttonText="Let's Feed Him! 🍎"
-          onNext={() => setFeedPhase("countdown")}
-          showCancel={true}
-        />
-      )}
-
-      {feedPhase === "countdown" && (
-        <CountdownPhase onFinish={() => setFeedPhase("spelling")} />
-      )}
-      {feedPhase === "spelling" && (
-        <SpellingPractice
-          words={sessionWords}
-          onFinish={() => setFeedPhase("encouragement")}
-        />
-      )}
-
-      {feedPhase === "encouragement" && (
-        <QuestScreen
-          type="encouragement"
-          theme="emerald"
-          icon="🔥"
-          title="Amazing Job!"
-          description="You're doing incredible! Take a deep breath before the next challenge."
-          buttonText="Continue"
-          onNext={() => setFeedPhase("transition")}
-          audio="victory"
-        />
-      )}
-
-      {feedPhase === "transition" && (
-        <QuestScreen
-          type="transition"
-          theme="indigo"
-          icon="⚔️"
-          title="Next Quest Ready"
-          subtitle="Spelling Test"
-          description="Fill in the missing letters from the words you just learned. No training wheels this time!"
-          buttonText="Start Test!"
-          onNext={() => setFeedPhase("test_countdown")}
-          audio="sword"
-        />
-      )}
-
-      {feedPhase === "test_countdown" && (
-        <CountdownPhase onFinish={() => setFeedPhase("test")} />
-      )}
-      {feedPhase === "test" && (
-        <SpellingTest
-          words={sessionWords}
-          onFinish={() => setFeedPhase("complete")}
-        />
-      )}
-
-      {feedPhase === "complete" && (
-        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-          <div className="text-6xl mb-6">🏆</div>
-          <h2 className="text-3xl font-black text-gray-900 mb-2">
-            Quest Complete!
-          </h2>
-          <p className="text-gray-500 mb-8 font-medium">
-            Amazing job! You passed the test and earned tons of EXP.
-          </p>
-          <Link
-            href="/"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
-          >
-            Return to Dashboard
-          </Link>
-        </div>
-      )}
-    </main>
-  );
-}
-</file>
-
 <file path="src/app/login/page.tsx">
 "use client";
 
@@ -2249,157 +1985,6 @@ export default function LoginPage() {
           </button>
         </form>
       </div>
-    </main>
-  );
-}
-</file>
-
-<file path="src/app/test/page.tsx">
-"use client";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { getVocabForWeek, VocabWord } from "@/data/vocab";
-import { triggerSilentSync } from "@/lib/syncHelper";
-
-import QuestScreen from "@/components/shared/QuestScreen";
-import CountdownPhase from "@/components/feed/CountdownPhase";
-import DragDropTest from "@/components/test/DragDropTest";
-import MasteryTest from "@/components/test/MasteryTest";
-
-export default function TestPage() {
-  const [phase, setPhase] = useState<
-    | "intro"
-    | "countdown"
-    | "dragdrop"
-    | "encouragement"
-    | "trans_mastery"
-    | "mastery_countdown"
-    | "mastery"
-    | "complete"
-  >("intro");
-
-  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const hasAwardedExp = useRef(false);
-
-  useEffect(() => {
-    const initTimer = setTimeout(() => {
-      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
-      const vocabData = getVocabForWeek(activeWeekId);
-      
-      const currentSet = parseInt(
-        localStorage.getItem("current_word_set") || "0",
-        10,
-      );
-      // FIX: Removed the "10 +" offset! Set 0 now starts exactly at index 0.
-      const startIndex = currentSet * 5;
-      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
-      setIsLoaded(true);
-    }, 0);
-
-    return () => clearTimeout(initTimer);
-  }, []);
-
-  useEffect(() => {
-    if (phase === "complete" && !hasAwardedExp.current) {
-      hasAwardedExp.current = true;
-      const currentExp = parseInt(
-        localStorage.getItem("vocabmon_exp") || "0",
-        10,
-      );
-      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
-      localStorage.setItem("quest_test_done", "true");
-      localStorage.setItem("trigger_fireworks", "true");
-
-      // 🚀 NEW: Silently back up to MongoDB!
-      triggerSilentSync();
-    }
-  }, [phase]);
-
-  if (!isLoaded)
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
-    );
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
-      {phase === "intro" && (
-        <QuestScreen
-          type="intro"
-          theme="indigo"
-          icon="📝"
-          title="The Final Test"
-          description="Prove your mastery of today's words to unlock the final EXP bonus."
-          buttonText="Start Final Exam"
-          onNext={() => setPhase("countdown")}
-          showCancel={true}
-        />
-      )}
-
-      {phase === "countdown" && (
-        <CountdownPhase onFinish={() => setPhase("dragdrop")} />
-      )}
-      {phase === "dragdrop" && (
-        <DragDropTest
-          words={sessionWords}
-          onFinish={() => setPhase("encouragement")}
-        />
-      )}
-
-      {phase === "encouragement" && (
-        <QuestScreen
-          type="encouragement"
-          theme="indigo"
-          icon="🔥"
-          title="Great Job!"
-          description="You crushed the Drag & Drop! Brace yourself for the Final Boss..."
-          buttonText="Face the Final Test"
-          onNext={() => setPhase("trans_mastery")}
-          audio="victory"
-        />
-      )}
-
-      {phase === "trans_mastery" && (
-        <QuestScreen
-          type="transition"
-          theme="blue"
-          icon="⚔️"
-          title="Next Quest Ready"
-          subtitle="The Final Boss"
-          description="Complete the meaning, then spell the word from memory!"
-          buttonText="Start Test!"
-          onNext={() => setPhase("mastery_countdown")}
-          audio="sword"
-        />
-      )}
-
-      {phase === "mastery_countdown" && (
-        <CountdownPhase onFinish={() => setPhase("mastery")} />
-      )}
-      {phase === "mastery" && (
-        <MasteryTest
-          words={sessionWords}
-          onFinish={() => setPhase("complete")}
-        />
-      )}
-
-      {phase === "complete" && (
-        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-          <div className="text-6xl mb-6">🏆</div>
-          <h2 className="text-3xl font-black text-gray-900 mb-2">
-            Flawless Victory!
-          </h2>
-          <p className="text-gray-500 mb-8 font-medium">
-            You dominated the final test and earned +50 EXP!
-          </p>
-          <Link
-            href="/"
-            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
-          >
-            Return to Dashboard
-          </Link>
-        </div>
-      )}
     </main>
   );
 }
@@ -5498,393 +5083,6 @@ export async function startNewWeek(username: string, newWeekId: string) {
 }
 </file>
 
-<file path="src/app/exercise/page.tsx">
-"use client";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { getVocabForWeek, VocabWord } from "@/data/vocab";
-import { triggerSilentSync } from "@/lib/syncHelper";
-
-import QuestScreen from "@/components/shared/QuestScreen";
-import CountdownPhase from "@/components/feed/CountdownPhase";
-import MeaningPractice from "@/components/exercise/MeaningPractice";
-import MeaningPuzzle from "@/components/exercise/MeaningPuzzle";
-import MeaningFlip from "@/components/exercise/MeaningFlip";
-import MeaningMatch from "@/components/exercise/MeaningMatch";
-
-export default function ExercisePage() {
-  const router = useRouter();
-  const [phase, setPhase] = useState<
-    | "intro"
-    | "countdown"
-    | "practice"
-    | "trans_puzzle"
-    | "puzzle_countdown"
-    | "puzzle"
-    | "trans_flip"
-    | "flip_countdown"
-    | "flip"
-    | "trans_match"
-    | "match_countdown"
-    | "match"
-    | "complete"
-  >("intro");
-
-  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const hasAwardedExp = useRef(false);
-
-  useEffect(() => {
-    // FIX: Wrapping the local storage read in a 0ms timeout makes it asynchronous.
-    // This perfectly bypasses the Next.js "cascading render" warning!
-    const initTimer = setTimeout(() => {
-      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
-      const vocabData = getVocabForWeek(activeWeekId);
-
-      const currentSet = parseInt(
-        localStorage.getItem("current_word_set") || "0",
-        10,
-      );
-      // FIX: Removed the "10 +" offset! Set 0 now starts at index 0.
-      const startIndex = currentSet * 5;
-      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
-      setIsLoaded(true);
-    }, 0);
-
-    return () => clearTimeout(initTimer);
-  }, []);
-
-  useEffect(() => {
-    if (phase === "complete" && !hasAwardedExp.current) {
-      hasAwardedExp.current = true;
-      const currentExp = parseInt(
-        localStorage.getItem("vocabmon_exp") || "0",
-        10,
-      );
-      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
-      localStorage.setItem("quest_exercise_done", "true");
-      localStorage.setItem("trigger_fireworks", "true");
-
-      // Handle the completedQuests array
-      const storedQuests = localStorage.getItem("completedQuests");
-      const completedQuests: string[] = storedQuests ? JSON.parse(storedQuests) : [];
-      if (!completedQuests.includes("exercise")) {
-        completedQuests.push("exercise");
-      }
-      localStorage.setItem("completedQuests", JSON.stringify(completedQuests));
-
-      // 🚀 NEW: Silently back up to MongoDB!
-      triggerSilentSync();
-
-      // Redirect after 2 seconds
-      setTimeout(() => {
-        router.push("/");
-      }, 2000);
-    }
-  }, [phase, router]);
-
-  if (!isLoaded)
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
-    );
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
-      {phase === "intro" && (
-        <QuestScreen
-          type="intro"
-          theme="emerald"
-          icon="📖"
-          title="Exercise Time!"
-          description="Master the meanings to evolve Vocabmon. Let's go!"
-          buttonText="Start Training"
-          onNext={() => setPhase("countdown")}
-          showCancel={true}
-        />
-      )}
-
-      {phase === "countdown" && (
-        <CountdownPhase onFinish={() => setPhase("practice")} />
-      )}
-      {phase === "practice" && (
-        <MeaningPractice
-          words={sessionWords}
-          onFinish={() => setPhase("trans_puzzle")}
-        />
-      )}
-
-      {phase === "trans_puzzle" && (
-        <QuestScreen
-          type="transition"
-          theme="emerald"
-          icon="⚔️"
-          title="Next Quest Ready"
-          subtitle="Meaning Puzzle"
-          description="Recall the exact words."
-          buttonText="Start Test!"
-          onNext={() => setPhase("puzzle_countdown")}
-          audio="sword"
-        />
-      )}
-      {phase === "puzzle_countdown" && (
-        <CountdownPhase onFinish={() => setPhase("puzzle")} />
-      )}
-      {phase === "puzzle" && (
-        <MeaningPuzzle
-          words={sessionWords}
-          onFinish={() => setPhase("trans_flip")}
-        />
-      )}
-
-      {phase === "trans_flip" && (
-        <QuestScreen
-          type="transition"
-          theme="emerald"
-          icon="⚔️"
-          title="Next Quest Ready"
-          subtitle="Tile Flip Memory"
-          description="Find the hidden tiles."
-          buttonText="Start Test!"
-          onNext={() => setPhase("flip_countdown")}
-          audio="sword"
-        />
-      )}
-      {phase === "flip_countdown" && (
-        <CountdownPhase onFinish={() => setPhase("flip")} />
-      )}
-      {phase === "flip" && (
-        <MeaningFlip
-          words={sessionWords}
-          onFinish={() => setPhase("trans_match")}
-        />
-      )}
-
-      {phase === "trans_match" && (
-        <QuestScreen
-          type="transition"
-          theme="emerald"
-          icon="⚔️"
-          title="Next Quest Ready"
-          subtitle="Meaning Match"
-          description="Draw the lines! Match the word to the exact meaning."
-          buttonText="Start Test!"
-          onNext={() => setPhase("match_countdown")}
-          audio="sword"
-        />
-      )}
-      {phase === "match_countdown" && (
-        <CountdownPhase onFinish={() => setPhase("match")} />
-      )}
-      {phase === "match" && (
-        <MeaningMatch
-          words={sessionWords}
-          onFinish={() => setPhase("complete")}
-        />
-      )}
-
-      {phase === "complete" && (
-        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-          <div className="text-6xl mb-6">🎓</div>
-          <h2 className="text-3xl font-black text-gray-900 mb-2">
-            Quest Mastered!
-          </h2>
-          <p className="text-gray-500 mb-8 font-medium">
-            You crushed all tests and earned +50 EXP!
-          </p>
-          <Link
-            href="/"
-            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
-          >
-            Return to Dashboard
-          </Link>
-        </div>
-      )}
-    </main>
-  );
-}
-</file>
-
-<file path="src/app/review/page.tsx">
-"use client";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { getVocabForWeek, VocabWord } from "@/data/vocab";
-import { triggerSilentSync } from "@/lib/syncHelper";
-import { archiveWeekProgress } from "@/actions/progress";
-
-import QuestScreen from "@/components/shared/QuestScreen";
-import CountdownPhase from "@/components/feed/CountdownPhase";
-import MasteryTest from "@/components/test/MasteryTest";
-
-export default function ReviewPage() {
-  const router = useRouter();
-  const [phase, setPhase] = useState<
-    "intro" | "countdown" | "mastery" | "complete"
-  >("intro");
-  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
-  const [reviewType, setReviewType] = useState<
-    "midterm" | "final1" | "finale" | ""
-  >("");
-  const [isLoaded, setIsLoaded] = useState(false);
-  const hasAwarded = useRef(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
-      const vocabData = getVocabForWeek(activeWeekId);
-      
-      const params = new URLSearchParams(window.location.search);
-      const t = params.get("type") as "midterm" | "final1" | "finale";
-      setReviewType(t);
-
-      // EXACT SLICES FOR THE 50 WORD CAMPAIGN
-      if (t === "midterm") {
-        setSessionWords(vocabData.slice(0, 25)); // Words 1 - 25
-      } else if (t === "final1") {
-        setSessionWords(vocabData.slice(25, 50)); // Words 26 - 50
-      } else if (t === "finale") {
-        setSessionWords(vocabData.slice(0, 50)); // All 50 Words
-      }
-      setIsLoaded(true);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (phase === "complete" && !hasAwarded.current && reviewType) {
-      hasAwarded.current = true;
-      
-      const runArchive = async () => {
-        if (reviewType === "midterm")
-          localStorage.setItem("quest_midterm_done", "true");
-        if (reviewType === "final1")
-          localStorage.setItem("quest_final1_done", "true");
-        
-        if (reviewType === "finale") {
-          localStorage.setItem("quest_finale_done", "true");
-          
-          // 🏆 ARCHIVE WEEK: Move current stats to Hall of Fame & Reset
-          const activeWeek = localStorage.getItem("active_week_id") || "week_1";
-          await archiveWeekProgress(activeWeek);
-
-          // Clear local progress so next week starts fresh
-          const keysToClear = [
-            "vocabmon_exp",
-            "current_word_set",
-            "quest_spelling_done",
-            "quest_exercise_done",
-            "quest_test_done",
-            "quest_midterm_done",
-            "quest_final1_done",
-            "quest_finale_done",
-            "completedQuests"
-          ];
-          keysToClear.forEach(key => localStorage.removeItem(key));
-          
-          // Redirect to Hall of Fame after fireworks
-          setTimeout(() => {
-            router.push("/collection");
-          }, 3500);
-        }
-
-        localStorage.setItem("trigger_fireworks", "true");
-
-        // 🚀 NEW: Silently back up to MongoDB (if not finale, otherwise it's already reset)
-        if (reviewType !== "finale") {
-          triggerSilentSync();
-        }
-      };
-
-      runArchive();
-    }
-  }, [phase, reviewType, router]);
-
-  if (!isLoaded || !reviewType)
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
-    );
-
-  const config = {
-    midterm: {
-      theme: "purple" as const,
-      icon: "👾",
-      title: "Midterm Boss Fight",
-      desc: "A massive test of the first 25 words. Prove your mastery!",
-    },
-    final1: {
-      theme: "amber" as const,
-      icon: "🔥",
-      title: "Final Boss: Part 1",
-      desc: "A grueling test of the last 25 words. Focus up!",
-    },
-    finale: {
-      theme: "red" as const,
-      icon: "👑",
-      title: "The Grand Finale",
-      desc: "The ultimate challenge. ALL 50 WORDS. Leave nothing behind!",
-    },
-  };
-
-  const currentConfig = config[reviewType];
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
-      {phase === "intro" && (
-        <QuestScreen
-          type="intro"
-          theme={currentConfig.theme}
-          icon={currentConfig.icon}
-          title={currentConfig.title}
-          description={currentConfig.desc}
-          buttonText="Enter the Arena ⚔️"
-          onNext={() => setPhase("countdown")}
-          showCancel={true}
-        />
-      )}
-
-      {phase === "countdown" && (
-        <CountdownPhase onFinish={() => setPhase("mastery")} />
-      )}
-
-      {phase === "mastery" && (
-        <MasteryTest
-          words={sessionWords}
-          onFinish={() => setPhase("complete")}
-        />
-      )}
-
-      {phase === "complete" && (
-        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-          <div className="text-6xl mb-6">🎖️</div>
-          <h2 className="text-3xl font-black text-gray-900 mb-2">
-            Boss Defeated!
-          </h2>
-          <p className="text-gray-500 mb-8 font-medium">
-            Absolutely incredible. You proved you know these words by heart!
-          </p>
-          <Link
-            href="/"
-            className={`text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block bg-${currentConfig.theme}-500 hover:bg-${currentConfig.theme}-600`}
-            style={{
-              backgroundColor:
-                currentConfig.theme === "purple"
-                  ? "#a855f7"
-                  : currentConfig.theme === "amber"
-                    ? "#f59e0b"
-                    : "#ef4444",
-            }}
-          >
-            Return to Dashboard
-          </Link>
-        </div>
-      )}
-    </main>
-  );
-}
-</file>
-
 <file path="src/components/shared/QuestScreen.tsx">
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -6148,6 +5346,304 @@ export default function QuestScreen({
 }
 </file>
 
+<file path="src/app/feed/page.tsx">
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { vocabData, VocabWord } from "@/data/vocab";
+import { triggerSilentSync } from "@/lib/syncHelper";
+import { getStudentProgress } from "@/actions/loadProgress";
+
+import QuestScreen from "@/components/shared/QuestScreen";
+import CountdownPhase from "@/components/feed/CountdownPhase";
+import SpellingPractice from "@/components/feed/SpellingPractice";
+import SpellingTest from "@/components/feed/SpellingTest";
+
+export default function FeedPage() {
+  const [feedPhase, setFeedPhase] = useState<
+    | "intro"
+    | "countdown"
+    | "spelling"
+    | "encouragement"
+    | "transition"
+    | "test_countdown"
+    | "test"
+    | "complete"
+  >("intro");
+
+  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const hasAwardedExp = useRef(false);
+
+  useEffect(() => {
+    async function fetchVocab() {
+      const progress = await getStudentProgress();
+      const currentSet = progress?.currentSet || 0;
+
+      const startIndex = currentSet * 5;
+      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
+      setIsLoaded(true);
+    }
+    fetchVocab();
+  }, []);
+
+  useEffect(() => {
+    if (feedPhase === "complete" && !hasAwardedExp.current) {
+      hasAwardedExp.current = true;
+      const currentExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
+      localStorage.setItem("quest_spelling_done", "true");
+      localStorage.setItem("trigger_fireworks", "true");
+
+      // 🚀 NEW: Silently back up to MongoDB!
+      triggerSilentSync();
+    }
+  }, [feedPhase]);
+
+  if (!isLoaded)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
+    );
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
+      {feedPhase === "intro" && (
+        <QuestScreen
+          type="intro"
+          theme="indigo"
+          icon="vocabmon"
+          title="Vocabmon is hungry!"
+          description={
+            <>
+              Let&apos;s feed Vocabmon by practicing our spelling.
+              <br />
+              Type the words correctly to give him EXP!
+            </>
+          }
+          buttonText="Let's Feed Him! 🍎"
+          onNext={() => setFeedPhase("countdown")}
+          showCancel={true}
+        />
+      )}
+
+      {feedPhase === "countdown" && (
+        <CountdownPhase onFinish={() => setFeedPhase("spelling")} />
+      )}
+      {feedPhase === "spelling" && (
+        <SpellingPractice
+          words={sessionWords}
+          onFinish={() => setFeedPhase("encouragement")}
+        />
+      )}
+
+      {feedPhase === "encouragement" && (
+        <QuestScreen
+          type="encouragement"
+          theme="emerald"
+          icon="🔥"
+          title="Amazing Job!"
+          description="You're doing incredible! Take a deep breath before the next challenge."
+          buttonText="Continue"
+          onNext={() => setFeedPhase("transition")}
+          audio="victory"
+        />
+      )}
+
+      {feedPhase === "transition" && (
+        <QuestScreen
+          type="transition"
+          theme="indigo"
+          icon="⚔️"
+          title="Next Quest Ready"
+          subtitle="Spelling Test"
+          description="Fill in the missing letters from the words you just learned. No training wheels this time!"
+          buttonText="Start Test!"
+          onNext={() => setFeedPhase("test_countdown")}
+          audio="sword"
+        />
+      )}
+
+      {feedPhase === "test_countdown" && (
+        <CountdownPhase onFinish={() => setFeedPhase("test")} />
+      )}
+      {feedPhase === "test" && (
+        <SpellingTest
+          words={sessionWords}
+          onFinish={() => setFeedPhase("complete")}
+        />
+      )}
+
+      {feedPhase === "complete" && (
+        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
+          <div className="text-6xl mb-6">🏆</div>
+          <h2 className="text-3xl font-black text-gray-900 mb-2">
+            Quest Complete!
+          </h2>
+          <p className="text-gray-500 mb-8 font-medium">
+            Amazing job! You passed the test and earned tons of EXP.
+          </p>
+          <Link
+            href="/"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
+          >
+            Return to Dashboard
+          </Link>
+        </div>
+      )}
+    </main>
+  );
+}
+</file>
+
+<file path="src/app/test/page.tsx">
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { vocabData, VocabWord } from "@/data/vocab";
+import { triggerSilentSync } from "@/lib/syncHelper";
+import { getStudentProgress } from "@/actions/loadProgress";
+
+import QuestScreen from "@/components/shared/QuestScreen";
+import CountdownPhase from "@/components/feed/CountdownPhase";
+import DragDropTest from "@/components/test/DragDropTest";
+import MasteryTest from "@/components/test/MasteryTest";
+
+export default function TestPage() {
+  const [phase, setPhase] = useState<
+    | "intro"
+    | "countdown"
+    | "dragdrop"
+    | "encouragement"
+    | "trans_mastery"
+    | "mastery_countdown"
+    | "mastery"
+    | "complete"
+  >("intro");
+
+  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const hasAwardedExp = useRef(false);
+
+  useEffect(() => {
+    async function fetchVocab() {
+      const progress = await getStudentProgress();
+      const currentSet = progress?.currentSet || 0;
+
+      const startIndex = currentSet * 5;
+      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
+      setIsLoaded(true);
+    }
+    fetchVocab();
+  }, []);
+
+  useEffect(() => {
+    if (phase === "complete" && !hasAwardedExp.current) {
+      hasAwardedExp.current = true;
+      const currentExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
+      localStorage.setItem("quest_test_done", "true");
+      localStorage.setItem("trigger_fireworks", "true");
+
+      // 🚀 NEW: Silently back up to MongoDB!
+      triggerSilentSync();
+    }
+  }, [phase]);
+
+  if (!isLoaded)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
+    );
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
+      {phase === "intro" && (
+        <QuestScreen
+          type="intro"
+          theme="indigo"
+          icon="📝"
+          title="The Final Test"
+          description="Prove your mastery of today's words to unlock the final EXP bonus."
+          buttonText="Start Final Exam"
+          onNext={() => setPhase("countdown")}
+          showCancel={true}
+        />
+      )}
+
+      {phase === "countdown" && (
+        <CountdownPhase onFinish={() => setPhase("dragdrop")} />
+      )}
+      {phase === "dragdrop" && (
+        <DragDropTest
+          words={sessionWords}
+          onFinish={() => setPhase("encouragement")}
+        />
+      )}
+
+      {phase === "encouragement" && (
+        <QuestScreen
+          type="encouragement"
+          theme="indigo"
+          icon="🔥"
+          title="Great Job!"
+          description="You crushed the Drag & Drop! Brace yourself for the Final Boss..."
+          buttonText="Face the Final Test"
+          onNext={() => setPhase("trans_mastery")}
+          audio="victory"
+        />
+      )}
+
+      {phase === "trans_mastery" && (
+        <QuestScreen
+          type="transition"
+          theme="blue"
+          icon="⚔️"
+          title="Next Quest Ready"
+          subtitle="The Final Boss"
+          description="Complete the meaning, then spell the word from memory!"
+          buttonText="Start Test!"
+          onNext={() => setPhase("mastery_countdown")}
+          audio="sword"
+        />
+      )}
+
+      {phase === "mastery_countdown" && (
+        <CountdownPhase onFinish={() => setPhase("mastery")} />
+      )}
+      {phase === "mastery" && (
+        <MasteryTest
+          words={sessionWords}
+          onFinish={() => setPhase("complete")}
+        />
+      )}
+
+      {phase === "complete" && (
+        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
+          <div className="text-6xl mb-6">🏆</div>
+          <h2 className="text-3xl font-black text-gray-900 mb-2">
+            Flawless Victory!
+          </h2>
+          <p className="text-gray-500 mb-8 font-medium">
+            You dominated the final test and earned +50 EXP!
+          </p>
+          <Link
+            href="/"
+            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
+          >
+            Return to Dashboard
+          </Link>
+        </div>
+      )}
+    </main>
+  );
+}
+</file>
+
 <file path="src/components/feed/SpellingPractice.tsx">
 import { useState, useEffect, useRef, useCallback } from "react";
 import { VocabWord } from "@/data/vocab";
@@ -6370,10 +5866,385 @@ export default function SpellingPractice({
 }
 </file>
 
-<file path="src/data/vocab.ts">
-import { newVocabularySet as week2Vocab } from "./week2";
-import { newVocabularySet as week3Vocab } from "./week3";
+<file path="src/app/exercise/page.tsx">
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { vocabData, VocabWord } from "@/data/vocab";
+import { triggerSilentSync } from "@/lib/syncHelper";
+import { getStudentProgress } from "@/actions/loadProgress";
 
+import QuestScreen from "@/components/shared/QuestScreen";
+import CountdownPhase from "@/components/feed/CountdownPhase";
+import MeaningPractice from "@/components/exercise/MeaningPractice";
+import MeaningPuzzle from "@/components/exercise/MeaningPuzzle";
+import MeaningFlip from "@/components/exercise/MeaningFlip";
+import MeaningMatch from "@/components/exercise/MeaningMatch";
+
+export default function ExercisePage() {
+  const router = useRouter();
+  const [phase, setPhase] = useState<
+    | "intro"
+    | "countdown"
+    | "practice"
+    | "trans_puzzle"
+    | "puzzle_countdown"
+    | "puzzle"
+    | "trans_flip"
+    | "flip_countdown"
+    | "flip"
+    | "trans_match"
+    | "match_countdown"
+    | "match"
+    | "complete"
+  >("intro");
+
+  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const hasAwardedExp = useRef(false);
+
+  useEffect(() => {
+    async function fetchVocab() {
+      const progress = await getStudentProgress();
+      const currentSet = progress?.currentSet || 0;
+
+      const startIndex = currentSet * 5;
+      setSessionWords(vocabData.slice(startIndex, startIndex + 5));
+      setIsLoaded(true);
+    }
+    fetchVocab();
+  }, []);
+
+  useEffect(() => {
+    if (phase === "complete" && !hasAwardedExp.current) {
+      hasAwardedExp.current = true;
+      const currentExp = parseInt(
+        localStorage.getItem("vocabmon_exp") || "0",
+        10,
+      );
+      localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
+      localStorage.setItem("quest_exercise_done", "true");
+      localStorage.setItem("trigger_fireworks", "true");
+
+      // Handle the completedQuests array
+      const storedQuests = localStorage.getItem("completedQuests");
+      const completedQuests: string[] = storedQuests ? JSON.parse(storedQuests) : [];
+      if (!completedQuests.includes("exercise")) {
+        completedQuests.push("exercise");
+      }
+      localStorage.setItem("completedQuests", JSON.stringify(completedQuests));
+
+      // 🚀 NEW: Silently back up to MongoDB!
+      triggerSilentSync();
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
+    }
+  }, [phase, router]);
+
+  if (!isLoaded)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
+    );
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
+      {phase === "intro" && (
+        <QuestScreen
+          type="intro"
+          theme="emerald"
+          icon="📖"
+          title="Exercise Time!"
+          description="Master the meanings to evolve Vocabmon. Let's go!"
+          buttonText="Start Training"
+          onNext={() => setPhase("countdown")}
+          showCancel={true}
+        />
+      )}
+
+      {phase === "countdown" && (
+        <CountdownPhase onFinish={() => setPhase("practice")} />
+      )}
+      {phase === "practice" && (
+        <MeaningPractice
+          words={sessionWords}
+          onFinish={() => setPhase("trans_puzzle")}
+        />
+      )}
+
+      {phase === "trans_puzzle" && (
+        <QuestScreen
+          type="transition"
+          theme="emerald"
+          icon="⚔️"
+          title="Next Quest Ready"
+          subtitle="Meaning Puzzle"
+          description="Recall the exact words."
+          buttonText="Start Test!"
+          onNext={() => setPhase("puzzle_countdown")}
+          audio="sword"
+        />
+      )}
+      {phase === "puzzle_countdown" && (
+        <CountdownPhase onFinish={() => setPhase("puzzle")} />
+      )}
+      {phase === "puzzle" && (
+        <MeaningPuzzle
+          words={sessionWords}
+          onFinish={() => setPhase("trans_flip")}
+        />
+      )}
+
+      {phase === "trans_flip" && (
+        <QuestScreen
+          type="transition"
+          theme="emerald"
+          icon="⚔️"
+          title="Next Quest Ready"
+          subtitle="Tile Flip Memory"
+          description="Find the hidden tiles."
+          buttonText="Start Test!"
+          onNext={() => setPhase("flip_countdown")}
+          audio="sword"
+        />
+      )}
+      {phase === "flip_countdown" && (
+        <CountdownPhase onFinish={() => setPhase("flip")} />
+      )}
+      {phase === "flip" && (
+        <MeaningFlip
+          words={sessionWords}
+          onFinish={() => setPhase("trans_match")}
+        />
+      )}
+
+      {phase === "trans_match" && (
+        <QuestScreen
+          type="transition"
+          theme="emerald"
+          icon="⚔️"
+          title="Next Quest Ready"
+          subtitle="Meaning Match"
+          description="Draw the lines! Match the word to the exact meaning."
+          buttonText="Start Test!"
+          onNext={() => setPhase("match_countdown")}
+          audio="sword"
+        />
+      )}
+      {phase === "match_countdown" && (
+        <CountdownPhase onFinish={() => setPhase("match")} />
+      )}
+      {phase === "match" && (
+        <MeaningMatch
+          words={sessionWords}
+          onFinish={() => setPhase("complete")}
+        />
+      )}
+
+      {phase === "complete" && (
+        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
+          <div className="text-6xl mb-6">🎓</div>
+          <h2 className="text-3xl font-black text-gray-900 mb-2">
+            Quest Mastered!
+          </h2>
+          <p className="text-gray-500 mb-8 font-medium">
+            You crushed all tests and earned +50 EXP!
+          </p>
+          <Link
+            href="/"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block"
+          >
+            Return to Dashboard
+          </Link>
+        </div>
+      )}
+    </main>
+  );
+}
+</file>
+
+<file path="src/app/review/page.tsx">
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { vocabData, VocabWord } from "@/data/vocab";
+import { triggerSilentSync } from "@/lib/syncHelper";
+import { archiveWeekProgress } from "@/actions/progress";
+import { getStudentProgress } from "@/actions/loadProgress";
+
+import QuestScreen from "@/components/shared/QuestScreen";
+import CountdownPhase from "@/components/feed/CountdownPhase";
+import MasteryTest from "@/components/test/MasteryTest";
+
+export default function ReviewPage() {
+  const router = useRouter();
+  const [phase, setPhase] = useState<
+    "intro" | "countdown" | "mastery" | "complete"
+  >("intro");
+  const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
+  const [reviewType, setReviewType] = useState<
+    "midterm" | "final1" | "finale" | ""
+  >("");
+  const [isLoaded, setIsLoaded] = useState(false);
+  const hasAwarded = useRef(false);
+
+  useEffect(() => {
+    async function fetchVocab() {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("type") as "midterm" | "final1" | "finale";
+      setReviewType(t);
+
+      // EXACT SLICES FOR THE 50 WORD CAMPAIGN
+      if (t === "midterm") {
+        setSessionWords(vocabData.slice(0, 25)); // Words 1 - 25
+      } else if (t === "final1") {
+        setSessionWords(vocabData.slice(25, 50)); // Words 26 - 50
+      } else if (t === "finale") {
+        setSessionWords(vocabData.slice(0, 50)); // All 50 Words
+      }
+      setIsLoaded(true);
+    }
+    fetchVocab();
+  }, []);
+
+  useEffect(() => {
+    if (phase === "complete" && !hasAwarded.current && reviewType) {
+      hasAwarded.current = true;
+      
+      const runArchive = async () => {
+        if (reviewType === "midterm")
+          localStorage.setItem("quest_midterm_done", "true");
+        if (reviewType === "final1")
+          localStorage.setItem("quest_final1_done", "true");
+        
+        if (reviewType === "finale") {
+          localStorage.setItem("quest_finale_done", "true");
+          
+          // 🏆 ARCHIVE WEEK: Move current stats to Hall of Fame & Reset
+          const activeWeek = localStorage.getItem("active_week_id") || "week_1";
+          await archiveWeekProgress(activeWeek);
+
+          // Clear local progress so next week starts fresh
+          const keysToClear = [
+            "vocabmon_exp",
+            "current_word_set",
+            "quest_spelling_done",
+            "quest_exercise_done",
+            "quest_test_done",
+            "quest_midterm_done",
+            "quest_final1_done",
+            "quest_finale_done",
+            "completedQuests"
+          ];
+          keysToClear.forEach(key => localStorage.removeItem(key));
+          
+          // Redirect to Hall of Fame after fireworks
+          setTimeout(() => {
+            router.push("/collection");
+          }, 3500);
+        }
+
+        localStorage.setItem("trigger_fireworks", "true");
+
+        // 🚀 NEW: Silently back up to MongoDB (if not finale, otherwise it's already reset)
+        if (reviewType !== "finale") {
+          triggerSilentSync();
+        }
+      };
+
+      runArchive();
+    }
+  }, [phase, reviewType, router]);
+
+  if (!isLoaded || !reviewType)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center"></div>
+    );
+
+  const config = {
+    midterm: {
+      theme: "purple" as const,
+      icon: "👾",
+      title: "Midterm Boss Fight",
+      desc: "A massive test of the first 25 words. Prove your mastery!",
+    },
+    final1: {
+      theme: "amber" as const,
+      icon: "🔥",
+      title: "Final Boss: Part 1",
+      desc: "A grueling test of the last 25 words. Focus up!",
+    },
+    finale: {
+      theme: "red" as const,
+      icon: "👑",
+      title: "The Grand Finale",
+      desc: "The ultimate challenge. ALL 50 WORDS. Leave nothing behind!",
+    },
+  };
+
+  const currentConfig = config[reviewType];
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
+      {phase === "intro" && (
+        <QuestScreen
+          type="intro"
+          theme={currentConfig.theme}
+          icon={currentConfig.icon}
+          title={currentConfig.title}
+          description={currentConfig.desc}
+          buttonText="Enter the Arena ⚔️"
+          onNext={() => setPhase("countdown")}
+          showCancel={true}
+        />
+      )}
+
+      {phase === "countdown" && (
+        <CountdownPhase onFinish={() => setPhase("mastery")} />
+      )}
+
+      {phase === "mastery" && (
+        <MasteryTest
+          words={sessionWords}
+          onFinish={() => setPhase("complete")}
+        />
+      )}
+
+      {phase === "complete" && (
+        <div className="text-center animate-fade-in bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
+          <div className="text-6xl mb-6">🎖️</div>
+          <h2 className="text-3xl font-black text-gray-900 mb-2">
+            Boss Defeated!
+          </h2>
+          <p className="text-gray-500 mb-8 font-medium">
+            Absolutely incredible. You proved you know these words by heart!
+          </p>
+          <Link
+            href="/"
+            className={`text-white font-bold py-4 px-8 rounded-xl text-xl transition-all shadow-md inline-block bg-${currentConfig.theme}-500 hover:bg-${currentConfig.theme}-600`}
+            style={{
+              backgroundColor:
+                currentConfig.theme === "purple"
+                  ? "#a855f7"
+                  : currentConfig.theme === "amber"
+                    ? "#f59e0b"
+                    : "#ef4444",
+            }}
+          >
+            Return to Dashboard
+          </Link>
+        </div>
+      )}
+    </main>
+  );
+}
+</file>
+
+<file path="src/data/vocab.ts">
 export type VocabWord = {
   id: number;
   word: string;
@@ -6384,400 +6255,57 @@ export type VocabWord = {
   imageUrl?: string;
 };
 
-export function getVocabForWeek(weekId: string): VocabWord[] {
-  if (weekId === "week_2") return week2Vocab;
-  if (weekId === "week_3") return week3Vocab;
-  return vocabData;
-}
-
 export const vocabData: VocabWord[] = [
-  {
-    id: 1,
-    word: "archaeology",
-    pos: "noun",
-    definition:
-      "a science that deals with past human life and activities by studying the bones, tools, etc., of ancient people",
-    keywords: ["science", "past", "bones", "ancient"],
-  },
-  {
-    id: 2,
-    word: "pity",
-    pos: "noun",
-    definition:
-      "a strong feeling of sadness or sympathy for someone or something",
-    keywords: ["sadness", "sympathy", "feeling"],
-  },
-  {
-    id: 3,
-    word: "conscience",
-    pos: "noun",
-    definition:
-      "the part of the mind that makes you aware of your actions as being either morally right or wrong",
-    keywords: ["mind", "aware", "morally", "right", "wrong"],
-  },
-  {
-    id: 4,
-    word: "genius",
-    pos: "noun",
-    definition:
-      "a very smart or talented person : a person who has a level of talent or intelligence that is very rare or remarkable",
-    keywords: ["smart", "talented", "intelligence", "rare"],
-  },
-  {
-    id: 5,
-    word: "enthusiasm",
-    pos: "noun",
-    definition:
-      "strong excitement about something : a strong feeling of active interest in something that you like or enjoy",
-    keywords: ["excitement", "interest", "enjoy"],
-  },
-  {
-    id: 6,
-    word: "effect",
-    pos: "noun",
-    definition:
-      "a change that results when something is done or happens : an event, condition, or state of affairs that is produced by a cause",
-    keywords: ["change", "results", "cause"],
-  },
-  {
-    id: 7,
-    word: "logic",
-    pos: "noun",
-    definition:
-      "a proper or reasonable way of thinking about or understanding something",
-    keywords: ["reasonable", "thinking", "understanding"],
-  },
-  {
-    id: 8,
-    word: "gravity",
-    pos: "noun",
-    definition:
-      "① a very serious quality or condition ② the natural force that tends to cause physical things to move towards each other",
-    keywords: ["serious", "force", "move towards"],
-  },
-  {
-    id: 9,
-    word: "means",
-    pos: "noun",
-    definition: "a way of doing something or of achieving a desired result",
-    keywords: ["way", "achieving", "result"],
-  },
-  {
-    id: 10,
-    word: "nerve",
-    pos: "noun",
-    definition:
-      "one of the many thin parts that control movement and feeling by carrying messages between the brain and other parts of the body",
-    keywords: ["control", "movement", "messages", "brain"],
-  },
-  {
-    id: 11,
-    word: "soul",
-    pos: "noun",
-    definition:
-      "the spiritual part of a person that is believed to give life to the body and in many religions is believed to live forever",
-    keywords: ["spiritual", "life", "forever"],
-  },
-  {
-    id: 12,
-    word: "prospect",
-    pos: "noun",
-    definition: "the possibility that something will happen in the future",
-    keywords: ["possibility", "future", "happen"],
-  },
-  {
-    id: 13,
-    word: "philosophy",
-    pos: "noun",
-    definition:
-      "① a particular set of ideas about knowledge, truth, the nature and meaning of life, etc. ② the study of ideas about knowledge, truth, the nature and meaning of life, etc.",
-    keywords: ["ideas", "knowledge", "truth", "life"],
-  },
-  {
-    id: 14,
-    word: "prosperity",
-    pos: "noun",
-    definition:
-      "the state of being successful usually by making a lot of money",
-    keywords: ["successful", "money", "state"],
-  },
-  {
-    id: 15,
-    word: "phenomenon",
-    pos: "noun",
-    definition:
-      "something such as an interesting fact or event that can be observed and studied and that typically is unusual or difficult to understand or explain fully",
-    keywords: ["fact", "event", "observed", "unusual"],
-  },
-  {
-    id: 16,
-    word: "sympathy",
-    pos: "noun",
-    definition:
-      "the feeling that you care about and are sorry about someone else's trouble, grief, misfortune",
-    keywords: ["care", "sorry", "trouble", "grief"],
-  },
-  {
-    id: 17,
-    word: "justice",
-    pos: "noun",
-    definition:
-      "the process or result of using laws to fairly judge and punish crimes and criminals",
-    keywords: ["laws", "fairly", "judge", "punish"],
-  },
-  {
-    id: 18,
-    word: "welfare",
-    pos: "noun",
-    definition: "the state of being happy, healthy, or successful",
-    keywords: ["happy", "healthy", "successful"],
-  },
-  {
-    id: 19,
-    word: "biology",
-    pos: "noun",
-    definition:
-      "a science that deals with things that are alive such as plants and animals",
-    keywords: ["science", "alive", "plants", "animals"],
-  },
-  {
-    id: 20,
-    word: "theory",
-    pos: "noun",
-    definition:
-      "an idea or set of ideas that is intended to explain facts or events",
-    keywords: ["idea", "explain", "facts", "events"],
-  },
-  {
-    id: 21,
-    word: "temper",
-    pos: "noun",
-    definition:
-      "① the tendency of someone to become angry ② a state of being angry",
-    keywords: ["tendency", "angry", "state"],
-  },
-  {
-    id: 22,
-    word: "psychology",
-    pos: "noun",
-    definition: "the science or study of the mind and behavior",
-    keywords: ["science", "study", "mind", "behavior"],
-  },
-  {
-    id: 23,
-    word: "reputation",
-    pos: "noun",
-    definition:
-      "the common opinion that people have about someone or something",
-    keywords: ["common", "opinion", "people"],
-  },
-  {
-    id: 24,
-    word: "biography",
-    pos: "noun",
-    definition:
-      "the story of a real person's life written by someone other than that person",
-    keywords: ["story", "life", "written"],
-  },
-  {
-    id: 25,
-    word: "principle",
-    pos: "noun",
-    definition:
-      "a basic truth or theory : an idea that forms the basis of something",
-    keywords: ["basic", "truth", "theory", "basis"],
-  },
-  {
-    id: 26,
-    word: "contract",
-    pos: "noun",
-    definition: "a legal agreement between people, companies, etc.",
-    keywords: ["legal", "agreement", "people", "companies"],
-  },
-  {
-    id: 27,
-    word: "fault",
-    pos: "noun",
-    definition:
-      "a bad quality or part of someone's character : a weakness in character",
-    keywords: ["bad", "quality", "weakness", "character"],
-  },
-  {
-    id: 28,
-    word: "suburb",
-    pos: "noun",
-    definition:
-      "a town or other area where people live in houses near a larger city",
-    keywords: ["town", "area", "houses", "near city"],
-  },
-  {
-    id: 29,
-    word: "superstition",
-    pos: "noun",
-    definition:
-      "a belief or way of behaving that is based on fear of the unknown and faith in magic or luck",
-    keywords: ["belief", "fear", "magic", "luck"],
-  },
-  {
-    id: 30,
-    word: "zeal",
-    pos: "noun",
-    definition:
-      "a strong feeling of interest and enthusiasm that makes someone very eager or determined to do something",
-    keywords: ["interest", "enthusiasm", "eager", "determined"],
-  },
-  {
-    id: 31,
-    word: "progress",
-    pos: "noun",
-    definition: "movement forward or toward a place",
-    keywords: ["movement", "forward", "toward"],
-  },
-  {
-    id: 32,
-    word: "chaos",
-    pos: "noun",
-    definition: "complete confusion and disorder",
-    keywords: ["complete", "confusion", "disorder"],
-  },
-  {
-    id: 33,
-    word: "motive",
-    pos: "noun",
-    definition: "a reason for doing something",
-    keywords: ["reason", "doing"],
-  },
-  {
-    id: 34,
-    word: "agriculture",
-    pos: "noun",
-    definition: "the science or occupation of farming",
-    keywords: ["science", "occupation", "farming"],
-  },
-  {
-    id: 35,
-    word: "statistics",
-    pos: "noun",
-    definition:
-      "a number that represents a piece of information such as information about how often something is done, how common something is, etc.",
-    keywords: ["number", "information", "how often", "common"],
-  },
-  {
-    id: 36,
-    word: "metropolis",
-    pos: "noun",
-    definition: "a very large or important city",
-    keywords: ["large", "important", "city"],
-  },
-  {
-    id: 37,
-    word: "friction",
-    pos: "noun",
-    definition:
-      "① the force that causes a moving object to slow down when it is touching another object ② disagreement or tension between people or groups of people",
-    keywords: ["force", "slow down", "disagreement", "tension"],
-  },
-  {
-    id: 38,
-    word: "proverb",
-    pos: "noun",
-    definition:
-      'a brief popular saying (such as "Too many cooks spoil the broth") that gives advice about how people should live or that expresses a belief that is generally thought to be true',
-    keywords: ["brief", "saying", "advice", "belief"],
-  },
-  {
-    id: 39,
-    word: "ambition",
-    pos: "noun",
-    definition:
-      "a particular goal or aim : something that a person hopes to do or achieve",
-    keywords: ["goal", "aim", "hopes", "achieve"],
-  },
-  {
-    id: 40,
-    word: "tragedy",
-    pos: "noun",
-    definition:
-      "a very bad event that causes great sadness and often involves someone's death",
-    keywords: ["bad event", "sadness", "death"],
-  },
-  {
-    id: 41,
-    word: "obstacle",
-    pos: "noun",
-    definition: "something that makes it difficult to do something",
-    keywords: ["difficult", "do something"],
-  },
-  {
-    id: 42,
-    word: "attitude",
-    pos: "noun",
-    definition: "the way you think and feel about someone or something",
-    keywords: ["way", "think", "feel"],
-  },
-  {
-    id: 43,
-    word: "meteorite",
-    pos: "noun",
-    definition:
-      "a piece of rock or metal that has fallen to the ground from outer space : a meteor that reaches the surface of the Earth without burning up entirely",
-    keywords: ["rock", "metal", "outer space", "Earth"],
-  },
-  {
-    id: 44,
-    word: "foundation",
-    pos: "noun",
-    definition:
-      "a usually stone or concrete structure that supports a building from underneath",
-    keywords: ["stone", "structure", "supports", "underneath"],
-  },
-  {
-    id: 45,
-    word: "adversity",
-    pos: "noun",
-    definition: "a difficult situation or condition : misfortune or tragedy",
-    keywords: ["difficult", "situation", "misfortune", "tragedy"],
-  },
-  {
-    id: 46,
-    word: "destiny",
-    pos: "noun",
-    definition:
-      "what happens in the future : the things that someone or something will experience in the future",
-    keywords: ["happens", "future", "experience"],
-  },
-  {
-    id: 47,
-    word: "nomad",
-    pos: "noun",
-    definition:
-      "a member of a group of people who move from place to place instead of living in one place all the time",
-    keywords: ["member", "move", "place to place"],
-  },
-  {
-    id: 48,
-    word: "function",
-    pos: "noun",
-    definition:
-      "the special purpose or activity for which a thing exists or is used",
-    keywords: ["special", "purpose", "activity", "used"],
-  },
-  {
-    id: 49,
-    word: "barometer",
-    pos: "noun",
-    definition:
-      "① an instrument that is used to measure air pressure and predict changes in the weather ② something that is used to indicate or predict something",
-    keywords: ["instrument", "measure", "predict", "weather"],
-  },
-  {
-    id: 50,
-    word: "ecology",
-    pos: "noun",
-    definition:
-      "the relationships between a group of living things and their environment/ a science that deals with the relationships between groups of living things and their environments",
-    keywords: ["relationships", "living things", "environment", "science"],
-  },
+  { id: 1, word: "consequence", pos: "noun", definition: "(noun) something that happens as a result of a particular action or set of conditions", sentence: "The slightest error can have serious consequences." },
+  { id: 2, word: "plague", pos: "noun", definition: "(noun) a disease that causes death and that spreads quickly to a large number of people", sentence: "Thousands of people died during the plague." },
+  { id: 3, word: "prey", pos: "noun", definition: "(noun) an animal that is hunted or killed by another animal for food", sentence: "The bird circled above looking for prey." },
+  { id: 4, word: "physician", pos: "noun", definition: "(noun) a medical doctor", sentence: "A physician is a doctor who treats people with medicine." },
+  { id: 5, word: "mercy", pos: "noun", definition: "(noun) kind or forgiving treatment of someone who could be treated harshly", sentence: "She fell to her knees and asked for mercy." },
+  { id: 6, word: "fatigue", pos: "noun", definition: "(noun) the state of being very tired : extreme weariness", sentence: "We were overcome by fatigue after the long journey." },
+  { id: 7, word: "affection", pos: "noun", definition: "(noun) a feeling of liking and caring for someone or something", sentence: "She has deep affection for her parents." },
+  { id: 8, word: "fraction", pos: "noun", definition: "(noun) ① a number (such as 1/2 or 3/4) which indicates that one number is being divided by another ② a part or amount of something", sentence: "We've described only a small fraction of the available options." },
+  { id: 9, word: "district", pos: "noun", definition: "(noun) an area or section of a country, city, or town such as an area established by a government for official government business", sentence: "Six police officers are in charge of the district." },
+  { id: 10, word: "faculty", pos: "noun", definition: "(noun) the group of teachers in a school or college", sentence: "She's a member of the Harvard faculty." },
+  { id: 11, word: "luxury", pos: "noun", definition: "(noun) a condition or situation of great comfort, ease, and wealth", sentence: "Eating dinner at the fancy restaurant was a luxury for our family." },
+  { id: 12, word: "minimum", pos: "noun", definition: "(noun) the lowest number or amount that is possible or allowed", sentence: "I will need a minimum of three weeks to finish my report." },
+  { id: 13, word: "sermon", pos: "noun", definition: "(noun) a speech about a moral or religious subject that is usually given by a religious leader", sentence: "He preached a sermon on the importance of kindness." },
+  { id: 14, word: "core", pos: "noun", definition: "(noun) the central part of something", sentence: "The core of his lecture has to do with the improvement of quality." },
+  { id: 15, word: "vice", pos: "noun", definition: "(noun) bad or immoral behavior or habits", sentence: "Gambling and drug abuse are vices." },
+  { id: 16, word: "impact", pos: "noun", definition: "(noun) a powerful or major influence or effect / the act or force of one thing hitting another", sentence: "The book had a huge impact when it first came out." },
+  { id: 17, word: "charity", pos: "noun", definition: "(noun) the act of giving money, food, or other kinds of help to people who are poor, sick, etc.", sentence: "The holidays are a time for charity and good will." },
+  { id: 18, word: "defect", pos: "noun", definition: "(noun) a problem or fault that makes someone or something not perfect", sentence: "This small defect greatly reduces the diamond's value." },
+  { id: 19, word: "virtue", pos: "noun", definition: "(noun) morally good behavior or character", sentence: "I urge you all to lead lives of virtue." },
+  { id: 20, word: "cliff", pos: "noun", definition: "(noun) a high, steep surface of rock, earth, or ice", sentence: "Standing at the edge of the cliff, we watched the waves crash on the shore far below." },
+  { id: 21, word: "peninsula", pos: "noun", definition: "(piece of land that is almost entirely surrounded by water and is attached to a larger land area", sentence: "They built their house on a narrow peninsula." },
+  { id: 22, word: "specimen", pos: "noun", definition: "(noun) something such as an animal or plant collected as an example of a particular kind of thing", sentence: "The doctor took a specimen of my blood." },
+  { id: 23, word: "mass", pos: "noun", definition: "(noun) a usually large amount of a substance that has no particular shape", sentence: "The slush froze into an icy mass." },
+  { id: 24, word: "inhabitant", pos: "noun", definition: "(noun) a person or animal that lives in a particular place", sentence: "The city has more than a million inhabitants." },
+  { id: 25, word: "scenery", pos: "noun", definition: "(noun) a view of natural features such as mountains, hills, valleys, etc that is pleasing to look at", sentence: "We went for a drive to enjoy the scenery." },
+  { id: 26, word: "vogue", pos: "noun", definition: "(noun) something such as a way of dressing or behaving that is fashionable or popular in a particular time and place", sentence: "Short skirts are in vogue right now." },
+  { id: 27, word: "dialect", pos: "noun", definition: "(noun) a form of a language that is spoken in a particular area and that uses some of its own words, grammar, and pronunciations", sentence: "They speak a southern dialect of French." },
+  { id: 28, word: "merit", pos: "noun", definition: "(noun) a good quality or feature that deserves to be praised", sentence: "The great merit of this plan is its simplicity." },
+  { id: 29, word: "ritual", pos: "noun", definition: "(noun) a formal ceremony or series of acts that is always performed in the same way", sentence: "The priest will perform the ritual." },
+  { id: 30, word: "theme", pos: "noun", definition: "(noun) the main subject that is being discussed or described in a piece of writing, a movie, etc.", sentence: "A constant theme in his novels is religion." },
+  { id: 31, word: "interval", pos: "noun", definition: "(noun) a period of time between events", sentence: "There might be long intervals during which nothing happens." },
+  { id: 32, word: "emigrant", pos: "noun", definition: "(noun) a person who leaves a country or region to live in another one", sentence: "Millions of European emigrants came to America in the 19th century." },
+  { id: 33, word: "destination", pos: "noun", definition: "(noun) a place to which a person is going or something is being sent", sentence: "After stopping for lunch, we continued on toward our destination." },
+  { id: 34, word: "grief", pos: "noun", definition: "(noun) deep sadness caused especially by someone's death", sentence: "He has been unable to recover from his grief at his son's death." },
+  { id: 35, word: "reception", pos: "noun", definition: "(noun) the kind of welcome that someone or something is given", sentence: "The performers did not get the warm reception they had hoped for." },
+  { id: 36, word: "extent", pos: "noun", definition: "(noun) the range, distance, or space that is covered or affected by something or included in something", sentence: "She tried to determine the extent of the damage." },
+  { id: 37, word: "resume", pos: "verb", definition: "(verb) to begin again after stopping", sentence: "The game resumed after the rain stopped." },
+  { id: 38, word: "sustain", pos: "verb", definition: "(verb) to provide what is needed for something or someone to exist, continue, etc.", sentence: "There is not enough oxygen to sustain life at very high altitudes." },
+  { id: 39, word: "paralyze", pos: "verb", definition: "(verb) to make a person or animal unable to move or feel all or part of the body", sentence: "The accident paralyzed him from the neck down." },
+  { id: 40, word: "linger", pos: "verb", definition: "(verb) to stay somewhere beyond the usual or expected time", sentence: "The tourists didn't linger very long." },
+  { id: 41, word: "stammer", pos: "verb", definition: "(verb) to speak with many pauses and repetitions because you have a speech problem or because you are very nervous, frightened, etc.", sentence: "He stammers when he's nervous." },
+  { id: 42, word: "exceed", pos: "verb", definition: "(verb) to be greater or more than something", sentence: "The cost must not exceed 10 dollars." },
+  { id: 43, word: "detect", pos: "verb", definition: "(verb) to discover or notice the presence of something that is hidden or hard to see, hear, taste, etc.", sentence: "The test is used to detect the presence of alcohol in the blood." },
+  { id: 44, word: "misuse", pos: "verb", definition: "(verb) to use something incorrectly", sentence: "She's charged with misusing company funds." },
+  { id: 45, word: "resolve", pos: "verb", definition: "(verb) to find an answer or solution to something", sentence: "The brothers finally resolved their conflict." },
+  { id: 46, word: "surpass", pos: "verb", definition: "(verb) to be better or greater than someone or something", sentence: "She soon surpassed her teacher in skill and proficiency." },
+  { id: 47, word: "wither", pos: "verb", definition: "(verb) to become dry and weak", sentence: "The plants withered and died." },
+  { id: 48, word: "refine", pos: "verb", definition: "(verb) to remove the unwanted substances in something / to improve something by making small changes", sentence: "The inventor of the machine spent years refining the design." },
+  { id: 49, word: "transplant", pos: "verb", definition: "(verb) to remove a plant from the ground or from a pot and move it to another place", sentence: "The bush was transplanted to a different part of the garden." },
+  { id: 50, word: "console", pos: "verb", definition: "(verb) to try to make someone feel less sadness or disappointment", sentence: "She consoled him after his wife died." }
 ];
 </file>
 
@@ -6809,6 +6337,9 @@ export default function Home() {
             dbProgress.currentSet.toString(),
           );
           localStorage.setItem("active_week_id", dbProgress.activeWeekId);
+
+          const historyExp = dbProgress.history?.reduce((sum: number, week: any) => sum + week.totalExp, 0) || 0;
+          localStorage.setItem("lifetime_base_exp", historyExp.toString());
 
           // Clear old quest flags
           const questKeys = [

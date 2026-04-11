@@ -26,6 +26,9 @@ export default function Home() {
           );
           localStorage.setItem("active_week_id", dbProgress.activeWeekId);
 
+          const historyExp = dbProgress.history?.reduce((sum: number, week: any) => sum + week.totalExp, 0) || 0;
+          localStorage.setItem("lifetime_base_exp", historyExp.toString());
+
           // Clear old quest flags
           const questKeys = [
             "quest_spelling_done",

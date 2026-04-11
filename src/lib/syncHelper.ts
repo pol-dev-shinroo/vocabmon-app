@@ -8,18 +8,23 @@ export async function triggerSilentSync() {
     10,
   );
 
-  // 2. Calculate current level and unlock stickers accordingly
-  // Level 1: 0-149 EXP, Level 2: 150-299 EXP, etc.
-  const currentLevel = Math.min(Math.floor(exp / 150) + 1, 10);
+  // 2. Calculate lifetime EXP and unlock stickers accordingly
+  const baseExp = parseInt(localStorage.getItem("lifetime_base_exp") || "0", 10);
+  const totalLifetimeExp = baseExp + exp;
+
+  // Determine how many total stickers they should own (1 sticker per 150 EXP)
+  const totalEarnedStickers = Math.floor(totalLifetimeExp / 150);
+  // Cap it at 10 (the max number of characters)
+  const maxStickerId = Math.min(totalEarnedStickers, 10);
   
-  // Unlock stickers 1 through level - 1
+  // Unlock stickers
   const unlockedStickers: number[] = JSON.parse(
     localStorage.getItem("unlocked_stickers") || "[]",
   );
   
   const newlyUnlocked: number[] = [];
   let changed = false;
-  for (let id = 1; id < currentLevel; id++) {
+  for (let id = 1; id <= maxStickerId; id++) {
     if (!unlockedStickers.includes(id)) {
       unlockedStickers.push(id);
       newlyUnlocked.push(id);
