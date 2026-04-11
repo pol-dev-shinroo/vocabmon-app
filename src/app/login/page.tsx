@@ -1,10 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { loginUser } from "@/actions/auth";
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginUser, null);
+
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
