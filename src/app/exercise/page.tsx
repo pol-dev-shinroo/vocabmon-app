@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getVocabForWeek, VocabWord } from "@/data/vocab";
+import { vocabData, VocabWord } from "@/data/vocab";
 import { triggerSilentSync } from "@/lib/syncHelper";
 import { getStudentProgress } from "@/actions/loadProgress";
 
@@ -38,9 +38,7 @@ export default function ExercisePage() {
   useEffect(() => {
     async function fetchVocab() {
       const progress = await getStudentProgress();
-      const activeWeekId = progress?.activeWeekId || "week_1";
       const currentSet = progress?.currentSet || 0;
-      const vocabData = getVocabForWeek(activeWeekId);
 
       const startIndex = currentSet * 5;
       setSessionWords(vocabData.slice(startIndex, startIndex + 5));

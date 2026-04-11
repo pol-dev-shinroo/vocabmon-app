@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getVocabForWeek, VocabWord } from "@/data/vocab";
+import { vocabData, VocabWord } from "@/data/vocab";
 import { triggerSilentSync } from "@/lib/syncHelper";
 import { archiveWeekProgress } from "@/actions/progress";
 import { getStudentProgress } from "@/actions/loadProgress";
@@ -25,10 +25,6 @@ export default function ReviewPage() {
 
   useEffect(() => {
     async function fetchVocab() {
-      const progress = await getStudentProgress();
-      const activeWeekId = progress?.activeWeekId || "week_1";
-      const vocabData = getVocabForWeek(activeWeekId);
-
       const params = new URLSearchParams(window.location.search);
       const t = params.get("type") as "midterm" | "final1" | "finale";
       setReviewType(t);
