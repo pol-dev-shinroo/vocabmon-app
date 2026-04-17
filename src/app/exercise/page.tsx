@@ -10,7 +10,7 @@ import QuestScreen from "@/components/shared/QuestScreen";
 import CountdownPhase from "@/components/feed/CountdownPhase";
 import MeaningPractice from "@/components/exercise/MeaningPractice";
 import MeaningPuzzle from "@/components/exercise/MeaningPuzzle";
-import MeaningFlip from "@/components/exercise/MeaningFlip";
+import SentenceFill from "@/components/exercise/SentenceFill";
 import MeaningMatch from "@/components/exercise/MeaningMatch";
 
 export default function ExercisePage() {
@@ -135,8 +135,8 @@ export default function ExercisePage() {
           theme="emerald"
           icon="⚔️"
           title="Next Quest Ready"
-          subtitle="Tile Flip Memory"
-          description="Find the hidden tiles."
+          subtitle="Sentence Fill"
+          description="Sentence Fill: Tap the word that fits the blank!"
           buttonText="Start Test!"
           onNext={() => setPhase("flip_countdown")}
           audio="sword"
@@ -146,7 +146,7 @@ export default function ExercisePage() {
         <CountdownPhase onFinish={() => setPhase("flip")} />
       )}
       {phase === "flip" && (
-        <MeaningFlip
+        <SentenceFill
           words={sessionWords}
           onFinish={() => setPhase("trans_match")}
         />

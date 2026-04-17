@@ -10,9 +10,11 @@ const SECONDS_PER_MATCH = 45; // Time allowed per full word mastery (meaning + s
 export default function MasteryTest({
   words,
   onFinish,
+  isExamMode = false,
 }: {
   words: VocabWord[];
   onFinish: () => void;
+  isExamMode?: boolean;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [feedTrigger, setFeedTrigger] = useState(0);
@@ -147,7 +149,7 @@ export default function MasteryTest({
       setErrorId(`${clickedWord}-${index}`);
       setTimeout(() => {
         setErrorId(null);
-        if (newMistakeCount >= 3) {
+        if (!isExamMode && newMistakeCount >= 3) {
           setIsGameOver(true);
         }
       }, 400);
@@ -166,7 +168,7 @@ export default function MasteryTest({
 
       setTimeout(() => {
         setInputValue(""); // Wipe input on mistake
-        if (newMistakeCount >= 3) {
+        if (!isExamMode && newMistakeCount >= 3) {
           setIsGameOver(true);
         }
       }, 400);

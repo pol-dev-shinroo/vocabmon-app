@@ -47,6 +47,13 @@ export default function ReviewPage() {
       hasAwarded.current = true;
       
       const runArchive = async () => {
+        // 1. Reward 50 EXP
+        const currentExp = parseInt(localStorage.getItem("vocabmon_exp") || "0", 10);
+        localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
+
+        // 2. Sync to MongoDB (ensure DB gets the +50 before archival)
+        await triggerSilentSync();
+
         if (reviewType === "midterm")
           localStorage.setItem("quest_midterm_done", "true");
         if (reviewType === "final1")
@@ -80,11 +87,6 @@ export default function ReviewPage() {
         }
 
         localStorage.setItem("trigger_fireworks", "true");
-
-        // 🚀 NEW: Silently back up to MongoDB (if not finale, otherwise it's already reset)
-        if (reviewType !== "finale") {
-          triggerSilentSync();
-        }
       };
 
       runArchive();
@@ -142,6 +144,7 @@ export default function ReviewPage() {
         <MasteryTest
           words={sessionWords}
           onFinish={() => setPhase("complete")}
+          isExamMode={true}
         />
       )}
 
