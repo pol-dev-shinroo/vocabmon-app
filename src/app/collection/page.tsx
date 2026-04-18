@@ -103,7 +103,15 @@ export default function CollectionPage() {
                   className="bg-white rounded-3xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1"
                 >
                   <div className="bg-gradient-to-b from-indigo-50 to-blue-50 p-6 flex justify-center items-end h-56 relative border-b border-gray-100">
-                    <PixelVocabmon level={item.finalLevel} feedTrigger={0} />
+                    <PixelVocabmon
+                      level={item.finalLevel}
+                      feedTrigger={0}
+                      variant={
+                        ["Week 1", "Week 2", "Week 3", "week_1", "week_2", "week_3"].includes(item.weekId)
+                          ? "fire"
+                          : "digimon"
+                      }
+                    />
                   </div>
                   <div className="p-6">
                     <div className="flex justify-between items-center mb-2">
