@@ -66,7 +66,7 @@ export default function JumpGame({ words }: { words: VocabWord[] }) {
     }
     setIsGameOver(true);
 
-    if (bgmCtxRef.current) bgmCtxRef.current.close();
+    if (bgmRef.current) bgmRef.current.pause();
     try {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
