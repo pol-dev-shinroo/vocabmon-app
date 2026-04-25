@@ -21,7 +21,6 @@ export default function Dashboard() {
   const [atkTrigger, setAtkTrigger] = useState(0);
   const [spcTrigger, setSpcTrigger] = useState(0);
   const [showEnergyAlert, setShowEnergyAlert] = useState(false);
-  const [showFeatureAlert, setShowFeatureAlert] = useState(false);
 
   const [currentSet, setCurrentSet] = useState(0);
   const totalSets = 10;
@@ -162,6 +161,7 @@ export default function Dashboard() {
         localStorage.setItem("last_attack_exp", exp.toString());
         localStorage.setItem("atk_charges", "2");
         localStorage.setItem("spc_charges", "2");
+        localStorage.setItem("game_attempts", "2");
       } else {
         const savedAtk = localStorage.getItem("atk_charges");
         const savedSpc = localStorage.getItem("spc_charges");
@@ -322,13 +322,13 @@ export default function Dashboard() {
             </div>
 
             <div className="flex gap-2">
-              <button
-                onClick={() => setShowFeatureAlert(true)}
-                className="bg-gray-50 hover:bg-gray-100 text-gray-400 border border-gray-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center justify-center"
-                title="Feature Locked"
+              <Link
+                href="/game"
+                className="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
+                title="Play Jump Game"
               >
-                <span className="text-xl opacity-50">🪄</span>
-              </button>
+                <span className="text-xl">🎮</span>
+              </Link>
               <Link
                 href="/collection"
                 className="bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
@@ -878,21 +878,6 @@ export default function Dashboard() {
             </p>
             <button onClick={() => setShowEnergyAlert(false)} className="w-full bg-red-500 hover:bg-red-600 text-white text-lg font-black py-4 rounded-xl shadow-md active:scale-95 transition-all">
               I&apos;ll go train! 🏃
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showFeatureAlert && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 animate-fade-in p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-indigo-400 shadow-2xl">
-            <div className="text-5xl mb-4 animate-bounce">🚧</div>
-            <h3 className="text-2xl font-black text-gray-800 mb-2">Under Construction!</h3>
-            <p className="text-gray-500 font-medium mb-8 leading-relaxed">
-              We are building a special game for you! Once it is ready, this button will be enabled again.
-            </p>
-            <button onClick={() => setShowFeatureAlert(false)} className="w-full bg-indigo-500 hover:bg-indigo-600 text-white text-lg font-black py-4 rounded-xl shadow-md active:scale-95 transition-all">
-              Got it! 👍
             </button>
           </div>
         </div>
