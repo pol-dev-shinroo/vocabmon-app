@@ -342,96 +342,33 @@ import JumpGame from "@/components/game/JumpGame";
 export default function GamePage() {
   const [sessionWords, setSessionWords] = useState<VocabWord[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [attempts, setAttempts] = useState(2);
 
   useEffect(() => {
     async function fetchVocab() {
       const progress = await getStudentProgress();
       const currentSet = progress?.currentSet || 0;
-
-      // Slice the vocabulary to include all words learned so far this week
       const endIndex = (currentSet + 1) * 5;
       setSessionWords(vocabData.slice(0, endIndex));
-
-      const savedAttempts = localStorage.getItem("game_attempts");
-      if (savedAttempts !== null) setAttempts(parseInt(savedAttempts, 10));
-
       setIsLoaded(true);
     }
     fetchVocab();
   }, []);
 
-  const handleGameEnd = () => {
-    const newAttempts = Math.max(0, attempts - 1);
-    setAttempts(newAttempts);
-    localStorage.setItem("game_attempts", newAttempts.toString());
-  };
-
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-sky-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-indigo-500"></div>
-      </div>
-    );
-  }
+  if (!isLoaded) return <div className="min-h-screen bg-sky-50 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-4 border-indigo-500"></div></div>;
 
   return (
     <main className="min-h-screen bg-sky-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Header UI */}
       <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-10">
-        <Link
-          href="/"
-          className="bg-white/90 backdrop-blur-sm hover:bg-white text-indigo-600 font-black py-3 px-6 rounded-2xl shadow-sm border border-indigo-100 transition-all flex items-center gap-2 group"
-        >
-          <span className="transition-transform group-hover:-translate-x-1">←</span> 
-          Back to Dashboard
+        <Link href="/" className="bg-white/90 backdrop-blur-sm hover:bg-white text-indigo-600 font-black py-3 px-6 rounded-2xl shadow-sm border border-indigo-100 transition-all flex items-center gap-2 group">
+          <span className="transition-transform group-hover:-translate-x-1">←</span> Back to Dashboard
         </Link>
         <div className="bg-white/90 backdrop-blur-sm text-indigo-800 font-black py-3 px-6 rounded-2xl shadow-sm border border-indigo-100 flex items-center gap-2">
           🎮 <span className="uppercase tracking-widest text-xs">Mini-Game Mode</span>
         </div>
       </div>
-
-      <div className="w-full max-w-4xl animate-fade-in-up">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-indigo-950 mb-2 uppercase italic tracking-tighter">Dino Jump: Vocab Edition</h1>
-          <p className="text-indigo-400 font-bold uppercase tracking-widest text-xs">Jump over your weekly words to survive!</p>
-        </div>
-        
-        {attempts <= 0 ? (
-          <div className="bg-white rounded-3xl p-10 text-center shadow-xl border border-red-100 max-w-md mx-auto">
-            <div className="text-6xl mb-4">🔋</div>
-            <h2 className="text-3xl font-black text-gray-900 mb-4">Out of Attempts!</h2>
-            <p className="text-gray-500 font-medium mb-8">You used all your mini-game energy. Complete a quest on your Dashboard to recharge!</p>
-            <Link href="/" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-md inline-block">Return to Dashboard</Link>
-          </div>
-        ) : (
-          <>
-            <div className="text-center mb-4"><span className="bg-indigo-100 text-indigo-800 font-bold px-4 py-2 rounded-full shadow-sm">Attempts Left: {attempts}/2</span></div>
-            <JumpGame words={sessionWords} onGameEnd={handleGameEnd} />
-          </>
-        )}
-        
-        <div className="mt-8 grid grid-cols-2 gap-4 max-w-md mx-auto">
-          <div className="bg-white/50 rounded-2xl p-4 border border-white/50 text-center">
-            <div className="text-xs font-black text-indigo-300 uppercase mb-1">Controls</div>
-            <div className="text-indigo-900 font-bold">Tap / Click to Jump</div>
-          </div>
-          <div className="bg-white/50 rounded-2xl p-4 border border-white/50 text-center">
-            <div className="text-xs font-black text-indigo-300 uppercase mb-1">Objective</div>
-            <div className="text-indigo-900 font-bold">Don&apos;t hit the words!</div>
-          </div>
-        </div>
+      <div className="w-full max-w-4xl animate-fade-in-up mt-16">
+        <JumpGame words={sessionWords} />
       </div>
-
-      <style jsx>{`
-        @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up {
-          animation: fade-in-up 0.5s ease-out forwards;
-        }
-      `}</style>
     </main>
   );
 }
@@ -728,301 +665,6 @@ export default function SentenceFill({
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-</file>
-
-<file path="src/components/game/JumpGame.tsx">
-"use client";
-import React, { useState, useEffect, useRef } from "react";
-import { VocabWord } from "@/data/vocab";
-import PixelVocabmon from "../shared/PixelVocabmon";
-import Link from "next/link";
-
-type Obstacle = {
-  id: number;
-  x: number;
-  width: number;
-  word: string;
-  passed: boolean;
-};
-
-export default function JumpGame({ 
-  words, 
-  onGameEnd 
-}: { 
-  words: VocabWord[], 
-  onGameEnd: () => void 
-}) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [hasWon, setHasWon] = useState(false);
-  const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
-  const [currentLevel, setCurrentLevel] = useState(1);
-
-  const playerRef = useRef<HTMLDivElement>(null);
-  const obstaclesRef = useRef<HTMLDivElement>(null);
-
-  const gameLoopId = useRef<number | null>(null);
-  const playerY = useRef(280);
-  const velocity = useRef(0);
-  const obstacles = useRef<Obstacle[]>([]);
-
-  const GRAVITY = 0.6;
-  const JUMP_POWER = -12;
-  const GAME_SPEED = 5;
-  const GROUND_Y = 280;
-  const OBSTACLE_WIDTH = 50;
-  const OBSTACLE_HEIGHT = 60;
-  const PLAYER_X = 50;
-
-  useEffect(() => {
-    const savedHighScore = localStorage.getItem("jump_game_high_score");
-    if (savedHighScore) setHighScore(parseInt(savedHighScore, 10));
-
-    const savedExp = parseInt(localStorage.getItem("vocabmon_exp") || "0", 10);
-    const rawLevel = Math.floor(savedExp / 150) + 1;
-    setCurrentLevel(Math.min(rawLevel, 10));
-
-    initObstacles();
-  }, [words]);
-
-  const initObstacles = () => {
-    obstacles.current = words.map((w, i) => ({
-      id: i,
-      x: 800 + i * 400,
-      width: OBSTACLE_WIDTH,
-      word: w.word,
-      passed: false
-    }));
-  };
-
-  const playJumpSound = () => {
-    try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioContextClass) {
-        const ctx = new AudioContextClass();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.setValueAtTime(440, ctx.currentTime);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.1);
-      }
-    } catch (e) {}
-  };
-
-  const handleJump = (e?: React.MouseEvent | React.TouchEvent) => {
-    if (e) e.preventDefault();
-    
-    if (isGameOver || hasWon) {
-      resetGame();
-      return;
-    }
-
-    if (!isPlaying) {
-      setIsPlaying(true);
-      velocity.current = JUMP_POWER;
-      playJumpSound();
-      return;
-    }
-
-    if (playerY.current >= GROUND_Y) {
-      velocity.current = JUMP_POWER;
-      playJumpSound();
-    }
-  };
-
-  const resetGame = () => {
-    playerY.current = GROUND_Y;
-    velocity.current = 0;
-    initObstacles();
-    setScore(0);
-    setIsGameOver(false);
-    setHasWon(false);
-    setIsPlaying(true);
-  };
-
-  const triggerEnd = (win: boolean) => {
-    setIsGameOver(true);
-    setIsPlaying(false);
-    setHasWon(win);
-    if (gameLoopId.current) cancelAnimationFrame(gameLoopId.current);
-    onGameEnd();
-  };
-
-  const update = () => {
-    if (!isPlaying || isGameOver || hasWon) return;
-
-    // Physics
-    velocity.current += GRAVITY;
-    playerY.current += velocity.current;
-
-    // Floor collision
-    if (playerY.current >= GROUND_Y) {
-      playerY.current = GROUND_Y;
-      velocity.current = 0;
-    }
-
-    const playerRect = {
-      left: PLAYER_X + 15,
-      right: PLAYER_X + 45,
-      top: playerY.current + 10,
-      bottom: playerY.current + 50
-    };
-
-    obstacles.current.forEach((obs) => {
-      obs.x -= GAME_SPEED;
-      const obsRect = {
-        left: obs.x,
-        right: obs.x + OBSTACLE_WIDTH,
-        top: GROUND_Y + 60 - OBSTACLE_HEIGHT,
-        bottom: GROUND_Y + 60
-      };
-
-      // Collision detection
-      if (
-        playerRect.right > obsRect.left &&
-        playerRect.left < obsRect.right &&
-        playerRect.bottom > obsRect.top &&
-        playerRect.top < obsRect.bottom
-      ) {
-        return triggerEnd(false);
-      }
-
-      // Score update
-      if (!obs.passed && obs.x + OBSTACLE_WIDTH < PLAYER_X) {
-        obs.passed = true;
-        setScore((s) => {
-          const newScore = s + 1;
-          if (newScore === words.length) {
-            setTimeout(() => triggerEnd(true), 100);
-          }
-          return newScore;
-        });
-      }
-    });
-
-    // Direct DOM Updates for performance
-    if (playerRef.current) {
-      playerRef.current.style.transform = `translateY(${playerY.current}px)`;
-    }
-
-    if (obstaclesRef.current) {
-      obstaclesRef.current.innerHTML = obstacles.current
-        .map(
-          (obs) => `
-        <div style="position:absolute; left:${obs.x}px; top:${GROUND_Y + 60 - OBSTACLE_HEIGHT}px; width:${OBSTACLE_WIDTH}px; height:${OBSTACLE_HEIGHT}px; background:#ef4444; border:3px solid #7f1d1d; border-radius:8px;">
-          <div style="position:absolute; top:-35px; left:50%; transform:translateX(-50%); background:white; padding:4px 10px; border-radius:12px; font-weight:900; font-size:16px; color:#1e1b4b; border:2px solid #e2e8f0; white-space:nowrap; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-            ${obs.word}
-          </div>
-        </div>
-      `
-        )
-        .join("");
-    }
-
-    gameLoopId.current = requestAnimationFrame(update);
-  };
-
-  useEffect(() => {
-    if (isPlaying && !isGameOver && !hasWon) {
-      gameLoopId.current = requestAnimationFrame(update);
-    }
-    return () => {
-      if (gameLoopId.current) cancelAnimationFrame(gameLoopId.current);
-    };
-  }, [isPlaying, isGameOver, hasWon]);
-
-  return (
-    <div 
-      className="relative w-full max-w-3xl h-[400px] bg-white rounded-3xl border-4 border-indigo-100 shadow-2xl overflow-hidden cursor-pointer select-none"
-      onTouchStart={handleJump}
-      onMouseDown={handleJump}
-    >
-      {/* Background Decor */}
-      <div className="absolute inset-0 bg-sky-50/50 flex items-center justify-center">
-        <div className="text-indigo-100 font-black text-9xl rotate-12 opacity-20">JUMP</div>
-      </div>
-      
-      {/* Floor Line */}
-      <div className="absolute bottom-[60px] w-full h-2 bg-indigo-100 rounded-full mx-auto left-0 right-0 max-w-[95%]" />
-      
-      {/* Score UI */}
-      <div className="absolute top-6 left-8 z-30">
-        <div className="text-indigo-900 font-black text-3xl drop-shadow-sm">
-          WORDS: {score} / {words.length}
-        </div>
-      </div>
-
-      {/* Game Stage */}
-      <div className="absolute inset-0">
-        {/* Player */}
-        <div 
-          ref={playerRef}
-          style={{ 
-            position: "absolute", 
-            left: PLAYER_X, 
-            top: 0, 
-            width: 60, 
-            height: 60,
-            zIndex: 20,
-            transform: `translateY(${playerY.current}px)`
-          }}
-        >
-          <PixelVocabmon level={currentLevel} className="scale-75" />
-        </div>
-
-        {/* Obstacles Container */}
-        <div ref={obstaclesRef} className="absolute inset-0 z-10"></div>
-      </div>
-
-      {/* Overlays */}
-      {!isPlaying && !isGameOver && !hasWon && (
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-40 flex flex-col items-center justify-center text-white">
-          <div className="text-6xl mb-4 animate-bounce">🦖</div>
-          <h2 className="text-4xl font-black mb-2">Dino Jump!</h2>
-          <p className="text-xl font-bold opacity-80">Tap to Jump over the words!</p>
-        </div>
-      )}
-
-      {isGameOver && !hasWon && (
-        <div className="absolute inset-0 bg-red-600/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white p-8 text-center animate-fade-in">
-          <div className="text-7xl mb-4 animate-bounce">💥</div>
-          <h2 className="text-5xl font-black mb-2 uppercase italic tracking-tighter">Oh no!</h2>
-          <div className="bg-white/20 rounded-2xl p-6 mb-8 w-full max-w-xs">
-            <div className="text-sm font-black uppercase tracking-widest opacity-70">Words Jumped</div>
-            <div className="text-6xl font-black mb-2">{score}</div>
-          </div>
-          <p className="text-2xl font-black animate-pulse">Tap to try your last attempt! 🏃</p>
-        </div>
-      )}
-
-      {hasWon && (
-        <div className="absolute inset-0 bg-emerald-500/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white p-8 text-center animate-fade-in">
-          <div className="text-7xl mb-4 animate-bounce">🏆</div>
-          <h2 className="text-5xl font-black mb-2 uppercase italic">You Win!</h2>
-          <p className="text-xl font-bold mb-8">You passed all {words.length} words!</p>
-          <Link href="/" className="bg-white text-emerald-600 font-black py-4 px-8 rounded-xl shadow-lg active:scale-95 transition-all">
-            Return Victorious! 👑
-          </Link>
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 }
@@ -2342,6 +1984,242 @@ export default function CountdownPhase({ onFinish }: { onFinish: () => void }) {
       >
         {count > 0 ? count : "Begin!"}
       </div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/game/JumpGame.tsx">
+"use client";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { VocabWord } from '@/data/vocab';
+import PixelVocabmon from '../shared/PixelVocabmon';
+import SandTimer from '../shared/SandTimer';
+
+export default function JumpGame({ words }: { words: VocabWord[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [options, setOptions] = useState<string[]>([]);
+  const [playerLane, setPlayerLane] = useState(1);
+  const [doorStatus, setDoorStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
+  
+  const [hasWon, setHasWon] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [strikes, setStrikes] = useState(0);
+  const [attackTrigger, setAttackTrigger] = useState(0);
+  
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+  const [currentLevel, setCurrentLevel] = useState(1);
+
+  const bgmCtxRef = useRef<AudioContext | null>(null);
+  const bgmIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const savedExp = parseInt(localStorage.getItem("vocabmon_exp") || "0", 10);
+    setCurrentLevel(Math.min(Math.floor(savedExp / 150) + 1, 10));
+    setHighScore(parseInt(localStorage.getItem("jump_high_score") || "0", 10));
+
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+      const ctx = new AudioContextClass();
+      bgmCtxRef.current = ctx;
+      
+      // POKÉMON STYLE 8-BIT MELODY & BASSLINE
+      const melody = [523.25, 659.25, 783.99, 1046.50, 783.99, 659.25, 523.25, 587.33, 659.25, 698.46, 659.25, 587.33, 523.25, 392.00, 523.25, 0];
+      const bass = [130.81, 0, 196.00, 0, 130.81, 0, 196.00, 0, 146.83, 0, 220.00, 0, 130.81, 0, 196.00, 0];
+      
+      let step = 0;
+      const scheduleNext = () => {
+        if (ctx.state === 'closed') return;
+        
+        if (melody[step % melody.length] > 0) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.value = melody[step % melody.length];
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.015, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.2);
+        }
+
+        if (bass[step % bass.length] > 0) {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.type = 'triangle';
+          osc2.frequency.value = bass[step % bass.length];
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          gain2.gain.setValueAtTime(0.03, ctx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+          osc2.start();
+          osc2.stop(ctx.currentTime + 0.2);
+        }
+        
+        step++;
+        bgmIntervalRef.current = setTimeout(scheduleNext, 200); 
+      };
+      scheduleNext();
+    }
+
+    return () => {
+      if (bgmCtxRef.current) bgmCtxRef.current.close();
+      if (bgmIntervalRef.current) clearTimeout(bgmIntervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentIndex >= words.length) {
+      setHasWon(true);
+      return;
+    }
+    const correctWord = words[currentIndex].word;
+    const distractors = words.filter(w => w.word !== correctWord).sort(() => 0.5 - Math.random()).slice(0, 2).map(w => w.word);
+    while (distractors.length < 2) distractors.push(["abandon", "modify", "derive", "cease"][Math.floor(Math.random() * 4)]);
+    
+    setOptions([correctWord, ...distractors].sort(() => 0.5 - Math.random()));
+    setDoorStatus('idle');
+    setPlayerLane(1);
+  }, [currentIndex, words]);
+
+  const triggerGameOver = useCallback(() => {
+    if (score > highScore) {
+      setHighScore(score);
+      localStorage.setItem("jump_high_score", score.toString());
+    }
+    setIsGameOver(true);
+  }, [score, highScore]);
+
+  const handleDoorClick = (laneIndex: number, selectedWord: string) => {
+    if (doorStatus !== 'idle' || isGameOver) return;
+    setPlayerLane(laneIndex);
+    
+    if (selectedWord === words[currentIndex].word) {
+      setDoorStatus('correct');
+      setScore(prev => prev + 10);
+      setAttackTrigger(prev => prev + 1); // Trigger attack animation!
+      
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator(); osc.type = 'sine'; 
+          osc.frequency.setValueAtTime(600, ctx.currentTime); 
+          osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1); 
+          osc.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.1);
+        }
+      } catch (e) {}
+      setTimeout(() => setCurrentIndex(prev => prev + 1), 600);
+    } else {
+      setDoorStatus('wrong');
+      const newStrikes = strikes + 1;
+      setStrikes(newStrikes);
+      
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator(); osc.type = 'sawtooth'; 
+          osc.frequency.setValueAtTime(150, ctx.currentTime); 
+          osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2); 
+          osc.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.2);
+        }
+      } catch (e) {}
+      
+      if (newStrikes >= 2) {
+        setTimeout(() => triggerGameOver(), 800);
+      } else {
+        setTimeout(() => { setDoorStatus('idle'); setPlayerLane(1); }, 800);
+      }
+    }
+  };
+
+  const handlePlayAgain = () => {
+    setIsGameOver(false);
+    setHasWon(false);
+    setCurrentIndex(0);
+    setScore(0);
+    setStrikes(0); // Reset strikes!
+    setDoorStatus('idle');
+    setPlayerLane(1);
+  };
+
+  const currentDef = words[currentIndex]?.definition || "";
+
+  return (
+    <div className="relative w-full h-[450px] bg-sky-900 overflow-hidden rounded-2xl border-4 border-indigo-900 shadow-inner" style={{ perspective: '800px' }}>
+      
+      <div className="absolute top-0 left-0 w-full px-6 pt-3 z-40">
+        <SandTimer key={`${currentIndex}-${isGameOver}`} duration={15} isActive={doorStatus === 'idle' && !isGameOver && !hasWon} onTimeUp={triggerGameOver} />
+      </div>
+
+      {/* Score UI */}
+      <div className="absolute top-12 right-4 bg-amber-400 text-amber-950 font-black px-4 py-2 rounded-xl shadow-lg z-40 border-2 border-white flex items-center gap-2 animate-fade-in">
+        <span className="text-xl">🪙</span> {score}
+      </div>
+      
+      {/* Lives UI */}
+      <div className="absolute top-12 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md z-40 border-2 border-red-100 flex items-center gap-1 text-xl">
+        {strikes === 0 ? "❤️❤️" : strikes === 1 ? "❤️🖤" : "🖤🖤"}
+      </div>
+
+      {isGameOver && (
+        <div className="absolute inset-0 bg-sky-950/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white p-8 text-center animate-fade-in">
+          <div className="text-7xl mb-4 animate-bounce">💥</div>
+          <h2 className="text-4xl font-black mb-2 text-red-400">CRASH!</h2>
+          <div className="bg-sky-900/50 border-2 border-sky-800 rounded-2xl p-6 mb-8 w-full max-w-sm">
+            <p className="text-sky-300 font-bold uppercase tracking-widest text-sm mb-1">Score</p>
+            <p className="text-5xl font-black text-amber-400 mb-4">{score}</p>
+            <div className="h-px w-full bg-sky-800 mb-4"></div>
+            <p className="text-sky-300 font-bold uppercase tracking-widest text-sm mb-1">Top Score</p>
+            <p className="text-2xl font-black text-white">{Math.max(score, highScore)}</p>
+          </div>
+          <button onClick={handlePlayAgain} className="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-8 rounded-xl text-xl transition-transform active:scale-95 shadow-lg border-2 border-emerald-400 w-full max-w-sm">
+            Play Again 🔄
+          </button>
+        </div>
+      )}
+
+      {hasWon && (
+        <div className="absolute inset-0 bg-emerald-500/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white p-8 text-center animate-fade-in">
+          <div className="text-7xl mb-4 animate-bounce">🏆</div>
+          <h2 className="text-4xl font-black mb-2 uppercase italic text-yellow-300">Run Complete!</h2>
+          <p className="text-xl font-bold mb-8">You cleared all doors!</p>
+          <button onClick={handlePlayAgain} className="bg-white hover:bg-gray-100 text-emerald-700 font-black py-4 px-8 rounded-xl text-xl transition-transform active:scale-95 shadow-lg w-full max-w-sm">
+            Play Again 🔄
+          </button>
+        </div>
+      )}
+
+      <div className="absolute inset-x-0 bottom-0 h-[300px] origin-bottom opacity-80" style={{ transform: 'rotateX(60deg)', background: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.2) 40px, rgba(255,255,255,0.2) 80px), linear-gradient(90deg, #1e3a8a 33%, #1e40af 33%, #1e40af 66%, #1e3a8a 66%)', backgroundSize: '100% 160px', animation: 'scroll-track 0.5s linear infinite' }} />
+
+      <div className="absolute top-12 left-[100px] right-[100px] bg-white/95 backdrop-blur-md border-4 border-indigo-300 rounded-2xl p-4 shadow-xl z-30 text-center">
+        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">Meaning {currentIndex + 1}/{words.length}</span>
+        <p className="text-indigo-950 font-bold text-sm line-clamp-3">{currentDef}</p>
+      </div>
+
+      <div className={`absolute top-[45%] left-0 w-full flex justify-center gap-4 px-4 z-20 transition-all duration-500 ${doorStatus === 'correct' ? 'scale-150 opacity-0 translate-y-20' : 'scale-100 opacity-100'}`}>
+        {options.map((word, i) => (
+          <button key={i} onClick={() => handleDoorClick(i, word)} disabled={doorStatus !== 'idle'} className={`flex-1 relative h-32 rounded-t-full border-4 shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:-translate-y-2 active:scale-95 ${doorStatus === 'wrong' && playerLane === i ? 'bg-red-500 border-red-200 animate-shake' : doorStatus === 'correct' && playerLane === i ? 'bg-emerald-400 border-white' : 'bg-indigo-600/90 border-indigo-300 hover:bg-indigo-500'}`}>
+            <div className="absolute inset-0 rounded-t-full bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+            <span className="text-white font-black text-sm shadow-black drop-shadow-md z-10 px-2 break-words text-center">{word}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="absolute bottom-6 left-1/2 w-[80px] h-[80px] z-30 transition-transform duration-300 ease-out" style={{ transform: `translateX(calc(-50% + ${(playerLane - 1) * 110}px))` }}>
+        <PixelVocabmon level={currentLevel} attackTrigger={attackTrigger} className={`w-full h-full drop-shadow-2xl ${doorStatus === 'wrong' ? 'filter grayscale brightness-50' : ''}`} />
+      </div>
+
+      <style jsx>{`
+        @keyframes scroll-track { from { background-position: 0 0; } to { background-position: 0 160px; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px) rotate(-5deg); } 75% { transform: translateX(10px) rotate(5deg); } }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+      `}</style>
     </div>
   );
 }
