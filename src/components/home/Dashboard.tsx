@@ -25,6 +25,56 @@ export default function Dashboard() {
   const [currentSet, setCurrentSet] = useState(0);
   const totalSets = 10;
 
+  const [isMusicOn, setIsMusicOn] = useState(false);
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio('/piano.mp3');
+    audio.loop = true;
+    audio.volume = 0.2;
+    bgmRef.current = audio;
+
+    const tryPlay = () => {
+      audio.play().then(() => {
+        // Browser allowed it (e.g., returning from the game)
+        setIsMusicOn(true);
+      }).catch(err => {
+        // Browser blocked it on first load! Set UI to muted.
+        console.log("Autoplay blocked. Waiting for user interaction...");
+        setIsMusicOn(false);
+
+        // Setup a one-time listener to unlock audio on their first tap
+        const unlockAudio = () => {
+          audio.play().then(() => {
+            setIsMusicOn(true); // Now we update the UI!
+          }).catch(e => {});
+          document.removeEventListener('click', unlockAudio);
+          document.removeEventListener('touchstart', unlockAudio);
+        };
+        
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
+      });
+    };
+
+    tryPlay();
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, []);
+
+  const toggleMusic = () => {
+    if (!bgmRef.current) return;
+    if (isMusicOn) {
+      bgmRef.current.pause();
+    } else {
+      bgmRef.current.play().catch(e => console.log("Audio play blocked"));
+    }
+    setIsMusicOn(!isMusicOn);
+  };
+
   const digimonNames = ["", "Digi-Egg", "Botamon", "Koromon", "Agumon", "Tyrannomon", "Greymon", "SkullGreymon", "MetalGreymon", "WarGreymon", "Omnimon"];
 
   // Keep this array for the "Evolve/Next" button labels
@@ -278,6 +328,16 @@ export default function Dashboard() {
         @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.5)); } 50% { filter: drop-shadow(0 0 20px rgba(52, 211, 153, 0.9)); } }
         .animate-evo-glow { animation: glow 2s infinite alternate; }
       `}</style>
+
+      <div className="absolute top-4 left-4 z-50">
+        <button 
+          onClick={toggleMusic}
+          className="bg-white/90 backdrop-blur-sm border-2 border-indigo-100 text-indigo-600 p-3 rounded-full shadow-sm hover:bg-indigo-50 transition-all transform active:scale-95 flex items-center justify-center w-12 h-12"
+          title={isMusicOn ? "Pause Music" : "Play Music"}
+        >
+          <span className="text-xl">{isMusicOn ? "🔊" : "🔇"}</span>
+        </button>
+      </div>
 
       {showFireworks && (
         <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center overflow-hidden">

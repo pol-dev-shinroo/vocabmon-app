@@ -13,70 +13,37 @@ export default function JumpGame({ words }: { words: VocabWord[] }) {
   const [hasWon, setHasWon] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [strikes, setStrikes] = useState(0);
-  const [attackTrigger, setAttackTrigger] = useState(0);
+  const [specialTrigger, setSpecialTrigger] = useState(0);
   
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [currentLevel, setCurrentLevel] = useState(1);
 
-  const bgmCtxRef = useRef<AudioContext | null>(null);
-  const bgmIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+
+  const startBGM = useCallback(() => {
+    if (bgmRef.current) {
+      bgmRef.current.pause();
+      bgmRef.current.currentTime = 0;
+    }
+    const audio = new Audio('/exciting.mp3');
+    audio.loop = true;
+    audio.volume = 0.4;
+    bgmRef.current = audio;
+    audio.play().catch(e => console.log("Audio play blocked"));
+  }, []);
 
   useEffect(() => {
     const savedExp = parseInt(localStorage.getItem("vocabmon_exp") || "0", 10);
     setCurrentLevel(Math.min(Math.floor(savedExp / 150) + 1, 10));
     setHighScore(parseInt(localStorage.getItem("jump_high_score") || "0", 10));
 
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (AudioContextClass) {
-      const ctx = new AudioContextClass();
-      bgmCtxRef.current = ctx;
-      
-      // POKÉMON STYLE 8-BIT MELODY & BASSLINE
-      const melody = [523.25, 659.25, 783.99, 1046.50, 783.99, 659.25, 523.25, 587.33, 659.25, 698.46, 659.25, 587.33, 523.25, 392.00, 523.25, 0];
-      const bass = [130.81, 0, 196.00, 0, 130.81, 0, 196.00, 0, 146.83, 0, 220.00, 0, 130.81, 0, 196.00, 0];
-      
-      let step = 0;
-      const scheduleNext = () => {
-        if (ctx.state === 'closed') return;
-        
-        if (melody[step % melody.length] > 0) {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'square';
-          osc.frequency.value = melody[step % melody.length];
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.015, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.2);
-        }
-
-        if (bass[step % bass.length] > 0) {
-          const osc2 = ctx.createOscillator();
-          const gain2 = ctx.createGain();
-          osc2.type = 'triangle';
-          osc2.frequency.value = bass[step % bass.length];
-          osc2.connect(gain2);
-          gain2.connect(ctx.destination);
-          gain2.gain.setValueAtTime(0.03, ctx.currentTime);
-          gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-          osc2.start();
-          osc2.stop(ctx.currentTime + 0.2);
-        }
-        
-        step++;
-        bgmIntervalRef.current = setTimeout(scheduleNext, 200); 
-      };
-      scheduleNext();
-    }
+    startBGM();
 
     return () => {
-      if (bgmCtxRef.current) bgmCtxRef.current.close();
-      if (bgmIntervalRef.current) clearTimeout(bgmIntervalRef.current);
+      if (bgmRef.current) bgmRef.current.pause();
     };
-  }, []);
+  }, [startBGM]);
 
   useEffect(() => {
     if (currentIndex >= words.length) {
@@ -98,6 +65,30 @@ export default function JumpGame({ words }: { words: VocabWord[] }) {
       localStorage.setItem("jump_high_score", score.toString());
     }
     setIsGameOver(true);
+
+    if (bgmCtxRef.current) bgmCtxRef.current.close();
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContextClass) {
+        const ctx = new AudioContextClass();
+        const playSadNote = (freq: number, start: number, dur: number) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.value = freq;
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+          osc.start(ctx.currentTime + start);
+          osc.stop(ctx.currentTime + start + dur);
+        };
+        // Sad descending arpeggio
+        playSadNote(300, 0, 0.4);
+        playSadNote(250, 0.3, 0.4);
+        playSadNote(200, 0.6, 0.8);
+      }
+    } catch (e) {}
   }, [score, highScore]);
 
   const handleDoorClick = (laneIndex: number, selectedWord: string) => {
@@ -107,7 +98,7 @@ export default function JumpGame({ words }: { words: VocabWord[] }) {
     if (selectedWord === words[currentIndex].word) {
       setDoorStatus('correct');
       setScore(prev => prev + 10);
-      setAttackTrigger(prev => prev + 1); // Trigger attack animation!
+      setSpecialTrigger(prev => prev + 1); 
       
       try {
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -149,9 +140,10 @@ export default function JumpGame({ words }: { words: VocabWord[] }) {
     setHasWon(false);
     setCurrentIndex(0);
     setScore(0);
-    setStrikes(0); // Reset strikes!
+    setStrikes(0);
     setDoorStatus('idle');
     setPlayerLane(1);
+    startBGM();
   };
 
   const currentDef = words[currentIndex]?.definition || "";
@@ -218,7 +210,7 @@ export default function JumpGame({ words }: { words: VocabWord[] }) {
       </div>
 
       <div className="absolute bottom-6 left-1/2 w-[80px] h-[80px] z-30 transition-transform duration-300 ease-out" style={{ transform: `translateX(calc(-50% + ${(playerLane - 1) * 110}px))` }}>
-        <PixelVocabmon level={currentLevel} attackTrigger={attackTrigger} className={`w-full h-full drop-shadow-2xl ${doorStatus === 'wrong' ? 'filter grayscale brightness-50' : ''}`} />
+        <PixelVocabmon level={currentLevel} specialTrigger={specialTrigger} className={`w-full h-full drop-shadow-2xl ${doorStatus === 'wrong' ? 'filter grayscale brightness-50' : ''}`} />
       </div>
 
       <style jsx>{`

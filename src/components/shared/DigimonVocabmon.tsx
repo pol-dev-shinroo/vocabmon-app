@@ -121,6 +121,17 @@ export default function DigimonVocabmon({
 
   const safeLevel = Math.min(Math.max(level, 1), 10);
 
+  const getAnimationClass = () => {
+    if (!isAttacking && !isSpecial) return '';
+    let tier = 'egg';
+    if (safeLevel >= 2 && safeLevel <= 3) tier = 'baby';
+    if (safeLevel >= 4 && safeLevel <= 6) tier = 'dino';
+    if (safeLevel === 7) tier = 'skull';
+    if (safeLevel >= 8 && safeLevel <= 9) tier = 'mega';
+    if (safeLevel === 10) tier = 'omni';
+    return isSpecial ? `animate-[spc-${tier}_0.6s_ease-in-out]` : `animate-[atk-${tier}_0.3s_ease-in-out]`;
+  };
+
   const renderEyes = (
     x1: number,
     x2: number,
@@ -178,16 +189,18 @@ export default function DigimonVocabmon({
       className={`relative flex flex-col items-center justify-end ${className}`}
     >
       <style>{`
-        @keyframes attack-dash { 
-          0%, 100% { transform: translateX(0) scale(1); } 
-          20% { transform: translateX(-8px) rotate(-5deg) scale(0.95); } 
-          60% { transform: translateX(35px) scale(1.1) skewX(-10deg); } 
-        }
-        @keyframes special-dash { 
-          0%, 100% { transform: translateX(0) scale(1); filter: brightness(1); } 
-          30% { transform: scaleY(0.7) scaleX(1.2); filter: brightness(1.5); } 
-          70% { transform: translateX(45px) translateY(-15px) scale(1.3); filter: brightness(1.3) drop-shadow(0 0 20px rgba(239,68,68,1)); } 
-        }
+        @keyframes atk-egg { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-10px); } }
+        @keyframes spc-egg { 0%, 100% { transform: rotate(0); filter: brightness(1); } 50% { transform: rotate(15deg) scale(1.2); filter: brightness(1.5) drop-shadow(0 0 10px yellow); } }
+        @keyframes atk-baby { 0%, 100% { transform: translateX(0); } 40% { transform: translateX(-5px) scaleY(0.8); } 60% { transform: translateX(20px) scaleY(1.1); } }
+        @keyframes spc-baby { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px) scale(1.3); filter: drop-shadow(0 0 15px pink); } }
+        @keyframes atk-dino { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-10px) rotate(-5deg); } 60% { transform: translateX(40px) rotate(10deg); } }
+        @keyframes spc-dino { 0%, 100% { transform: scale(1) translateX(0); } 40% { transform: scale(1.2) translateX(-10px); filter: drop-shadow(0 0 20px orange); } 70% { transform: scale(1.1) translateX(50px); filter: drop-shadow(0 0 30px red); } }
+        @keyframes atk-skull { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(20px) rotate(5deg); } 40% { transform: translateX(-5px); } }
+        @keyframes spc-skull { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px) scale(1.2); filter: drop-shadow(0 0 30px purple) grayscale(100%); } }
+        @keyframes atk-mega { 0%, 100% { transform: translate(0,0); } 30% { transform: translate(20px, -20px) scale(1.1); } 60% { transform: translate(-10px, 10px); } }
+        @keyframes spc-mega { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px) scale(1.4); filter: drop-shadow(0 0 40px #facc15) brightness(1.5); } }
+        @keyframes atk-omni { 0%, 100% { transform: translateX(0); opacity: 1; } 20% { transform: translateX(50px); opacity: 0.5; } 40% { transform: translateX(50px); opacity: 1; } }
+        @keyframes spc-omni { 0%, 100% { transform: translateX(0); } 40% { transform: translateX(-20px) scale(1.3); filter: drop-shadow(0 0 50px cyan) brightness(2); } 60% { transform: translateX(10px); filter: drop-shadow(0 0 10px blue); } }
         @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
         @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
         @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
@@ -212,7 +225,7 @@ export default function DigimonVocabmon({
           height="140"
           viewBox="-6 -6 28 24"
           xmlns="http://www.w3.org/2000/svg"
-          className={`drop-shadow-xl overflow-visible ${isAttacking ? "animate-[attack-dash_0.3s_ease-in-out]" : ""} ${isSpecial ? "animate-[special-dash_0.6s_ease-in-out]" : ""}`}
+          className={`drop-shadow-xl overflow-visible ${getAnimationClass()}`}
         >
           {renderSprite()}
         </svg>
