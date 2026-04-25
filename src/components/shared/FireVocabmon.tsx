@@ -4,15 +4,69 @@ import { useState, useEffect } from "react";
 export default function FireVocabmon({
   className = "",
   feedTrigger = 0,
+  attackTrigger = 0,
+  specialTrigger = 0,
   level = 1,
 }: {
   className?: string;
   feedTrigger?: number;
+  attackTrigger?: number;
+  specialTrigger?: number;
   level?: number;
 }) {
   const [isEating, setIsEating] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
+  const [isAttacking, setIsAttacking] = useState(false);
+  const [isSpecial, setIsSpecial] = useState(false);
   const [expPopups, setExpPopups] = useState<{ id: number }[]>([]);
+
+  useEffect(() => {
+    if (attackTrigger > 0) {
+      setIsAttacking(true);
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.frequency.setValueAtTime(1100, ctx.currentTime);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.1);
+        }
+      } catch (e) {}
+      const timer = setTimeout(() => setIsAttacking(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [attackTrigger]);
+
+  useEffect(() => {
+    if (specialTrigger > 0) {
+      setIsSpecial(true);
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "square";
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.5);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.6);
+        }
+      } catch (e) {}
+      const timer = setTimeout(() => setIsSpecial(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [specialTrigger]);
 
   useEffect(() => {
     if (feedTrigger > 0) {
@@ -543,6 +597,8 @@ export default function FireVocabmon({
       className={`relative flex flex-col items-center justify-end ${className}`}
     >
       <style>{`
+        @keyframes attack-dash { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(25px) scale(1.05); } }
+        @keyframes special-dash { 0%, 100% { transform: translateX(0) scale(1); filter: brightness(1); } 50% { transform: translateX(40px) translateY(-10px) scale(1.2); filter: brightness(1.3) drop-shadow(0 0 15px rgba(239,68,68,0.8)); } }
         @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
         @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
         @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
@@ -576,7 +632,7 @@ export default function FireVocabmon({
           height="140"
           viewBox="-6 -6 28 24"
           xmlns="http://www.w3.org/2000/svg"
-          className="drop-shadow-xl overflow-visible"
+          className={`drop-shadow-xl overflow-visible ${isAttacking ? "animate-[attack-dash_0.3s_ease-in-out]" : ""} ${isSpecial ? "animate-[special-dash_0.6s_ease-in-out]" : ""}`}
         >
           {renderSprite()}
         </svg>

@@ -16,8 +16,17 @@ export default function Dashboard() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const [atkCharges, setAtkCharges] = useState(2);
+  const [spcCharges, setSpcCharges] = useState(2);
+  const [atkTrigger, setAtkTrigger] = useState(0);
+  const [spcTrigger, setSpcTrigger] = useState(0);
+  const [showEnergyAlert, setShowEnergyAlert] = useState(false);
+  const [showFeatureAlert, setShowFeatureAlert] = useState(false);
+
   const [currentSet, setCurrentSet] = useState(0);
   const totalSets = 10;
+
+  const digimonNames = ["", "Digi-Egg", "Botamon", "Koromon", "Agumon", "Tyrannomon", "Greymon", "SkullGreymon", "MetalGreymon", "WarGreymon", "Omnimon"];
 
   // Keep this array for the "Evolve/Next" button labels
   const scheduleDays = [
@@ -143,6 +152,17 @@ export default function Dashboard() {
     }, 0);
     return () => clearTimeout(initTimer);
   }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      const lastExp = parseInt(localStorage.getItem("last_attack_exp") || "0", 10);
+      if (exp > lastExp) {
+        setAtkCharges(2);
+        setSpcCharges(2);
+        localStorage.setItem("last_attack_exp", exp.toString());
+      }
+    }
+  }, [exp, isLoaded]);
 
   useEffect(() => {
     if (isLoaded && activeQuestRef.current) {
@@ -295,13 +315,13 @@ export default function Dashboard() {
             </div>
 
             <div className="flex gap-2">
-              <Link
-                href="/stickers"
-                className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
-                title="View Sticker Collection"
+              <button
+                onClick={() => setShowFeatureAlert(true)}
+                className="bg-gray-50 hover:bg-gray-100 text-gray-400 border border-gray-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center justify-center"
+                title="Feature Locked"
               >
-                <span className="text-xl">🪄</span>
-              </Link>
+                <span className="text-xl opacity-50">🪄</span>
+              </button>
               <Link
                 href="/collection"
                 className="bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
@@ -312,16 +332,31 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl p-6 flex justify-center mb-6 border border-indigo-100/50 relative overflow-visible">
-            <PixelVocabmon
-              feedTrigger={showFireworks ? 1 : 0}
-              level={levelStats.level}
-              className={
-                isSetComplete && currentSet < totalSets - 1
-                  ? "animate-evo-glow"
-                  : ""
-              }
-            />
+          <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-6 border border-indigo-100/50 relative">
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm border-2 border-indigo-100 text-indigo-800 font-black px-4 py-1 rounded-full text-xs uppercase tracking-widest shadow-sm z-10">
+              {digimonNames[levelStats.level] || "Mystery"}
+            </div>
+            <div className="mb-6">
+              <PixelVocabmon
+                feedTrigger={showFireworks ? 1 : 0}
+                attackTrigger={atkTrigger}
+                specialTrigger={spcTrigger}
+                level={levelStats.level}
+                className={
+                  isSetComplete && currentSet < totalSets - 1
+                    ? "animate-evo-glow"
+                    : ""
+                }
+              />
+            </div>
+            <div className="w-full flex justify-center gap-3 z-20">
+              <button onClick={() => { if (atkCharges > 0) { setAtkCharges(p => p - 1); setAtkTrigger(p => p + 1); } else { setShowEnergyAlert(true); } }} className="bg-white/90 backdrop-blur-sm border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-black px-4 py-2 rounded-xl text-sm shadow-sm transition-transform active:scale-95 flex-1">
+                ⚔️ Attack ({atkCharges}/2)
+              </button>
+              <button onClick={() => { if (spcCharges > 0) { setSpcCharges(p => p - 1); setSpcTrigger(p => p + 1); } else { setShowEnergyAlert(true); } }} className="bg-white/90 backdrop-blur-sm border-2 border-orange-200 text-orange-700 hover:bg-orange-50 font-black px-4 py-2 rounded-xl text-sm shadow-sm transition-transform active:scale-95 flex-1">
+                🔥 Special ({spcCharges}/2)
+              </button>
+            </div>
           </div>
 
           <div>
@@ -798,8 +833,35 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <StickerPopup />
-      <StickerUnlockCelebration />
+      {showEnergyAlert && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 animate-fade-in p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-red-400 shadow-2xl">
+            <div className="text-5xl mb-4 animate-bounce">💤</div>
+            <h3 className="text-2xl font-black text-gray-800 mb-2">Out of Energy!</h3>
+            <p className="text-gray-500 font-medium mb-8 leading-relaxed">
+              Your partner needs to rest. Complete a quest to gain EXP and recharge their energy!
+            </p>
+            <button onClick={() => setShowEnergyAlert(false)} className="w-full bg-red-500 hover:bg-red-600 text-white text-lg font-black py-4 rounded-xl shadow-md active:scale-95 transition-all">
+              I&apos;ll go train! 🏃
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showFeatureAlert && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 animate-fade-in p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-indigo-400 shadow-2xl">
+            <div className="text-5xl mb-4 animate-bounce">🚧</div>
+            <h3 className="text-2xl font-black text-gray-800 mb-2">Under Construction!</h3>
+            <p className="text-gray-500 font-medium mb-8 leading-relaxed">
+              We are building a special game for you! Once it is ready, this button will be enabled again.
+            </p>
+            <button onClick={() => setShowFeatureAlert(false)} className="w-full bg-indigo-500 hover:bg-indigo-600 text-white text-lg font-black py-4 rounded-xl shadow-md active:scale-95 transition-all">
+              Got it! 👍
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

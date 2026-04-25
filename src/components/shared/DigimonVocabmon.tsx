@@ -4,15 +4,69 @@ import { useState, useEffect } from "react";
 export default function DigimonVocabmon({
   className = "",
   feedTrigger = 0,
+  attackTrigger = 0,
+  specialTrigger = 0,
   level = 1,
 }: {
   className?: string;
   feedTrigger?: number;
+  attackTrigger?: number;
+  specialTrigger?: number;
   level?: number;
 }) {
   const [isEating, setIsEating] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
+  const [isAttacking, setIsAttacking] = useState(false);
+  const [isSpecial, setIsSpecial] = useState(false);
   const [expPopups, setExpPopups] = useState<{ id: number }[]>([]);
+
+  useEffect(() => {
+    if (attackTrigger > 0) {
+      setIsAttacking(true);
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.1);
+        }
+      } catch (e) {}
+      const timer = setTimeout(() => setIsAttacking(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [attackTrigger]);
+
+  useEffect(() => {
+    if (specialTrigger > 0) {
+      setIsSpecial(true);
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(220, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.6);
+        }
+      } catch (e) {}
+      const timer = setTimeout(() => setIsSpecial(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [specialTrigger]);
 
   useEffect(() => {
     if (feedTrigger > 0) {
@@ -94,109 +148,26 @@ export default function DigimonVocabmon({
 
   const renderSprite = () => {
     switch (safeLevel) {
-      case 1: // Lv1: Digi-Egg
-        return (
-          <g className="animate-float-slow">
-            <rect x="5" y="4" width="6" height="10" fill="#f8fafc" />
-            <rect x="4" y="6" width="8" height="6" fill="#f8fafc" />
-            <rect x="6" y="7" width="2" height="2" fill="#3b82f6" />
-            <rect x="8" y="9" width="2" height="2" fill="#3b82f6" />
-          </g>
-        );
-      case 2: // Lv2: Botamon
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="8" width="8" height="6" fill="#1e293b" />
-            <rect x="3" y="10" width="10" height="4" fill="#1e293b" />
-            {renderEyes(5, 9, 10, "#fb7185", true)}
-          </g>
-        );
-      case 3: // Lv3: Koromon
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="6" width="8" height="8" fill="#fda4af" />
-            <rect x="3" y="8" width="10" height="4" fill="#fda4af" />
-            <rect x="2" y="4" width="2" height="4" fill="#fda4af" />
-            <rect x="12" y="4" width="2" height="4" fill="#fda4af" />
-            {renderEyes(5, 9, 8, "#000000")}
-          </g>
-        );
-      case 4: // Lv4: Agumon
-        return (
-          <g className="animate-float-slow">
-            <rect x="5" y="4" width="6" height="6" fill="#f97316" />
-            <rect x="4" y="10" width="8" height="4" fill="#f97316" />
-            <rect x="3" y="12" width="2" height="2" fill="#f97316" />
-            <rect x="11" y="12" width="2" height="2" fill="#f97316" />
-            <rect x="6" y="8" width="4" height="2" fill="#fff7ed" />
-            {renderEyes(5, 9, 6, "#000000")}
-          </g>
-        );
-      case 5: // Lv5: Greymon
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="10" width="10" height="4" fill="#f97316" />
-            <rect x="6" y="4" width="6" height="6" fill="#78350f" />
-            <rect x="5" y="6" width="8" height="3" fill="#78350f" />
-            <rect x="8" y="2" width="2" height="2" fill="#78350f" />
-            <rect x="3" y="12" width="2" height="2" fill="#78350f" />
-            {renderEyes(6, 10, 7, "#ef4444", true)}
-          </g>
-        );
-      case 6: // Lv6: MetalGreymon
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="10" width="10" height="4" fill="#f97316" />
-            <rect x="6" y="4" width="6" height="6" fill="#94a3b8" />
-            <rect x="1" y="6" width="4" height="4" fill="#a855f7" />
-            <rect x="13" y="6" width="4" height="4" fill="#a855f7" />
-            {renderEyes(6, 10, 7, "#ef4444", true)}
-          </g>
-        );
-      case 7: // Lv7: WarGreymon
-        return (
-          <g className="animate-float-slow">
-            <rect x="6" y="4" width="4" height="4" fill="#facc15" />
-            <rect x="4" y="8" width="8" height="6" fill="#facc15" />
-            <rect x="3" y="9" width="2" height="4" fill="#94a3b8" />
-            <rect x="11" y="9" width="2" height="4" fill="#94a3b8" />
-            <rect x="5" y="2" width="6" height="2" fill="#94a3b8" />
-            {renderEyes(6, 8, 5, "#ef4444", true)}
-          </g>
-        );
-      case 8: // Lv8: Omnimon
-        return (
-          <g className="animate-float-slow">
-            <rect x="6" y="4" width="4" height="4" fill="#ffffff" />
-            <rect x="5" y="8" width="6" height="6" fill="#ffffff" />
-            <rect x="2" y="6" width="3" height="6" fill="#f97316" />
-            <rect x="11" y="6" width="3" height="6" fill="#3b82f6" />
-            <rect x="4" y="2" width="8" height="2" fill="#475569" />
-            {renderEyes(6, 8, 5, "#3b82f6", true)}
-          </g>
-        );
-      case 9: // Lv9: Imperialdramon
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="8" width="8" height="6" fill="#1e3a8a" />
-            <rect x="3" y="6" width="10" height="4" fill="#1e3a8a" />
-            <rect x="1" y="4" width="4" height="4" fill="#000000" />
-            <rect x="11" y="4" width="4" height="4" fill="#000000" />
-            <rect x="6" y="2" width="4" height="4" fill="#ef4444" />
-            {renderEyes(5, 9, 7, "#facc15", true)}
-          </g>
-        );
-      case 10: // Lv10: Gallantmon
-        return (
-          <g className="animate-float-slow">
-            <rect x="5" y="4" width="6" height="6" fill="#ffffff" />
-            <rect x="4" y="10" width="8" height="6" fill="#dc2626" />
-            <rect x="2" y="8" width="3" height="4" fill="#ffffff" />
-            <rect x="11" y="8" width="3" height="4" fill="#facc15" />
-            <rect x="7" y="0" width="2" height="4" fill="#dc2626" />
-            {renderEyes(6, 8, 6, "#facc15", true)}
-          </g>
-        );
+      case 1: // Digi-Egg
+        return <g className="animate-float-slow"><rect x="5" y="4" width="6" height="10" fill="#ffffff" /><rect x="4" y="6" width="8" height="6" fill="#ffffff" /><rect x="4" y="7" width="8" height="2" fill="#f97316" /></g>;
+      case 2: // Botamon
+        return <g className="animate-float-slow"><rect x="4" y="6" width="8" height="8" fill="#171717" /><rect x="3" y="8" width="10" height="4" fill="#171717" />{renderEyes(5, 9, 8, "#facc15", true)}</g>;
+      case 3: // Koromon
+        return <g className="animate-float-slow"><rect x="4" y="5" width="8" height="8" fill="#f472b6" /><rect x="3" y="7" width="10" height="4" fill="#f472b6" /><rect x="2" y="3" width="2" height="5" fill="#f472b6" /><rect x="12" y="3" width="2" height="5" fill="#f472b6" />{renderEyes(5, 9, 8, "#dc2626")}</g>;
+      case 4: // Agumon
+        return <g className="animate-float-slow"><rect x="4" y="2" width="8" height="6" fill="#f97316" /><rect x="5" y="8" width="6" height="6" fill="#f97316" /><rect x="3" y="10" width="2" height="2" fill="#f97316" /><rect x="11" y="10" width="2" height="2" fill="#f97316" /><rect x="5" y="14" width="2" height="2" fill="#f97316" /><rect x="9" y="14" width="2" height="2" fill="#f97316" />{renderEyes(5, 9, 4, "#22c55e")}</g>;
+      case 5: // Tyrannomon
+        return <g className="animate-float-slow"><rect x="4" y="2" width="8" height="12" fill="#dc2626" /><rect x="7" y="0" width="2" height="14" fill="#22c55e" opacity="0.8" /><rect x="2" y="6" width="12" height="6" fill="#dc2626" />{renderEyes(5, 9, 4, "#22c55e")}</g>;
+      case 6: // Greymon
+        return <g className="animate-float-slow"><rect x="3" y="1" width="10" height="6" fill="#78350f" /><rect x="7" y="-1" width="2" height="2" fill="#e5e5e5" /><rect x="2" y="0" width="2" height="3" fill="#e5e5e5" /><rect x="12" y="0" width="2" height="3" fill="#e5e5e5" /><rect x="4" y="7" width="8" height="7" fill="#f97316" /><rect x="4" y="9" width="8" height="2" fill="#3b82f6" /><rect x="3" y="14" width="3" height="2" fill="#f97316" /><rect x="10" y="14" width="3" height="2" fill="#f97316" />{renderEyes(5, 9, 4, "#ef4444", true)}</g>;
+      case 7: // SkullGreymon
+        return <g className="animate-float-slow"><rect x="4" y="4" width="8" height="10" fill="#e5e5e5" /><rect x="3" y="6" width="10" height="2" fill="#171717" /><rect x="7" y="0" width="2" height="4" fill="#94a3b8" /><rect x="5" y="2" width="6" height="2" fill="#94a3b8" />{renderEyes(5, 9, 5, "#dc2626", true)}</g>;
+      case 8: // MetalGreymon
+        return <g className="animate-float-slow"><rect x="-2" y="3" width="4" height="8" fill="#a855f7" /><rect x="14" y="3" width="4" height="8" fill="#a855f7" /><rect x="3" y="1" width="10" height="6" fill="#94a3b8" /><rect x="7" y="-1" width="2" height="2" fill="#94a3b8" /><rect x="4" y="7" width="8" height="7" fill="#f97316" /><rect x="11" y="9" width="5" height="3" fill="#94a3b8" /><rect x="3" y="14" width="3" height="2" fill="#f97316" /><rect x="10" y="14" width="3" height="2" fill="#f97316" />{renderEyes(6, 8, 4, "#ef4444", true)}</g>;
+      case 9: // WarGreymon
+        return <g className="animate-float-slow"><rect x="4" y="4" width="8" height="10" fill="#e5e5e5" /><rect x="4" y="4" width="8" height="3" fill="#facc15" /><rect x="0" y="5" width="4" height="6" fill="#facc15" /><rect x="12" y="5" width="4" height="6" fill="#facc15" /><rect x="5" y="14" width="2" height="2" fill="#e5e5e5" /><rect x="9" y="14" width="2" height="2" fill="#e5e5e5" />{renderEyes(6, 8, 5, "#22c55e", true)}</g>;
+      case 10: // Omnimon
+        return <g className="animate-float-slow"><rect x="-1" y="6" width="18" height="8" fill="#ffffff" opacity="0.8" /><rect x="6" y="0" width="4" height="4" fill="#e5e5e5" /><rect x="7" y="-2" width="2" height="2" fill="#facc15" /><rect x="5" y="4" width="6" height="8" fill="#ffffff" /><rect x="2" y="6" width="3" height="5" fill="#ea580c" /><rect x="11" y="6" width="3" height="5" fill="#3b82f6" /><rect x="5" y="12" width="2" height="4" fill="#ffffff" /><rect x="9" y="12" width="2" height="4" fill="#ffffff" />{renderEyes(6, 8, 1, "#3b82f6", true)}</g>;
       default:
         return null;
     }
@@ -207,6 +178,16 @@ export default function DigimonVocabmon({
       className={`relative flex flex-col items-center justify-end ${className}`}
     >
       <style>{`
+        @keyframes attack-dash { 
+          0%, 100% { transform: translateX(0) scale(1); } 
+          20% { transform: translateX(-8px) rotate(-5deg) scale(0.95); } 
+          60% { transform: translateX(35px) scale(1.1) skewX(-10deg); } 
+        }
+        @keyframes special-dash { 
+          0%, 100% { transform: translateX(0) scale(1); filter: brightness(1); } 
+          30% { transform: scaleY(0.7) scaleX(1.2); filter: brightness(1.5); } 
+          70% { transform: translateX(45px) translateY(-15px) scale(1.3); filter: brightness(1.3) drop-shadow(0 0 20px rgba(239,68,68,1)); } 
+        }
         @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
         @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
         @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
@@ -231,7 +212,7 @@ export default function DigimonVocabmon({
           height="140"
           viewBox="-6 -6 28 24"
           xmlns="http://www.w3.org/2000/svg"
-          className="drop-shadow-xl overflow-visible"
+          className={`drop-shadow-xl overflow-visible ${isAttacking ? "animate-[attack-dash_0.3s_ease-in-out]" : ""} ${isSpecial ? "animate-[special-dash_0.6s_ease-in-out]" : ""}`}
         >
           {renderSprite()}
         </svg>
