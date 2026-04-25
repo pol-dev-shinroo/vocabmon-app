@@ -111,86 +111,6 @@ tsconfig.json
 <files>
 This section contains the contents of the repository's files.
 
-<file path="scripts/rollover.ts">
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Load the environment variables from .env.local
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
-
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  console.error('❌ MONGODB_URI is missing in .env.local');
-  process.exit(1);
-}
-
-async function run() {
-  const username = process.argv[2];
-  const newWeekId = process.argv[3];
-
-  if (!username || !newWeekId) {
-    console.log('⚠️ Usage: npx tsx scripts/rollover.ts <username> <new_week_id>');
-    console.log('Example: npx tsx scripts/rollover.ts jaylee week_5');
-    process.exit(1);
-  }
-
-  console.log(`⏳ Connecting to MongoDB...`);
-  await mongoose.connect(MONGODB_URI as string);
-  
-  // Define a flexible schema for the script
-  const ProgressSchema = new mongoose.Schema({
-    username: String,
-    activeWeekId: String,
-    exp: Number,
-    currentSet: Number,
-    completedQuests: [String],
-    history: Array
-  }, { strict: false });
-
-  const Progress = mongoose.models.Progress || mongoose.model('Progress', ProgressSchema);
-  const userProgress = await Progress.findOne({ username });
-
-  if (!userProgress) {
-    console.error(`❌ Could not find progress for user: ${username}`);
-    process.exit(1);
-  }
-
-  console.log(`👤 Found user: ${username} (Currently on ${userProgress.activeWeekId} with ${userProgress.exp} EXP)`);
-
-  // 1. Calculate final level
-  const rawLevel = Math.floor(userProgress.exp / 150) + 1;
-  const finalLevel = Math.min(rawLevel, 10);
-
-  // 2. Archive to history
-  const historyEntry = {
-    weekId: userProgress.activeWeekId,
-    finalLevel: finalLevel,
-    totalExp: userProgress.exp,
-    completedAt: new Date()
-  };
-  
-  userProgress.history.push(historyEntry);
-
-  // 3. Reset stats for the new week
-  userProgress.activeWeekId = newWeekId;
-  userProgress.exp = 0;
-  userProgress.currentSet = 0;
-  userProgress.completedQuests = [];
-
-  await userProgress.save();
-
-  console.log(`🎉 Successfully archived ${historyEntry.weekId} to the Hall of Fame!`);
-  console.log(`🆕 Reset stats for ${newWeekId}. Ready to learn!`);
-
-  await mongoose.disconnect();
-  process.exit(0);
-}
-
-run();
-</file>
-
 <file path=".gitignore">
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -286,9 +206,84 @@ export default config;
 <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
 </file>
 
-<file path="README.md">
-to update mongodb
-npx tsx scripts/rollover.ts jaylee week_5
+<file path="scripts/rollover.ts">
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load the environment variables from .env.local
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI is missing in .env.local');
+  process.exit(1);
+}
+
+async function run() {
+  const username = process.argv[2];
+  const newWeekId = process.argv[3];
+
+  if (!username || !newWeekId) {
+    console.log('⚠️ Usage: npx tsx scripts/rollover.ts <username> <new_week_id>');
+    console.log('Example: npx tsx scripts/rollover.ts jaylee week_5');
+    process.exit(1);
+  }
+
+  console.log(`⏳ Connecting to MongoDB...`);
+  await mongoose.connect(MONGODB_URI as string);
+  
+  // Define a flexible schema for the script
+  const ProgressSchema = new mongoose.Schema({
+    username: String,
+    activeWeekId: String,
+    exp: Number,
+    currentSet: Number,
+    completedQuests: [String],
+    history: Array
+  }, { strict: false });
+
+  const Progress = mongoose.models.Progress || mongoose.model('Progress', ProgressSchema);
+  const userProgress = await Progress.findOne({ username });
+
+  if (!userProgress) {
+    console.error(`❌ Could not find progress for user: ${username}`);
+    process.exit(1);
+  }
+
+  console.log(`👤 Found user: ${username} (Currently on ${userProgress.activeWeekId} with ${userProgress.exp} EXP)`);
+
+  // 1. Calculate final level
+  const rawLevel = Math.floor(userProgress.exp / 150) + 1;
+  const finalLevel = Math.min(rawLevel, 10);
+
+  // 2. Archive to history
+  const historyEntry = {
+    weekId: userProgress.activeWeekId,
+    finalLevel: finalLevel,
+    totalExp: userProgress.exp,
+    completedAt: new Date()
+  };
+  
+  userProgress.history.push(historyEntry);
+
+  // 3. Reset stats for the new week
+  userProgress.activeWeekId = newWeekId;
+  userProgress.exp = 0;
+  userProgress.currentSet = 0;
+  userProgress.completedQuests = [];
+
+  await userProgress.save();
+
+  console.log(`🎉 Successfully archived ${historyEntry.weekId} to the Hall of Fame!`);
+  console.log(`🆕 Reset stats for ${newWeekId}. Ready to learn!`);
+
+  await mongoose.disconnect();
+  process.exit(0);
+}
+
+run();
 </file>
 
 <file path="src/actions/loadProgress.ts">
@@ -883,955 +878,6 @@ export default function VocabmonReveal({
           I'll help you grow! 🌟
         </button>
       </div>
-    </div>
-  );
-}
-</file>
-
-<file path="src/components/shared/DigimonVocabmon.tsx">
-"use client";
-import { useState, useEffect } from "react";
-
-export default function DigimonVocabmon({
-  className = "",
-  feedTrigger = 0,
-  attackTrigger = 0,
-  specialTrigger = 0,
-  level = 1,
-}: {
-  className?: string;
-  feedTrigger?: number;
-  attackTrigger?: number;
-  specialTrigger?: number;
-  level?: number;
-}) {
-  const [isEating, setIsEating] = useState(false);
-  const [isBlinking, setIsBlinking] = useState(false);
-  const [isAttacking, setIsAttacking] = useState(false);
-  const [isSpecial, setIsSpecial] = useState(false);
-  const [expPopups, setExpPopups] = useState<{ id: number }[]>([]);
-
-  useEffect(() => {
-    if (attackTrigger > 0) {
-      setIsAttacking(true);
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.frequency.setValueAtTime(880, ctx.currentTime);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.1);
-        }
-      } catch (e) {}
-      const timer = setTimeout(() => setIsAttacking(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [attackTrigger]);
-
-  useEffect(() => {
-    if (specialTrigger > 0) {
-      setIsSpecial(true);
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sawtooth";
-          osc.frequency.setValueAtTime(220, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.4);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.6);
-        }
-      } catch (e) {}
-      const timer = setTimeout(() => setIsSpecial(false), 600);
-      return () => clearTimeout(timer);
-    }
-  }, [specialTrigger]);
-
-  useEffect(() => {
-    if (feedTrigger > 0) {
-      const playExpSound = () => {
-        try {
-          const AudioContextClass =
-            window.AudioContext ||
-            (window as any).webkitAudioContext;
-          if (!AudioContextClass) return;
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sine";
-          const now = ctx.currentTime;
-          osc.frequency.setValueAtTime(987.77, now);
-          osc.frequency.setValueAtTime(1318.51, now + 0.08);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0, now);
-          gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
-          gain.gain.setValueAtTime(0.1, now + 0.1);
-          gain.gain.linearRampToValueAtTime(0, now + 0.2);
-          osc.start(now);
-          osc.stop(now + 0.2);
-        } catch (e) {}
-      };
-      playExpSound();
-
-      const startTimer = setTimeout(() => {
-        setIsEating(true);
-        setExpPopups((prev) => [...prev, { id: Date.now() }]);
-      }, 0);
-      const endTimer = setTimeout(() => setIsEating(false), 600);
-
-      return () => {
-        clearTimeout(startTimer);
-        clearTimeout(endTimer);
-      };
-    }
-  }, [feedTrigger]);
-
-  useEffect(() => {
-    const blinkInterval = setInterval(() => {
-      if (Math.random() > 0.3) {
-        setIsBlinking(true);
-        setTimeout(() => setIsBlinking(false), 150);
-      }
-    }, 3500);
-
-    return () => clearInterval(blinkInterval);
-  }, []);
-
-  const safeLevel = Math.min(Math.max(level, 1), 10);
-
-  const renderEyes = (
-    x1: number,
-    x2: number,
-    y: number,
-    color = "#000000",
-    glow = false,
-  ) => {
-    if (isEating || isBlinking) {
-      return (
-        <>
-          <rect x={x1} y={y} width="2" height="1" fill={color} />
-          <rect x={x2} y={y} width="2" height="1" fill={color} />
-        </>
-      );
-    }
-    return (
-      <g className={glow ? "animate-pulse" : ""}>
-        <rect x={x1} y={y} width="2" height="2" fill={color} />
-        <rect x={x2} y={y} width="2" height="2" fill={color} />
-        <rect x={x1} y={y} width="1" height="1" fill="#ffffff" />
-        <rect x={x2} y={y} width="1" height="1" fill="#ffffff" />
-      </g>
-    );
-  };
-
-  const renderSprite = () => {
-    switch (safeLevel) {
-      case 1: // Lv1: Digi-Egg (White with yellow/orange stripes)
-        return (
-          <g className="animate-float-slow">
-            <rect x="5" y="4" width="6" height="10" fill="#ffffff" />
-            <rect x="4" y="6" width="8" height="6" fill="#ffffff" />
-            <rect x="5" y="6" width="6" height="1" fill="#f97316" />
-            <rect x="4" y="9" width="8" height="1" fill="#fbbf24" />
-          </g>
-        );
-      case 2: // Lv2: Botamon (Black round body, yellow glowing eyes)
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="8" width="8" height="6" fill="#000000" />
-            <rect x="3" y="10" width="10" height="4" fill="#000000" />
-            {renderEyes(5, 9, 10, "#fbbf24", true)}
-          </g>
-        );
-      case 3: // Lv3: Koromon (Pink round body, floppy ears, red eyes)
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="6" width="8" height="8" fill="#fda4af" />
-            <rect x="3" y="8" width="10" height="4" fill="#fda4af" />
-            <rect x="2" y="4" width="2" height="4" fill="#fda4af" />
-            <rect x="12" y="4" width="2" height="4" fill="#fda4af" />
-            {renderEyes(5, 9, 8, "#dc2626")}
-          </g>
-        );
-      case 4: // Lv4: Agumon (Orange dinosaur, green eyes)
-        return (
-          <g className="animate-float-slow">
-            <rect x="5" y="4" width="6" height="6" fill="#f97316" />
-            <rect x="4" y="10" width="8" height="4" fill="#f97316" />
-            <rect x="3" y="12" width="2" height="2" fill="#f97316" />
-            <rect x="11" y="12" width="2" height="2" fill="#f97316" />
-            {renderEyes(5, 9, 6, "#22c55e")}
-          </g>
-        );
-      case 5: // Lv5: Tyrannomon (Red dinosaur, green spikes)
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="4" width="8" height="10" fill="#dc2626" />
-            <rect x="3" y="6" width="10" height="6" fill="#dc2626" />
-            <rect x="7" y="2" width="2" height="2" fill="#22c55e" />
-            <rect x="7" y="5" width="2" height="2" fill="#22c55e" />
-            <rect x="7" y="8" width="2" height="2" fill="#22c55e" />
-            {renderEyes(5, 9, 6, "#22c55e")}
-          </g>
-        );
-      case 6: // Lv6: Greymon (Orange dinosaur, horned helmet)
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="8" width="8" height="6" fill="#f97316" />
-            <rect x="4" y="3" width="8" height="6" fill="#78350f" />
-            <rect x="3" y="5" width="10" height="3" fill="#78350f" />
-            <rect x="2" y="3" width="2" height="2" fill="#f5f5f4" />
-            <rect x="12" y="3" width="2" height="2" fill="#f5f5f4" />
-            <rect x="7" y="1" width="2" height="2" fill="#f5f5f4" />
-            {renderEyes(5, 9, 6, "#dc2626", true)}
-          </g>
-        );
-      case 7: // Lv7: SkullGreymon (Skeletal dinosaur, bone missile)
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="6" width="8" height="8" fill="#e2e8f0" />
-            <rect x="3" y="8" width="10" height="4" fill="#e2e8f0" />
-            <rect x="4" y="10" width="8" height="1" fill="#94a3b8" />
-            <rect x="5" y="2" width="6" height="3" fill="#f5f5f4" />
-            <rect x="4" y="3" width="8" height="1" fill="#f5f5f4" />
-            {renderEyes(5, 9, 8, "#dc2626", true)}
-          </g>
-        );
-      case 8: // Lv8: MetalGreymon (Orange, silver helmet/claw, purple wings)
-        return (
-          <g className="animate-float-slow">
-            <rect x="4" y="8" width="8" height="6" fill="#f97316" />
-            <rect x="5" y="4" width="6" height="5" fill="#94a3b8" />
-            <rect x="2" y="9" width="3" height="3" fill="#94a3b8" />
-            <rect x="1" y="4" width="3" height="5" fill="#a855f7" />
-            <rect x="12" y="4" width="3" height="5" fill="#a855f7" />
-            {renderEyes(6, 8, 6, "#dc2626", true)}
-          </g>
-        );
-      case 9: // Lv9: WarGreymon (Gold/Silver armor, back shields)
-        return (
-          <g className="animate-float-slow">
-            <rect x="6" y="4" width="4" height="4" fill="#eab308" />
-            <rect x="5" y="8" width="6" height="6" fill="#e2e8f0" />
-            <rect x="3" y="4" width="2" height="8" fill="#eab308" />
-            <rect x="11" y="4" width="2" height="8" fill="#eab308" />
-            <rect x="5" y="2" width="6" height="2" fill="#eab308" />
-            {renderEyes(6, 8, 5, "#dc2626", true)}
-          </g>
-        );
-      case 10: // Lv10: Omnimon (White knight, red/blue heads, cape)
-        return (
-          <g className="animate-float-slow">
-            <rect x="6" y="2" width="4" height="4" fill="#ffffff" />
-            <rect x="5" y="6" width="6" height="8" fill="#ffffff" />
-            <rect x="1" y="6" width="4" height="5" fill="#dc2626" />
-            <rect x="11" y="6" width="4" height="5" fill="#3b82f6" />
-            <rect x="4" y="0" width="8" height="2" fill="#ffffff" />
-            <rect x="4" y="14" width="8" height="2" fill="#ffffff" />
-            {renderEyes(6, 8, 3, "#3b82f6", true)}
-          </g>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div
-      className={`relative flex flex-col items-center justify-end ${className}`}
-    >
-      <style>{`
-        @keyframes attack-dash { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(25px) scale(1.05); } }
-        @keyframes special-dash { 0%, 100% { transform: translateX(0) scale(1); filter: brightness(1); } 50% { transform: translateX(40px) translateY(-10px) scale(1.2); filter: brightness(1.3) drop-shadow(0 0 15px rgba(239,68,68,0.8)); } }
-        @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
-        @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
-        @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
-        @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
-        .animate-breathe { animation: squish-breathe 2s ease-in-out infinite; }
-        .animate-jump { animation: happy-jump 0.6s ease-in-out; }
-        .exp-float { animation: float-up 1s ease-out forwards; position: absolute; font-weight: 900; color: #f97316; text-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 50; top: -20px; }
-        .animate-float-slow { animation: float-slow 3s ease-in-out infinite; }
-      `}</style>
-
-      {expPopups.map((popup) => (
-        <div key={popup.id} className="exp-float text-xl">
-          +15 EXP!
-        </div>
-      ))}
-
-      <div
-        className={`relative z-10 ${isEating ? "animate-jump" : "animate-breathe"}`}
-      >
-        <svg
-          width="140"
-          height="140"
-          viewBox="-6 -6 28 24"
-          xmlns="http://www.w3.org/2000/svg"
-          className={`drop-shadow-xl overflow-visible ${isAttacking ? "animate-[attack-dash_0.3s_ease-in-out]" : ""} ${isSpecial ? "animate-[special-dash_0.6s_ease-in-out]" : ""}`}
-        >
-          {renderSprite()}
-        </svg>
-      </div>
-      <div className="absolute bottom-0 w-24 h-3 bg-black/10 rounded-full blur-[2px]"></div>
-    </div>
-  );
-}
-</file>
-
-<file path="src/components/shared/FireVocabmon.tsx">
-"use client";
-import { useState, useEffect } from "react";
-
-export default function FireVocabmon({
-  className = "",
-  feedTrigger = 0,
-  attackTrigger = 0,
-  specialTrigger = 0,
-  level = 1,
-}: {
-  className?: string;
-  feedTrigger?: number;
-  attackTrigger?: number;
-  specialTrigger?: number;
-  level?: number;
-}) {
-  const [isEating, setIsEating] = useState(false);
-  const [isBlinking, setIsBlinking] = useState(false);
-  const [isAttacking, setIsAttacking] = useState(false);
-  const [isSpecial, setIsSpecial] = useState(false);
-  const [expPopups, setExpPopups] = useState<{ id: number }[]>([]);
-
-  useEffect(() => {
-    if (attackTrigger > 0) {
-      setIsAttacking(true);
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.frequency.setValueAtTime(1100, ctx.currentTime);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.1);
-        }
-      } catch (e) {}
-      const timer = setTimeout(() => setIsAttacking(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [attackTrigger]);
-
-  useEffect(() => {
-    if (specialTrigger > 0) {
-      setIsSpecial(true);
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "square";
-          osc.frequency.setValueAtTime(150, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.5);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.6);
-        }
-      } catch (e) {}
-      const timer = setTimeout(() => setIsSpecial(false), 600);
-      return () => clearTimeout(timer);
-    }
-  }, [specialTrigger]);
-
-  useEffect(() => {
-    if (feedTrigger > 0) {
-      const playExpSound = () => {
-        try {
-          const AudioContextClass =
-            window.AudioContext ||
-            (
-              window as Window & {
-                webkitAudioContext?: typeof window.AudioContext;
-              }
-            ).webkitAudioContext;
-          if (!AudioContextClass) return;
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sine";
-          const now = ctx.currentTime;
-          osc.frequency.setValueAtTime(987.77, now);
-          osc.frequency.setValueAtTime(1318.51, now + 0.08);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0, now);
-          gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
-          gain.gain.setValueAtTime(0.1, now + 0.1);
-          gain.gain.linearRampToValueAtTime(0, now + 0.2);
-          osc.start(now);
-          osc.stop(now + 0.2);
-        } catch (e) {}
-      };
-      playExpSound();
-
-      const startTimer = setTimeout(() => {
-        setIsEating(true);
-        setExpPopups((prev) => [...prev, { id: Date.now() }]);
-      }, 0);
-      const endTimer = setTimeout(() => setIsEating(false), 600);
-
-      return () => {
-        clearTimeout(startTimer);
-        clearTimeout(endTimer);
-      };
-    }
-  }, [feedTrigger]);
-
-  useEffect(() => {
-    const blinkInterval = setInterval(() => {
-      if (Math.random() > 0.3) {
-        setIsBlinking(true);
-        setTimeout(() => setIsBlinking(false), 150);
-      }
-    }, 3500);
-
-    return () => clearInterval(blinkInterval);
-  }, []);
-
-  const safeLevel = Math.min(Math.max(level, 1), 10);
-
-  const renderEyes = (
-    x1: number,
-    x2: number,
-    y: number,
-    color = "#0f172a",
-    glow = false,
-  ) => {
-    if (isEating || isBlinking) {
-      return (
-        <>
-          <rect x={x1} y={y} width="2" height="1" fill={color} />
-          <rect x={x2} y={y} width="2" height="1" fill={color} />
-        </>
-      );
-    }
-    return (
-      <g className={glow ? "animate-pulse" : ""}>
-        <rect x={x1} y={y} width="2" height="2" fill={color} />
-        <rect x={x2} y={y} width="2" height="2" fill={color} />
-        <rect x={x1} y={y} width="1" height="1" fill="#ffffff" />
-        <rect x={x2} y={y} width="1" height="1" fill="#ffffff" />
-      </g>
-    );
-  };
-
-  const renderSprite = () => {
-    switch (safeLevel) {
-      case 1: // Lv1: Ember
-        return (
-          <>
-            <g className="animate-float-slow">
-              <rect x="6" y="6" width="4" height="6" fill="#ef4444" />
-              <rect x="5" y="8" width="6" height="3" fill="#f97316" />
-              <rect
-                x="7"
-                y="4"
-                width="2"
-                height="2"
-                fill="#facc15"
-                className="animate-flicker"
-              />
-              {renderEyes(6, 8, 7, "#450a0a")}
-            </g>
-          </>
-        );
-      case 2: // Lv2: Magma Shell
-        return (
-          <>
-            <rect x="4" y="6" width="8" height="6" fill="#292524" />
-            <rect x="3" y="7" width="10" height="4" fill="#44403c" />
-            <rect
-              x="6"
-              y="7"
-              width="4"
-              height="1"
-              fill="#ea580c"
-              className="animate-pulse"
-            />
-            <rect x="5" y="9" width="2" height="1" fill="#ea580c" />
-            <rect
-              x="7"
-              y="4"
-              width="2"
-              height="2"
-              fill="#f97316"
-              className="animate-flicker"
-            />
-            {renderEyes(5, 9, 8, "#facc15", true)}
-          </>
-        );
-      case 3: // Lv3: Flame Fox Fledgling
-        return (
-          <>
-            {/* Flickering Tail */}
-            <g
-              className="animate-wiggle"
-              style={{ transformOrigin: "12px 11px" }}
-            >
-              <rect x="10" y="9" width="4" height="3" fill="#f97316" />
-              <rect
-                x="12"
-                y="8"
-                width="3"
-                height="2"
-                fill="#facc15"
-                className="animate-flicker"
-              />
-            </g>
-
-            {/* Big Ears */}
-            <rect x="3" y="2" width="3" height="4" fill="#b91c1c" />
-            <rect x="10" y="2" width="3" height="4" fill="#b91c1c" />
-            <rect x="4" y="3" width="1" height="2" fill="#facc15" />
-            <rect x="11" y="3" width="1" height="2" fill="#facc15" />
-
-            {/* Head */}
-            <rect x="3" y="5" width="10" height="6" fill="#dc2626" />
-            <rect x="4" y="8" width="8" height="3" fill="#ef4444" />
-
-            {/* Fluffy Fire Cheeks */}
-            <rect x="1" y="7" width="2" height="3" fill="#f97316" />
-            <rect x="13" y="7" width="2" height="3" fill="#f97316" />
-
-            {/* Small Body */}
-            <rect x="5" y="11" width="6" height="3" fill="#b91c1c" />
-
-            {/* Glowing Core/Belly */}
-            <rect x="6" y="11" width="4" height="2" fill="#ea580c" />
-
-            {/* Tiny Paws */}
-            <rect x="4" y="14" width="2" height="1" fill="#450a0a" />
-            <rect x="10" y="14" width="2" height="1" fill="#450a0a" />
-
-            {/* Bright Eyes */}
-            {renderEyes(5, 9, 7, "#fef08a", true)}
-          </>
-        );
-      case 4: // Lv4: Blaze Hound
-        return (
-          <>
-            <rect x="4" y="5" width="8" height="6" fill="#dc2626" />
-            <rect x="3" y="6" width="10" height="4" fill="#b91c1c" />
-            <g className="animate-flicker">
-              <rect x="3" y="2" width="6" height="4" fill="#f97316" />
-              <rect x="4" y="1" width="4" height="2" fill="#facc15" />
-            </g>
-            <rect x="12" y="4" width="2" height="3" fill="#f97316" />
-            <rect x="5" y="11" width="2" height="2" fill="#7f1d1d" />
-            <rect x="9" y="11" width="2" height="2" fill="#7f1d1d" />
-            {renderEyes(5, 9, 6, "#fef08a", true)}
-          </>
-        );
-      case 5: // Lv5: Inferno Brawler
-        return (
-          <>
-            <rect x="3" y="4" width="10" height="8" fill="#b91c1c" />
-            <rect x="2" y="5" width="12" height="4" fill="#991b1b" />
-            <rect x="6" y="6" width="4" height="4" fill="#ea580c" />
-            <rect
-              x="7"
-              y="7"
-              width="2"
-              height="2"
-              fill="#facc15"
-              className="animate-pulse"
-            />
-            <rect x="1" y="4" width="2" height="6" fill="#7f1d1d" />
-            <rect x="13" y="4" width="2" height="6" fill="#7f1d1d" />
-            <g className="animate-flicker">
-              <rect x="6" y="2" width="4" height="2" fill="#f97316" />
-              <rect x="7" y="1" width="2" height="1" fill="#facc15" />
-            </g>
-            <rect x="4" y="12" width="3" height="2" fill="#450a0a" />
-            <rect x="9" y="12" width="3" height="2" fill="#450a0a" />
-            {renderEyes(5, 9, 4, "#fef08a", true)}
-          </>
-        );
-      case 6: // Lv6: Molten Giant
-        return (
-          <>
-            <rect x="4" y="2" width="8" height="10" fill="#44403c" />
-            <rect x="2" y="3" width="12" height="4" fill="#292524" />
-            <rect x="1" y="4" width="2" height="7" fill="#1c1917" />
-            <rect x="13" y="4" width="2" height="7" fill="#1c1917" />
-            <rect
-              x="5"
-              y="4"
-              width="1"
-              height="4"
-              fill="#ea580c"
-              className="animate-pulse"
-            />
-            <rect
-              x="10"
-              y="3"
-              width="1"
-              height="5"
-              fill="#ea580c"
-              className="animate-pulse"
-            />
-            <rect
-              x="7"
-              y="6"
-              width="2"
-              height="3"
-              fill="#facc15"
-              className="animate-pulse"
-            />
-            <rect
-              x="7"
-              y="1"
-              width="2"
-              height="1"
-              fill="#f97316"
-              className="animate-flicker"
-            />
-            <rect x="5" y="12" width="2" height="3" fill="#1c1917" />
-            <rect x="9" y="12" width="2" height="3" fill="#1c1917" />
-            {renderEyes(5, 9, 3, "#facc15", true)}
-          </>
-        );
-      case 7: // Lv7: Phoenix Fledgling
-        return (
-          <>
-            <g className="animate-flap" style={{ transformOrigin: "8px 6px" }}>
-              <rect
-                x="0"
-                y="4"
-                width="4"
-                height="5"
-                fill="#f97316"
-                opacity="0.9"
-              />
-              <rect
-                x="12"
-                y="4"
-                width="4"
-                height="5"
-                fill="#f97316"
-                opacity="0.9"
-              />
-              <rect x="-1" y="5" width="2" height="3" fill="#facc15" />
-              <rect x="15" y="5" width="2" height="3" fill="#facc15" />
-            </g>
-            <g className="animate-float-slow">
-              <rect x="4" y="3" width="8" height="7" fill="#ef4444" />
-              <rect x="5" y="2" width="6" height="2" fill="#dc2626" />
-              <rect x="6" y="10" width="4" height="3" fill="#f97316" />
-              <rect
-                x="7"
-                y="13"
-                width="2"
-                height="2"
-                fill="#facc15"
-                className="animate-flicker"
-              />
-              <rect
-                x="7"
-                y="0"
-                width="2"
-                height="2"
-                fill="#facc15"
-                className="animate-flicker"
-              />
-              {renderEyes(5, 9, 4, "#1c1917")}
-              <rect x="7" y="5" width="2" height="1" fill="#facc15" />
-            </g>
-          </>
-        );
-      case 8: // Lv8: Solar Flare Phoenix
-        return (
-          <>
-            <g className="animate-flap" style={{ transformOrigin: "8px 6px" }}>
-              <rect
-                x="-3"
-                y="1"
-                width="6"
-                height="10"
-                fill="#ea580c"
-                opacity="0.8"
-              />
-              <rect
-                x="13"
-                y="1"
-                width="6"
-                height="10"
-                fill="#ea580c"
-                opacity="0.8"
-              />
-              <rect
-                x="-4"
-                y="3"
-                width="3"
-                height="6"
-                fill="#facc15"
-                opacity="0.9"
-              />
-              <rect
-                x="17"
-                y="3"
-                width="3"
-                height="6"
-                fill="#facc15"
-                opacity="0.9"
-              />
-            </g>
-            <g className="animate-float-fast">
-              <rect x="4" y="2" width="8" height="8" fill="#b91c1c" />
-              <rect x="5" y="1" width="6" height="2" fill="#991b1b" />
-              <rect x="6" y="10" width="4" height="4" fill="#ea580c" />
-              <rect
-                x="7"
-                y="14"
-                width="2"
-                height="3"
-                fill="#facc15"
-                className="animate-flicker"
-              />
-              <rect
-                x="6"
-                y="-2"
-                width="4"
-                height="3"
-                fill="#facc15"
-                className="animate-flicker"
-              />
-              <rect x="7" y="4" width="2" height="2" fill="#facc15" />
-              {renderEyes(5, 9, 3, "#ffffff", true)}
-            </g>
-          </>
-        );
-      case 9: // Lv9: Supernova Spirit
-        return (
-          <>
-            <g className="animate-float-slow">
-              <rect
-                x="-2"
-                y="5"
-                width="2"
-                height="6"
-                fill="#fde047"
-                opacity="0.7"
-              />
-              <rect
-                x="16"
-                y="5"
-                width="2"
-                height="6"
-                fill="#fde047"
-                opacity="0.7"
-              />
-              <rect
-                x="0"
-                y="3"
-                width="2"
-                height="2"
-                fill="#facc15"
-                opacity="0.8"
-              />
-              <rect
-                x="14"
-                y="3"
-                width="2"
-                height="2"
-                fill="#facc15"
-                opacity="0.8"
-              />
-            </g>
-            <g className="animate-float-fast">
-              <rect x="2" y="3" width="12" height="10" fill="#ea580c" />
-              <rect x="4" y="1" width="8" height="2" fill="#f97316" />
-              <rect
-                x="6"
-                y="-1"
-                width="4"
-                height="2"
-                fill="#facc15"
-                className="animate-flicker"
-              />
-              <rect x="5" y="13" width="6" height="3" fill="#f97316" />
-              <rect
-                x="7"
-                y="16"
-                width="2"
-                height="2"
-                fill="#facc15"
-                className="animate-flicker"
-              />
-              <rect
-                x="6"
-                y="6"
-                width="4"
-                height="4"
-                fill="#fef08a"
-                className="animate-pulse"
-              />
-              <rect
-                x="7"
-                y="7"
-                width="2"
-                height="2"
-                fill="#ffffff"
-                className="animate-pulse"
-              />
-              {renderEyes(4, 10, 4, "#ffffff", true)}
-            </g>
-          </>
-        );
-      case 10: // Lv10: Obsidian Ifrit
-        return (
-          <>
-            <g className="animate-flap" style={{ transformOrigin: "8px 8px" }}>
-              <rect
-                x="-5"
-                y="-3"
-                width="7"
-                height="12"
-                fill="#b91c1c"
-                opacity="0.9"
-              />
-              <rect
-                x="14"
-                y="-3"
-                width="7"
-                height="12"
-                fill="#b91c1c"
-                opacity="0.9"
-              />
-              <rect
-                x="-3"
-                y="-1"
-                width="4"
-                height="8"
-                fill="#ea580c"
-                opacity="0.8"
-              />
-              <rect
-                x="15"
-                y="-1"
-                width="4"
-                height="8"
-                fill="#ea580c"
-                opacity="0.8"
-              />
-              <rect
-                x="-1"
-                y="1"
-                width="2"
-                height="4"
-                fill="#facc15"
-                opacity="0.9"
-              />
-              <rect
-                x="15"
-                y="1"
-                width="2"
-                height="4"
-                fill="#facc15"
-                opacity="0.9"
-              />
-            </g>
-            <rect x="2" y="2" width="12" height="11" fill="#1c1917" />
-            <rect x="1" y="4" width="14" height="5" fill="#292524" />
-            <rect x="5" y="5" width="6" height="5" fill="#44403c" />
-            <rect x="6" y="6" width="4" height="3" fill="#ea580c" />
-            <rect
-              x="7"
-              y="7"
-              width="2"
-              height="1"
-              fill="#facc15"
-              className="animate-pulse"
-            />
-            <rect x="3" y="-2" width="2" height="4" fill="#991b1b" />
-            <rect x="11" y="-2" width="2" height="4" fill="#991b1b" />
-            <rect x="2" y="-4" width="1" height="2" fill="#dc2626" />
-            <rect x="13" y="-4" width="1" height="2" fill="#dc2626" />
-            <rect x="2" y="13" width="4" height="3" fill="#1c1917" />
-            <rect x="10" y="13" width="4" height="3" fill="#1c1917" />
-            {renderEyes(4, 10, 3, "#facc15", true)}
-          </>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div
-      className={`relative flex flex-col items-center justify-end ${className}`}
-    >
-      <style>{`
-        @keyframes attack-dash { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(25px) scale(1.05); } }
-        @keyframes special-dash { 0%, 100% { transform: translateX(0) scale(1); filter: brightness(1); } 50% { transform: translateX(40px) translateY(-10px) scale(1.2); filter: brightness(1.3) drop-shadow(0 0 15px rgba(239,68,68,0.8)); } }
-        @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
-        @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
-        @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
-        @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
-        @keyframes float-fast { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-        @keyframes flicker { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.9) translateY(-1px); } }
-        @keyframes flap { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.3); } }
-        @keyframes wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
-
-        .animate-breathe { animation: squish-breathe 2s ease-in-out infinite; }
-        .animate-jump { animation: happy-jump 0.6s ease-in-out; }
-        .exp-float { animation: float-up 1s ease-out forwards; position: absolute; font-weight: 900; color: #f97316; text-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 50; top: -20px; }
-        .animate-float-slow { animation: float-slow 3s ease-in-out infinite; }
-        .animate-float-fast { animation: float-fast 1.5s ease-in-out infinite; }
-        .animate-flicker { animation: flicker 0.2s ease-in-out infinite; }
-        .animate-flap { animation: flap 1s ease-in-out infinite; }
-        .animate-wiggle { animation: wiggle 2s ease-in-out infinite; }
-      `}</style>
-
-      {expPopups.map((popup) => (
-        <div key={popup.id} className="exp-float text-xl">
-          +15 EXP!
-        </div>
-      ))}
-
-      <div
-        className={`relative z-10 ${isEating ? "animate-jump" : "animate-breathe"}`}
-      >
-        <svg
-          width="140"
-          height="140"
-          viewBox="-6 -6 28 24"
-          xmlns="http://www.w3.org/2000/svg"
-          className={`drop-shadow-xl overflow-visible ${isAttacking ? "animate-[attack-dash_0.3s_ease-in-out]" : ""} ${isSpecial ? "animate-[special-dash_0.6s_ease-in-out]" : ""}`}
-        >
-          {renderSprite()}
-        </svg>
-      </div>
-      <div className="absolute bottom-0 w-24 h-3 bg-black/10 rounded-full blur-[2px]"></div>
     </div>
   );
 }
@@ -2539,37 +1585,9 @@ export default User;
 }
 </file>
 
-<file path="package.json">
-{
-  "name": "vocab-mvp",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "mongoose": "^9.3.3",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "babel-plugin-react-compiler": "1.0.0",
-    "dotenv": "^17.4.2",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4",
-    "tsx": "^4.21.0",
-    "typescript": "^5"
-  }
-}
+<file path="README.md">
+to update mongodb
+npx tsx scripts/rollover.ts jaylee week_5
 </file>
 
 <file path="src/actions/auth.ts">
@@ -2926,6 +1944,878 @@ export default function CountdownPhase({ onFinish }: { onFinish: () => void }) {
 }
 </file>
 
+<file path="src/components/shared/DigimonVocabmon.tsx">
+"use client";
+import { useState, useEffect } from "react";
+
+export default function DigimonVocabmon({
+  className = "",
+  feedTrigger = 0,
+  attackTrigger = 0,
+  specialTrigger = 0,
+  level = 1,
+}: {
+  className?: string;
+  feedTrigger?: number;
+  attackTrigger?: number;
+  specialTrigger?: number;
+  level?: number;
+}) {
+  const [isEating, setIsEating] = useState(false);
+  const [isBlinking, setIsBlinking] = useState(false);
+  const [isAttacking, setIsAttacking] = useState(false);
+  const [isSpecial, setIsSpecial] = useState(false);
+  const [expPopups, setExpPopups] = useState<{ id: number }[]>([]);
+
+  useEffect(() => {
+    if (attackTrigger > 0) {
+      setIsAttacking(true);
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.1);
+        }
+      } catch (e) {}
+      const timer = setTimeout(() => setIsAttacking(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [attackTrigger]);
+
+  useEffect(() => {
+    if (specialTrigger > 0) {
+      setIsSpecial(true);
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(220, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.6);
+        }
+      } catch (e) {}
+      const timer = setTimeout(() => setIsSpecial(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [specialTrigger]);
+
+  useEffect(() => {
+    if (feedTrigger > 0) {
+      const playExpSound = () => {
+        try {
+          const AudioContextClass =
+            window.AudioContext ||
+            (window as any).webkitAudioContext;
+          if (!AudioContextClass) return;
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          const now = ctx.currentTime;
+          osc.frequency.setValueAtTime(987.77, now);
+          osc.frequency.setValueAtTime(1318.51, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
+          gain.gain.setValueAtTime(0.1, now + 0.1);
+          gain.gain.linearRampToValueAtTime(0, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } catch (e) {}
+      };
+      playExpSound();
+
+      const startTimer = setTimeout(() => {
+        setIsEating(true);
+        setExpPopups((prev) => [...prev, { id: Date.now() }]);
+      }, 0);
+      const endTimer = setTimeout(() => setIsEating(false), 600);
+
+      return () => {
+        clearTimeout(startTimer);
+        clearTimeout(endTimer);
+      };
+    }
+  }, [feedTrigger]);
+
+  useEffect(() => {
+    const blinkInterval = setInterval(() => {
+      if (Math.random() > 0.3) {
+        setIsBlinking(true);
+        setTimeout(() => setIsBlinking(false), 150);
+      }
+    }, 3500);
+
+    return () => clearInterval(blinkInterval);
+  }, []);
+
+  const safeLevel = Math.min(Math.max(level, 1), 10);
+
+  const renderEyes = (
+    x1: number,
+    x2: number,
+    y: number,
+    color = "#000000",
+    glow = false,
+  ) => {
+    if (isEating || isBlinking) {
+      return (
+        <>
+          <rect x={x1} y={y} width="2" height="1" fill={color} />
+          <rect x={x2} y={y} width="2" height="1" fill={color} />
+        </>
+      );
+    }
+    return (
+      <g className={glow ? "animate-pulse" : ""}>
+        <rect x={x1} y={y} width="2" height="2" fill={color} />
+        <rect x={x2} y={y} width="2" height="2" fill={color} />
+        <rect x={x1} y={y} width="1" height="1" fill="#ffffff" />
+        <rect x={x2} y={y} width="1" height="1" fill="#ffffff" />
+      </g>
+    );
+  };
+
+  const renderSprite = () => {
+    switch (safeLevel) {
+      case 1: // Digi-Egg
+        return <g className="animate-float-slow"><rect x="5" y="4" width="6" height="10" fill="#ffffff" /><rect x="4" y="6" width="8" height="6" fill="#ffffff" /><rect x="4" y="7" width="8" height="2" fill="#f97316" /></g>;
+      case 2: // Botamon
+        return <g className="animate-float-slow"><rect x="4" y="6" width="8" height="8" fill="#171717" /><rect x="3" y="8" width="10" height="4" fill="#171717" />{renderEyes(5, 9, 8, "#facc15", true)}</g>;
+      case 3: // Koromon
+        return <g className="animate-float-slow"><rect x="4" y="5" width="8" height="8" fill="#f472b6" /><rect x="3" y="7" width="10" height="4" fill="#f472b6" /><rect x="2" y="3" width="2" height="5" fill="#f472b6" /><rect x="12" y="3" width="2" height="5" fill="#f472b6" />{renderEyes(5, 9, 8, "#dc2626")}</g>;
+      case 4: // Agumon
+        return <g className="animate-float-slow"><rect x="4" y="2" width="8" height="6" fill="#f97316" /><rect x="5" y="8" width="6" height="6" fill="#f97316" /><rect x="3" y="10" width="2" height="2" fill="#f97316" /><rect x="11" y="10" width="2" height="2" fill="#f97316" /><rect x="5" y="14" width="2" height="2" fill="#f97316" /><rect x="9" y="14" width="2" height="2" fill="#f97316" />{renderEyes(5, 9, 4, "#22c55e")}</g>;
+      case 5: // Tyrannomon
+        return <g className="animate-float-slow"><rect x="4" y="2" width="8" height="12" fill="#dc2626" /><rect x="7" y="0" width="2" height="14" fill="#22c55e" opacity="0.8" /><rect x="2" y="6" width="12" height="6" fill="#dc2626" />{renderEyes(5, 9, 4, "#22c55e")}</g>;
+      case 6: // Greymon
+        return <g className="animate-float-slow"><rect x="3" y="1" width="10" height="6" fill="#78350f" /><rect x="7" y="-1" width="2" height="2" fill="#e5e5e5" /><rect x="2" y="0" width="2" height="3" fill="#e5e5e5" /><rect x="12" y="0" width="2" height="3" fill="#e5e5e5" /><rect x="4" y="7" width="8" height="7" fill="#f97316" /><rect x="4" y="9" width="8" height="2" fill="#3b82f6" /><rect x="3" y="14" width="3" height="2" fill="#f97316" /><rect x="10" y="14" width="3" height="2" fill="#f97316" />{renderEyes(5, 9, 4, "#ef4444", true)}</g>;
+      case 7: // SkullGreymon
+        return <g className="animate-float-slow"><rect x="4" y="4" width="8" height="10" fill="#e5e5e5" /><rect x="3" y="6" width="10" height="2" fill="#171717" /><rect x="7" y="0" width="2" height="4" fill="#94a3b8" /><rect x="5" y="2" width="6" height="2" fill="#94a3b8" />{renderEyes(5, 9, 5, "#dc2626", true)}</g>;
+      case 8: // MetalGreymon
+        return <g className="animate-float-slow"><rect x="-2" y="3" width="4" height="8" fill="#a855f7" /><rect x="14" y="3" width="4" height="8" fill="#a855f7" /><rect x="3" y="1" width="10" height="6" fill="#94a3b8" /><rect x="7" y="-1" width="2" height="2" fill="#94a3b8" /><rect x="4" y="7" width="8" height="7" fill="#f97316" /><rect x="11" y="9" width="5" height="3" fill="#94a3b8" /><rect x="3" y="14" width="3" height="2" fill="#f97316" /><rect x="10" y="14" width="3" height="2" fill="#f97316" />{renderEyes(6, 8, 4, "#ef4444", true)}</g>;
+      case 9: // WarGreymon
+        return <g className="animate-float-slow"><rect x="4" y="4" width="8" height="10" fill="#e5e5e5" /><rect x="4" y="4" width="8" height="3" fill="#facc15" /><rect x="0" y="5" width="4" height="6" fill="#facc15" /><rect x="12" y="5" width="4" height="6" fill="#facc15" /><rect x="5" y="14" width="2" height="2" fill="#e5e5e5" /><rect x="9" y="14" width="2" height="2" fill="#e5e5e5" />{renderEyes(6, 8, 5, "#22c55e", true)}</g>;
+      case 10: // Omnimon
+        return <g className="animate-float-slow"><rect x="-1" y="6" width="18" height="8" fill="#ffffff" opacity="0.8" /><rect x="6" y="0" width="4" height="4" fill="#e5e5e5" /><rect x="7" y="-2" width="2" height="2" fill="#facc15" /><rect x="5" y="4" width="6" height="8" fill="#ffffff" /><rect x="2" y="6" width="3" height="5" fill="#ea580c" /><rect x="11" y="6" width="3" height="5" fill="#3b82f6" /><rect x="5" y="12" width="2" height="4" fill="#ffffff" /><rect x="9" y="12" width="2" height="4" fill="#ffffff" />{renderEyes(6, 8, 1, "#3b82f6", true)}</g>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div
+      className={`relative flex flex-col items-center justify-end ${className}`}
+    >
+      <style>{`
+        @keyframes attack-dash { 
+          0%, 100% { transform: translateX(0) scale(1); } 
+          20% { transform: translateX(-8px) rotate(-5deg) scale(0.95); } 
+          60% { transform: translateX(35px) scale(1.1) skewX(-10deg); } 
+        }
+        @keyframes special-dash { 
+          0%, 100% { transform: translateX(0) scale(1); filter: brightness(1); } 
+          30% { transform: scaleY(0.7) scaleX(1.2); filter: brightness(1.5); } 
+          70% { transform: translateX(45px) translateY(-15px) scale(1.3); filter: brightness(1.3) drop-shadow(0 0 20px rgba(239,68,68,1)); } 
+        }
+        @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
+        @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
+        @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
+        @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
+        .animate-breathe { animation: squish-breathe 2s ease-in-out infinite; }
+        .animate-jump { animation: happy-jump 0.6s ease-in-out; }
+        .exp-float { animation: float-up 1s ease-out forwards; position: absolute; font-weight: 900; color: #f97316; text-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 50; top: -20px; }
+        .animate-float-slow { animation: float-slow 3s ease-in-out infinite; }
+      `}</style>
+
+      {expPopups.map((popup) => (
+        <div key={popup.id} className="exp-float text-xl">
+          +15 EXP!
+        </div>
+      ))}
+
+      <div
+        className={`relative z-10 ${isEating ? "animate-jump" : "animate-breathe"}`}
+      >
+        <svg
+          width="140"
+          height="140"
+          viewBox="-6 -6 28 24"
+          xmlns="http://www.w3.org/2000/svg"
+          className={`drop-shadow-xl overflow-visible ${isAttacking ? "animate-[attack-dash_0.3s_ease-in-out]" : ""} ${isSpecial ? "animate-[special-dash_0.6s_ease-in-out]" : ""}`}
+        >
+          {renderSprite()}
+        </svg>
+      </div>
+      <div className="absolute bottom-0 w-24 h-3 bg-black/10 rounded-full blur-[2px]"></div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/shared/FireVocabmon.tsx">
+"use client";
+import { useState, useEffect } from "react";
+
+export default function FireVocabmon({
+  className = "",
+  feedTrigger = 0,
+  attackTrigger = 0,
+  specialTrigger = 0,
+  level = 1,
+}: {
+  className?: string;
+  feedTrigger?: number;
+  attackTrigger?: number;
+  specialTrigger?: number;
+  level?: number;
+}) {
+  const [isEating, setIsEating] = useState(false);
+  const [isBlinking, setIsBlinking] = useState(false);
+  const [isAttacking, setIsAttacking] = useState(false);
+  const [isSpecial, setIsSpecial] = useState(false);
+  const [expPopups, setExpPopups] = useState<{ id: number }[]>([]);
+
+  useEffect(() => {
+    if (attackTrigger > 0) {
+      setIsAttacking(true);
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.frequency.setValueAtTime(1100, ctx.currentTime);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.1);
+        }
+      } catch (e) {}
+      const timer = setTimeout(() => setIsAttacking(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [attackTrigger]);
+
+  useEffect(() => {
+    if (specialTrigger > 0) {
+      setIsSpecial(true);
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "square";
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.5);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.6);
+        }
+      } catch (e) {}
+      const timer = setTimeout(() => setIsSpecial(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [specialTrigger]);
+
+  useEffect(() => {
+    if (feedTrigger > 0) {
+      const playExpSound = () => {
+        try {
+          const AudioContextClass =
+            window.AudioContext ||
+            (
+              window as Window & {
+                webkitAudioContext?: typeof window.AudioContext;
+              }
+            ).webkitAudioContext;
+          if (!AudioContextClass) return;
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          const now = ctx.currentTime;
+          osc.frequency.setValueAtTime(987.77, now);
+          osc.frequency.setValueAtTime(1318.51, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
+          gain.gain.setValueAtTime(0.1, now + 0.1);
+          gain.gain.linearRampToValueAtTime(0, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } catch (e) {}
+      };
+      playExpSound();
+
+      const startTimer = setTimeout(() => {
+        setIsEating(true);
+        setExpPopups((prev) => [...prev, { id: Date.now() }]);
+      }, 0);
+      const endTimer = setTimeout(() => setIsEating(false), 600);
+
+      return () => {
+        clearTimeout(startTimer);
+        clearTimeout(endTimer);
+      };
+    }
+  }, [feedTrigger]);
+
+  useEffect(() => {
+    const blinkInterval = setInterval(() => {
+      if (Math.random() > 0.3) {
+        setIsBlinking(true);
+        setTimeout(() => setIsBlinking(false), 150);
+      }
+    }, 3500);
+
+    return () => clearInterval(blinkInterval);
+  }, []);
+
+  const safeLevel = Math.min(Math.max(level, 1), 10);
+
+  const renderEyes = (
+    x1: number,
+    x2: number,
+    y: number,
+    color = "#0f172a",
+    glow = false,
+  ) => {
+    if (isEating || isBlinking) {
+      return (
+        <>
+          <rect x={x1} y={y} width="2" height="1" fill={color} />
+          <rect x={x2} y={y} width="2" height="1" fill={color} />
+        </>
+      );
+    }
+    return (
+      <g className={glow ? "animate-pulse" : ""}>
+        <rect x={x1} y={y} width="2" height="2" fill={color} />
+        <rect x={x2} y={y} width="2" height="2" fill={color} />
+        <rect x={x1} y={y} width="1" height="1" fill="#ffffff" />
+        <rect x={x2} y={y} width="1" height="1" fill="#ffffff" />
+      </g>
+    );
+  };
+
+  const renderSprite = () => {
+    switch (safeLevel) {
+      case 1: // Lv1: Ember
+        return (
+          <>
+            <g className="animate-float-slow">
+              <rect x="6" y="6" width="4" height="6" fill="#ef4444" />
+              <rect x="5" y="8" width="6" height="3" fill="#f97316" />
+              <rect
+                x="7"
+                y="4"
+                width="2"
+                height="2"
+                fill="#facc15"
+                className="animate-flicker"
+              />
+              {renderEyes(6, 8, 7, "#450a0a")}
+            </g>
+          </>
+        );
+      case 2: // Lv2: Magma Shell
+        return (
+          <>
+            <rect x="4" y="6" width="8" height="6" fill="#292524" />
+            <rect x="3" y="7" width="10" height="4" fill="#44403c" />
+            <rect
+              x="6"
+              y="7"
+              width="4"
+              height="1"
+              fill="#ea580c"
+              className="animate-pulse"
+            />
+            <rect x="5" y="9" width="2" height="1" fill="#ea580c" />
+            <rect
+              x="7"
+              y="4"
+              width="2"
+              height="2"
+              fill="#f97316"
+              className="animate-flicker"
+            />
+            {renderEyes(5, 9, 8, "#facc15", true)}
+          </>
+        );
+      case 3: // Lv3: Flame Fox Fledgling
+        return (
+          <>
+            {/* Flickering Tail */}
+            <g
+              className="animate-wiggle"
+              style={{ transformOrigin: "12px 11px" }}
+            >
+              <rect x="10" y="9" width="4" height="3" fill="#f97316" />
+              <rect
+                x="12"
+                y="8"
+                width="3"
+                height="2"
+                fill="#facc15"
+                className="animate-flicker"
+              />
+            </g>
+
+            {/* Big Ears */}
+            <rect x="3" y="2" width="3" height="4" fill="#b91c1c" />
+            <rect x="10" y="2" width="3" height="4" fill="#b91c1c" />
+            <rect x="4" y="3" width="1" height="2" fill="#facc15" />
+            <rect x="11" y="3" width="1" height="2" fill="#facc15" />
+
+            {/* Head */}
+            <rect x="3" y="5" width="10" height="6" fill="#dc2626" />
+            <rect x="4" y="8" width="8" height="3" fill="#ef4444" />
+
+            {/* Fluffy Fire Cheeks */}
+            <rect x="1" y="7" width="2" height="3" fill="#f97316" />
+            <rect x="13" y="7" width="2" height="3" fill="#f97316" />
+
+            {/* Small Body */}
+            <rect x="5" y="11" width="6" height="3" fill="#b91c1c" />
+
+            {/* Glowing Core/Belly */}
+            <rect x="6" y="11" width="4" height="2" fill="#ea580c" />
+
+            {/* Tiny Paws */}
+            <rect x="4" y="14" width="2" height="1" fill="#450a0a" />
+            <rect x="10" y="14" width="2" height="1" fill="#450a0a" />
+
+            {/* Bright Eyes */}
+            {renderEyes(5, 9, 7, "#fef08a", true)}
+          </>
+        );
+      case 4: // Lv4: Blaze Hound
+        return (
+          <>
+            <rect x="4" y="5" width="8" height="6" fill="#dc2626" />
+            <rect x="3" y="6" width="10" height="4" fill="#b91c1c" />
+            <g className="animate-flicker">
+              <rect x="3" y="2" width="6" height="4" fill="#f97316" />
+              <rect x="4" y="1" width="4" height="2" fill="#facc15" />
+            </g>
+            <rect x="12" y="4" width="2" height="3" fill="#f97316" />
+            <rect x="5" y="11" width="2" height="2" fill="#7f1d1d" />
+            <rect x="9" y="11" width="2" height="2" fill="#7f1d1d" />
+            {renderEyes(5, 9, 6, "#fef08a", true)}
+          </>
+        );
+      case 5: // Lv5: Inferno Brawler
+        return (
+          <>
+            <rect x="3" y="4" width="10" height="8" fill="#b91c1c" />
+            <rect x="2" y="5" width="12" height="4" fill="#991b1b" />
+            <rect x="6" y="6" width="4" height="4" fill="#ea580c" />
+            <rect
+              x="7"
+              y="7"
+              width="2"
+              height="2"
+              fill="#facc15"
+              className="animate-pulse"
+            />
+            <rect x="1" y="4" width="2" height="6" fill="#7f1d1d" />
+            <rect x="13" y="4" width="2" height="6" fill="#7f1d1d" />
+            <g className="animate-flicker">
+              <rect x="6" y="2" width="4" height="2" fill="#f97316" />
+              <rect x="7" y="1" width="2" height="1" fill="#facc15" />
+            </g>
+            <rect x="4" y="12" width="3" height="2" fill="#450a0a" />
+            <rect x="9" y="12" width="3" height="2" fill="#450a0a" />
+            {renderEyes(5, 9, 4, "#fef08a", true)}
+          </>
+        );
+      case 6: // Lv6: Molten Giant
+        return (
+          <>
+            <rect x="4" y="2" width="8" height="10" fill="#44403c" />
+            <rect x="2" y="3" width="12" height="4" fill="#292524" />
+            <rect x="1" y="4" width="2" height="7" fill="#1c1917" />
+            <rect x="13" y="4" width="2" height="7" fill="#1c1917" />
+            <rect
+              x="5"
+              y="4"
+              width="1"
+              height="4"
+              fill="#ea580c"
+              className="animate-pulse"
+            />
+            <rect
+              x="10"
+              y="3"
+              width="1"
+              height="5"
+              fill="#ea580c"
+              className="animate-pulse"
+            />
+            <rect
+              x="7"
+              y="6"
+              width="2"
+              height="3"
+              fill="#facc15"
+              className="animate-pulse"
+            />
+            <rect
+              x="7"
+              y="1"
+              width="2"
+              height="1"
+              fill="#f97316"
+              className="animate-flicker"
+            />
+            <rect x="5" y="12" width="2" height="3" fill="#1c1917" />
+            <rect x="9" y="12" width="2" height="3" fill="#1c1917" />
+            {renderEyes(5, 9, 3, "#facc15", true)}
+          </>
+        );
+      case 7: // Lv7: Phoenix Fledgling
+        return (
+          <>
+            <g className="animate-flap" style={{ transformOrigin: "8px 6px" }}>
+              <rect
+                x="0"
+                y="4"
+                width="4"
+                height="5"
+                fill="#f97316"
+                opacity="0.9"
+              />
+              <rect
+                x="12"
+                y="4"
+                width="4"
+                height="5"
+                fill="#f97316"
+                opacity="0.9"
+              />
+              <rect x="-1" y="5" width="2" height="3" fill="#facc15" />
+              <rect x="15" y="5" width="2" height="3" fill="#facc15" />
+            </g>
+            <g className="animate-float-slow">
+              <rect x="4" y="3" width="8" height="7" fill="#ef4444" />
+              <rect x="5" y="2" width="6" height="2" fill="#dc2626" />
+              <rect x="6" y="10" width="4" height="3" fill="#f97316" />
+              <rect
+                x="7"
+                y="13"
+                width="2"
+                height="2"
+                fill="#facc15"
+                className="animate-flicker"
+              />
+              <rect
+                x="7"
+                y="0"
+                width="2"
+                height="2"
+                fill="#facc15"
+                className="animate-flicker"
+              />
+              {renderEyes(5, 9, 4, "#1c1917")}
+              <rect x="7" y="5" width="2" height="1" fill="#facc15" />
+            </g>
+          </>
+        );
+      case 8: // Lv8: Solar Flare Phoenix
+        return (
+          <>
+            <g className="animate-flap" style={{ transformOrigin: "8px 6px" }}>
+              <rect
+                x="-3"
+                y="1"
+                width="6"
+                height="10"
+                fill="#ea580c"
+                opacity="0.8"
+              />
+              <rect
+                x="13"
+                y="1"
+                width="6"
+                height="10"
+                fill="#ea580c"
+                opacity="0.8"
+              />
+              <rect
+                x="-4"
+                y="3"
+                width="3"
+                height="6"
+                fill="#facc15"
+                opacity="0.9"
+              />
+              <rect
+                x="17"
+                y="3"
+                width="3"
+                height="6"
+                fill="#facc15"
+                opacity="0.9"
+              />
+            </g>
+            <g className="animate-float-fast">
+              <rect x="4" y="2" width="8" height="8" fill="#b91c1c" />
+              <rect x="5" y="1" width="6" height="2" fill="#991b1b" />
+              <rect x="6" y="10" width="4" height="4" fill="#ea580c" />
+              <rect
+                x="7"
+                y="14"
+                width="2"
+                height="3"
+                fill="#facc15"
+                className="animate-flicker"
+              />
+              <rect
+                x="6"
+                y="-2"
+                width="4"
+                height="3"
+                fill="#facc15"
+                className="animate-flicker"
+              />
+              <rect x="7" y="4" width="2" height="2" fill="#facc15" />
+              {renderEyes(5, 9, 3, "#ffffff", true)}
+            </g>
+          </>
+        );
+      case 9: // Lv9: Supernova Spirit
+        return (
+          <>
+            <g className="animate-float-slow">
+              <rect
+                x="-2"
+                y="5"
+                width="2"
+                height="6"
+                fill="#fde047"
+                opacity="0.7"
+              />
+              <rect
+                x="16"
+                y="5"
+                width="2"
+                height="6"
+                fill="#fde047"
+                opacity="0.7"
+              />
+              <rect
+                x="0"
+                y="3"
+                width="2"
+                height="2"
+                fill="#facc15"
+                opacity="0.8"
+              />
+              <rect
+                x="14"
+                y="3"
+                width="2"
+                height="2"
+                fill="#facc15"
+                opacity="0.8"
+              />
+            </g>
+            <g className="animate-float-fast">
+              <rect x="2" y="3" width="12" height="10" fill="#ea580c" />
+              <rect x="4" y="1" width="8" height="2" fill="#f97316" />
+              <rect
+                x="6"
+                y="-1"
+                width="4"
+                height="2"
+                fill="#facc15"
+                className="animate-flicker"
+              />
+              <rect x="5" y="13" width="6" height="3" fill="#f97316" />
+              <rect
+                x="7"
+                y="16"
+                width="2"
+                height="2"
+                fill="#facc15"
+                className="animate-flicker"
+              />
+              <rect
+                x="6"
+                y="6"
+                width="4"
+                height="4"
+                fill="#fef08a"
+                className="animate-pulse"
+              />
+              <rect
+                x="7"
+                y="7"
+                width="2"
+                height="2"
+                fill="#ffffff"
+                className="animate-pulse"
+              />
+              {renderEyes(4, 10, 4, "#ffffff", true)}
+            </g>
+          </>
+        );
+      case 10: // Lv10: Obsidian Ifrit
+        return (
+          <>
+            <g className="animate-flap" style={{ transformOrigin: "8px 8px" }}>
+              <rect
+                x="-5"
+                y="-3"
+                width="7"
+                height="12"
+                fill="#b91c1c"
+                opacity="0.9"
+              />
+              <rect
+                x="14"
+                y="-3"
+                width="7"
+                height="12"
+                fill="#b91c1c"
+                opacity="0.9"
+              />
+              <rect
+                x="-3"
+                y="-1"
+                width="4"
+                height="8"
+                fill="#ea580c"
+                opacity="0.8"
+              />
+              <rect
+                x="15"
+                y="-1"
+                width="4"
+                height="8"
+                fill="#ea580c"
+                opacity="0.8"
+              />
+              <rect
+                x="-1"
+                y="1"
+                width="2"
+                height="4"
+                fill="#facc15"
+                opacity="0.9"
+              />
+              <rect
+                x="15"
+                y="1"
+                width="2"
+                height="4"
+                fill="#facc15"
+                opacity="0.9"
+              />
+            </g>
+            <rect x="2" y="2" width="12" height="11" fill="#1c1917" />
+            <rect x="1" y="4" width="14" height="5" fill="#292524" />
+            <rect x="5" y="5" width="6" height="5" fill="#44403c" />
+            <rect x="6" y="6" width="4" height="3" fill="#ea580c" />
+            <rect
+              x="7"
+              y="7"
+              width="2"
+              height="1"
+              fill="#facc15"
+              className="animate-pulse"
+            />
+            <rect x="3" y="-2" width="2" height="4" fill="#991b1b" />
+            <rect x="11" y="-2" width="2" height="4" fill="#991b1b" />
+            <rect x="2" y="-4" width="1" height="2" fill="#dc2626" />
+            <rect x="13" y="-4" width="1" height="2" fill="#dc2626" />
+            <rect x="2" y="13" width="4" height="3" fill="#1c1917" />
+            <rect x="10" y="13" width="4" height="3" fill="#1c1917" />
+            {renderEyes(4, 10, 3, "#facc15", true)}
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div
+      className={`relative flex flex-col items-center justify-end ${className}`}
+    >
+      <style>{`
+        @keyframes attack-dash { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(25px) scale(1.05); } }
+        @keyframes special-dash { 0%, 100% { transform: translateX(0) scale(1); filter: brightness(1); } 50% { transform: translateX(40px) translateY(-10px) scale(1.2); filter: brightness(1.3) drop-shadow(0 0 15px rgba(239,68,68,0.8)); } }
+        @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
+        @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
+        @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
+        @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
+        @keyframes float-fast { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        @keyframes flicker { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.9) translateY(-1px); } }
+        @keyframes flap { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.3); } }
+        @keyframes wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
+
+        .animate-breathe { animation: squish-breathe 2s ease-in-out infinite; }
+        .animate-jump { animation: happy-jump 0.6s ease-in-out; }
+        .exp-float { animation: float-up 1s ease-out forwards; position: absolute; font-weight: 900; color: #f97316; text-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 50; top: -20px; }
+        .animate-float-slow { animation: float-slow 3s ease-in-out infinite; }
+        .animate-float-fast { animation: float-fast 1.5s ease-in-out infinite; }
+        .animate-flicker { animation: flicker 0.2s ease-in-out infinite; }
+        .animate-flap { animation: flap 1s ease-in-out infinite; }
+        .animate-wiggle { animation: wiggle 2s ease-in-out infinite; }
+      `}</style>
+
+      {expPopups.map((popup) => (
+        <div key={popup.id} className="exp-float text-xl">
+          +15 EXP!
+        </div>
+      ))}
+
+      <div
+        className={`relative z-10 ${isEating ? "animate-jump" : "animate-breathe"}`}
+      >
+        <svg
+          width="140"
+          height="140"
+          viewBox="-6 -6 28 24"
+          xmlns="http://www.w3.org/2000/svg"
+          className={`drop-shadow-xl overflow-visible ${isAttacking ? "animate-[attack-dash_0.3s_ease-in-out]" : ""} ${isSpecial ? "animate-[special-dash_0.6s_ease-in-out]" : ""}`}
+        >
+          {renderSprite()}
+        </svg>
+      </div>
+      <div className="absolute bottom-0 w-24 h-3 bg-black/10 rounded-full blur-[2px]"></div>
+    </div>
+  );
+}
+</file>
+
 <file path="src/models/Progress.ts">
 import mongoose, { Schema, Document } from "mongoose";
 
@@ -3018,6 +2908,39 @@ const nextConfig = {
 };
 
 export default nextConfig;
+</file>
+
+<file path="package.json">
+{
+  "name": "vocab-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "mongoose": "^9.3.3",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "dotenv": "^17.4.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}
 </file>
 
 <file path="src/app/login/page.tsx">
@@ -5194,48 +5117,6 @@ export async function startNewWeek(username: string, newWeekId: string) {
 }
 </file>
 
-<file path="src/components/shared/PixelVocabmon.tsx">
-import FireVocabmon from "./FireVocabmon";
-import DigimonVocabmon from "./DigimonVocabmon";
-
-export default function PixelVocabmon({
-  className = "",
-  feedTrigger = 0,
-  attackTrigger = 0,
-  specialTrigger = 0,
-  level = 1,
-  variant = "digimon",
-}: {
-  className?: string;
-  feedTrigger?: number;
-  attackTrigger?: number;
-  specialTrigger?: number;
-  level?: number;
-  variant?: "fire" | "digimon";
-}) {
-  if (variant === "fire") {
-    return (
-      <FireVocabmon
-        className={className}
-        feedTrigger={feedTrigger}
-        attackTrigger={attackTrigger}
-        specialTrigger={specialTrigger}
-        level={level}
-      />
-    );
-  }
-  return (
-    <DigimonVocabmon
-      className={className}
-      feedTrigger={feedTrigger}
-      attackTrigger={attackTrigger}
-      specialTrigger={specialTrigger}
-      level={level}
-    />
-  );
-}
-</file>
-
 <file path="src/components/shared/QuestScreen.tsx">
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -6423,6 +6304,48 @@ export default function SpellingPractice({
 }
 </file>
 
+<file path="src/components/shared/PixelVocabmon.tsx">
+import FireVocabmon from "./FireVocabmon";
+import DigimonVocabmon from "./DigimonVocabmon";
+
+export default function PixelVocabmon({
+  className = "",
+  feedTrigger = 0,
+  attackTrigger = 0,
+  specialTrigger = 0,
+  level = 1,
+  variant = "digimon",
+}: {
+  className?: string;
+  feedTrigger?: number;
+  attackTrigger?: number;
+  specialTrigger?: number;
+  level?: number;
+  variant?: "fire" | "digimon";
+}) {
+  if (variant === "fire") {
+    return (
+      <FireVocabmon
+        className={className}
+        feedTrigger={feedTrigger}
+        attackTrigger={attackTrigger}
+        specialTrigger={specialTrigger}
+        level={level}
+      />
+    );
+  }
+  return (
+    <DigimonVocabmon
+      className={className}
+      feedTrigger={feedTrigger}
+      attackTrigger={attackTrigger}
+      specialTrigger={specialTrigger}
+      level={level}
+    />
+  );
+}
+</file>
+
 <file path="src/app/exercise/page.tsx">
 "use client";
 import { useState, useEffect, useRef } from "react";
@@ -6804,71 +6727,6 @@ export default function ReviewPage() {
 }
 </file>
 
-<file path="src/data/vocab.ts">
-export type VocabWord = {
-  id: number;
-  word: string;
-  pos: string;
-  definition: string;
-  sentence?: string;
-  keywords?: string[];
-  imageUrl?: string;
-};
-
-export const vocabData: VocabWord[] = [
-  { id: 1, word: "acknowledge", pos: "verb", definition: "(verb) to say that you accept or do not deny the truth or existence of something / to express thanks or appreciation for", sentence: "I acknowledge the fact that I hurt you, and for that I am sorry." },
-  { id: 2, word: "distort", pos: "verb", definition: "(verb) to change the natural, normal, or original shape, appearance, or sound of something in a way that is usually not attractive or pleasing / to change something so that it is no longer true or accurate", sentence: "The story was distorted by the press." },
-  { id: 3, word: "distract", pos: "verb", definition: "(verb) to cause someone to stop thinking about or paying attention to someone or something", sentence: "You sneak into his room while I distract him." },
-  { id: 4, word: "restrain", pos: "verb", definition: "(verb) to prevent a person or animal from doing something / to keep something under control", sentence: "He could not restrain the dog from attacking." },
-  { id: 5, word: "inhabit", pos: "verb", definition: "(verb) to live in a place : to have a home in a place", sentence: "Several hundred species of birds inhabit the island." },
-  { id: 6, word: "abandon", pos: "verb", definition: "(verb) to leave and never return to someone who needs protection or help", sentence: "The child had been abandoned by his parents as an infant." },
-  { id: 7, word: "dwell", pos: "verb", definition: "(verb) to live in a particular place", sentence: "He dwelled in the same town for years." },
-  { id: 8, word: "cease", pos: "verb", definition: "(verb) to stop happening : to end", sentence: "The fighting along the border has temporarily ceased." },
-  { id: 9, word: "occupy", pos: "verb", definition: "(verb) to fill or be in a place or space", sentence: "Someone was occupying my place at the table." },
-  { id: 10, word: "plead", pos: "verb", definition: "(verb) to ask for something in a serious and emotional way", sentence: "She pleaded for forgiveness and got her job back." },
-  { id: 11, word: "engrave", pos: "verb", definition: "(verb) to cut or carve lines, letters, designs, etc., onto or into a hard surface", sentence: "They will engrave your initials on the ring for free." },
-  { id: 12, word: "deposit", pos: "verb", definition: "(verb) to put money in a bank account/ to leave an amount of something, such as sand, snow, or mud on a surface or area especially over a period of time", sentence: "Your paycheck will be automatically deposited into your account." },
-  { id: 13, word: "correspond", pos: "verb", definition: "(verb) to be similar or equal to something / to have a direct relationship to or with something", sentence: "Each number corresponds to a location on the map." },
-  { id: 14, word: "consent", pos: "verb", definition: "(verb) to agree to do or allow something : to give permission for something to happen or be done", sentence: "Her father consented to the marriage." },
-  { id: 15, word: "perceive", pos: "verb", definition: "(verb) to notice or become aware of something", sentence: "The detective perceived a change in the suspect's attitude." },
-  { id: 16, word: "conceive", pos: "verb", definition: "(verb) to think of or create something in the mind / to become pregnant", sentence: "I cannot conceive that he would leave without saying goodbye." },
-  { id: 17, word: "derive", pos: "verb", definition: "(verb) to take or get something from something else", sentence: "The river derives its name from a Native American tribe." },
-  { id: 18, word: "discriminate", pos: "verb", definition: "(verb) to unfairly treat a person or group of people differently from other people or groups", sentence: "It is illegal to discriminate on the grounds/basis of race/sex." },
-  { id: 19, word: "perish", pos: "verb", definition: "(verb) to die or be killed / to disappear or be destroyed : to cease to exist", sentence: "The civilization perished after 500 years." },
-  { id: 20, word: "modify", pos: "verb", definition: "(verb) to change some parts of something while not changing other parts", sentence: "He modified the recipe by using oil instead of butter." },
-  { id: 21, word: "contradict", pos: "verb", definition: "(verb) to say the opposite of something that someone else has said : to deny the truth of something / to not agree with something in a way that shows or suggests that it is false, wrong, etc.", sentence: "Sally just contradicted what she said earlier." },
-  { id: 22, word: "infect", pos: "verb", definition: "(verb) to cause someone or something to become sick or affected by disease", sentence: "The virus has infected many people." },
-  { id: 23, word: "illuminate", pos: "verb", definition: "(verb) to supply something with light : to shine light on something", sentence: "Candles illuminate the church." },
-  { id: 24, word: "pierce", pos: "verb", definition: "(verb) to make a hole in or through something", sentence: "The needle pierced her skin." },
-  { id: 25, word: "prescribe", pos: "verb", definition: "(verb) to officially tell someone to use a medicine, therapy, diet, etc. as a remedy or treatment", sentence: "This drug should not be prescribed to children." },
-  { id: 26, word: "infer", pos: "verb", definition: "(verb) to form an opinion from evidence : to reach a conclusion based on known facts", sentence: "She said she was pleased, but her true feelings could be inferred from the look of disappointment on her face." },
-  { id: 27, word: "hasten", pos: "verb", definition: "(verb) to cause something to happen more quickly", sentence: "His death was hastened by alcohol abuse." },
-  { id: 28, word: "torture", pos: "verb", definition: "(verb) to cause someone to experience severe physical pain especially as a form of punishment / to cause someone to feel very worried, unhappy, etc.", sentence: "The report revealed that prisoners had been repeatedly tortured." },
-  { id: 29, word: "embody", pos: "verb", definition: "(verb) to represent something in a clear and obvious way : to be a symbol or example of something", sentence: "He is a leader who embodies courage." },
-  { id: 30, word: "discard", pos: "verb", definition: "(verb) to throw something away because it is useless or unwanted", sentence: "Many of his original theories have been discarded in recent years." },
-  { id: 31, word: "migrate", pos: "verb", definition: "(verb) to move from one country or place to live or work in another", sentence: "He migrates from New York to Florida each winter." },
-  { id: 32, word: "entitle", pos: "verb", definition: "(verb) to give a right to someone", sentence: "I'm entitled to a refund." },
-  { id: 33, word: "enrich", pos: "verb", definition: "(verb) to improve the quality of something : to make something better", sentence: "Their lives were enriched by the experience." },
-  { id: 34, word: "coincide", pos: "verb", definition: "(verb) to happen at the same time as something else/ to agree with something exactly", sentence: "The population increase coincided with rapid industrial growth." },
-  { id: 35, word: "extinguish", pos: "verb", definition: "(verb) to cause the end or death of something / to cause something to stop burning", sentence: "News of the conflict extinguished our hopes for a peaceful resolution." },
-  { id: 36, word: "convert", pos: "verb", definition: "(verb) to change something into a different form or so that it can be used in a different way", sentence: "The cells absorb light and convert it to energy." },
-  { id: 37, word: "forecast", pos: "verb", definition: "(verb) to say that something will happen in the future : to predict something, such as weather after looking at the information that is available", sentence: "They're forecasting rain for this weekend." },
-  { id: 38, word: "prosper", pos: "verb", definition: "(verb) to become very successful usually by making a lot of money", sentence: "He hopes his business will prosper." },
-  { id: 39, word: "exaggerate", pos: "verb", definition: "(verb) to think of or describe something as larger or greater than it really is", sentence: "The book exaggerates the difficulties he faced in starting his career." },
-  { id: 40, word: "prohibit", pos: "verb", definition: "(verb) to order someone not to use or do something/ to make something impossible to do", sentence: "The town prohibited teenagers from being in the streets after 10 p.m." },
-  { id: 41, word: "inquire", pos: "verb", definition: "(verb) to ask for information", sentence: "When I inquired, they told me she was not here." },
-  { id: 42, word: "prevail", pos: "verb", definition: "(verb) to be usual, common, or popular / to defeat an opponent especially in a long or difficult contest", sentence: "The house was built in the style that prevailed in the 1980s." },
-  { id: 43, word: "confirm", pos: "verb", definition: "(verb) to state or show that something is true or correct", sentence: "The tests confirmed the doctors' suspicions of cancer." },
-  { id: 44, word: "stimulate", pos: "verb", definition: "(verb) to cause or encourage something to happen or develop", sentence: "This book stimulates readers' imagination." },
-  { id: 45, word: "dominate", pos: "verb", definition: "(verb) to have control of or power over someone or something", sentence: "One company has dominated the market for years." },
-  { id: 46, word: "diminish", pos: "verb", definition: "(verb) to become or to cause something to become less in size, importance, etc.", sentence: "The passing years did nothing to diminish their friendship." },
-  { id: 47, word: "ensure", pos: "verb", definition: "(verb) to make something sure, certain, or safe", sentence: "They took steps to ensure the safety of the passengers." },
-  { id: 48, word: "omit", pos: "verb", definition: "(verb) to leave out someone or something : to not include someone or something", sentence: "They omitted your name from the list." },
-  { id: 49, word: "revive", pos: "verb", definition: "(verb) to make someone or something strong, healthy, or active again", sentence: "The doctors were trying to revive the patient." },
-  { id: 50, word: "fascinate", pos: "verb", definition: "(verb) to cause someone to be very interested in something or someone", sentence: "His strange behavior fascinated the children." }
-];
-</file>
-
 <file path="src/app/page.tsx">
 "use client";
 
@@ -6997,6 +6855,71 @@ export default function Home() {
 }
 </file>
 
+<file path="src/data/vocab.ts">
+export type VocabWord = {
+  id: number;
+  word: string;
+  pos: string;
+  definition: string;
+  sentence?: string;
+  keywords?: string[];
+  imageUrl?: string;
+};
+
+export const vocabData: VocabWord[] = [
+  { id: 1, word: "acknowledge", pos: "verb", definition: "(verb) to say that you accept or do not deny the truth or existence of something / to express thanks or appreciation for", sentence: "I acknowledge the fact that I hurt you, and for that I am sorry." },
+  { id: 2, word: "distort", pos: "verb", definition: "(verb) to change the natural, normal, or original shape, appearance, or sound of something in a way that is usually not attractive or pleasing / to change something so that it is no longer true or accurate", sentence: "The story was distorted by the press." },
+  { id: 3, word: "distract", pos: "verb", definition: "(verb) to cause someone to stop thinking about or paying attention to someone or something", sentence: "You sneak into his room while I distract him." },
+  { id: 4, word: "restrain", pos: "verb", definition: "(verb) to prevent a person or animal from doing something / to keep something under control", sentence: "He could not restrain the dog from attacking." },
+  { id: 5, word: "inhabit", pos: "verb", definition: "(verb) to live in a place : to have a home in a place", sentence: "Several hundred species of birds inhabit the island." },
+  { id: 6, word: "abandon", pos: "verb", definition: "(verb) to leave and never return to someone who needs protection or help", sentence: "The child had been abandoned by his parents as an infant." },
+  { id: 7, word: "dwell", pos: "verb", definition: "(verb) to live in a particular place", sentence: "He dwelled in the same town for years." },
+  { id: 8, word: "cease", pos: "verb", definition: "(verb) to stop happening : to end", sentence: "The fighting along the border has temporarily ceased." },
+  { id: 9, word: "occupy", pos: "verb", definition: "(verb) to fill or be in a place or space", sentence: "Someone was occupying my place at the table." },
+  { id: 10, word: "plead", pos: "verb", definition: "(verb) to ask for something in a serious and emotional way", sentence: "She pleaded for forgiveness and got her job back." },
+  { id: 11, word: "engrave", pos: "verb", definition: "(verb) to cut or carve lines, letters, designs, etc., onto or into a hard surface", sentence: "They will engrave your initials on the ring for free." },
+  { id: 12, word: "deposit", pos: "verb", definition: "(verb) to put money in a bank account/ to leave an amount of something, such as sand, snow, or mud on a surface or area especially over a period of time", sentence: "Your paycheck will be automatically deposited into your account." },
+  { id: 13, word: "correspond", pos: "verb", definition: "(verb) to be similar or equal to something / to have a direct relationship to or with something", sentence: "Each number corresponds to a location on the map." },
+  { id: 14, word: "consent", pos: "verb", definition: "(verb) to agree to do or allow something : to give permission for something to happen or be done", sentence: "Her father consented to the marriage." },
+  { id: 15, word: "perceive", pos: "verb", definition: "(verb) to notice or become aware of something", sentence: "The detective perceived a change in the suspect's attitude." },
+  { id: 16, word: "conceive", pos: "verb", definition: "(verb) to think of or create something in the mind / to become pregnant", sentence: "I cannot conceive that he would leave without saying goodbye." },
+  { id: 17, word: "derive", pos: "verb", definition: "(verb) to take or get something from something else", sentence: "The river derives its name from a Native American tribe." },
+  { id: 18, word: "discriminate", pos: "verb", definition: "(verb) to unfairly treat a person or group of people differently from other people or groups", sentence: "It is illegal to discriminate on the grounds/basis of race/sex." },
+  { id: 19, word: "perish", pos: "verb", definition: "(verb) to die or be killed / to disappear or be destroyed : to cease to exist", sentence: "The civilization perished after 500 years." },
+  { id: 20, word: "modify", pos: "verb", definition: "(verb) to change some parts of something while not changing other parts", sentence: "He modified the recipe by using oil instead of butter." },
+  { id: 21, word: "contradict", pos: "verb", definition: "(verb) to say the opposite of something that someone else has said : to deny the truth of something / to not agree with something in a way that shows or suggests that it is false, wrong, etc.", sentence: "Sally just contradicted what she said earlier." },
+  { id: 22, word: "infect", pos: "verb", definition: "(verb) to cause someone or something to become sick or affected by disease", sentence: "The virus has infected many people." },
+  { id: 23, word: "illuminate", pos: "verb", definition: "(verb) to supply something with light : to shine light on something", sentence: "Candles illuminate the church." },
+  { id: 24, word: "pierce", pos: "verb", definition: "(verb) to make a hole in or through something", sentence: "The needle pierced her skin." },
+  { id: 25, word: "prescribe", pos: "verb", definition: "(verb) to officially tell someone to use a medicine, therapy, diet, etc. as a remedy or treatment", sentence: "This drug should not be prescribed to children." },
+  { id: 26, word: "infer", pos: "verb", definition: "(verb) to form an opinion from evidence : to reach a conclusion based on known facts", sentence: "She said she was pleased, but her true feelings could be inferred from the look of disappointment on her face." },
+  { id: 27, word: "hasten", pos: "verb", definition: "(verb) to cause something to happen more quickly", sentence: "His death was hastened by alcohol abuse." },
+  { id: 28, word: "torture", pos: "verb", definition: "(verb) to cause someone to experience severe physical pain especially as a form of punishment / to cause someone to feel very worried, unhappy, etc.", sentence: "The report revealed that prisoners had been repeatedly tortured." },
+  { id: 29, word: "embody", pos: "verb", definition: "(verb) to represent something in a clear and obvious way : to be a symbol or example of something", sentence: "He is a leader who embodies courage." },
+  { id: 30, word: "discard", pos: "verb", definition: "(verb) to throw something away because it is useless or unwanted", sentence: "Many of his original theories have been discarded in recent years." },
+  { id: 31, word: "migrate", pos: "verb", definition: "(verb) to move from one country or place to live or work in another", sentence: "He migrates from New York to Florida each winter." },
+  { id: 32, word: "entitle", pos: "verb", definition: "(verb) to give a right to someone", sentence: "I'm entitled to a refund." },
+  { id: 33, word: "enrich", pos: "verb", definition: "(verb) to improve the quality of something : to make something better", sentence: "Their lives were enriched by the experience." },
+  { id: 34, word: "coincide", pos: "verb", definition: "(verb) to happen at the same time as something else/ to agree with something exactly", sentence: "The population increase coincided with rapid industrial growth." },
+  { id: 35, word: "extinguish", pos: "verb", definition: "(verb) to cause the end or death of something / to cause something to stop burning", sentence: "News of the conflict extinguished our hopes for a peaceful resolution." },
+  { id: 36, word: "convert", pos: "verb", definition: "(verb) to change something into a different form or so that it can be used in a different way", sentence: "The cells absorb light and convert it to energy." },
+  { id: 37, word: "forecast", pos: "verb", definition: "(verb) to say that something will happen in the future : to predict something, such as weather after looking at the information that is available", sentence: "They're forecasting rain for this weekend." },
+  { id: 38, word: "prosper", pos: "verb", definition: "(verb) to become very successful usually by making a lot of money", sentence: "He hopes his business will prosper." },
+  { id: 39, word: "exaggerate", pos: "verb", definition: "(verb) to think of or describe something as larger or greater than it really is", sentence: "The book exaggerates the difficulties he faced in starting his career." },
+  { id: 40, word: "prohibit", pos: "verb", definition: "(verb) to order someone not to use or do something/ to make something impossible to do", sentence: "The town prohibited teenagers from being in the streets after 10 p.m." },
+  { id: 41, word: "inquire", pos: "verb", definition: "(verb) to ask for information", sentence: "When I inquired, they told me she was not here." },
+  { id: 42, word: "prevail", pos: "verb", definition: "(verb) to be usual, common, or popular / to defeat an opponent especially in a long or difficult contest", sentence: "The house was built in the style that prevailed in the 1980s." },
+  { id: 43, word: "confirm", pos: "verb", definition: "(verb) to state or show that something is true or correct", sentence: "The tests confirmed the doctors' suspicions of cancer." },
+  { id: 44, word: "stimulate", pos: "verb", definition: "(verb) to cause or encourage something to happen or develop", sentence: "This book stimulates readers' imagination." },
+  { id: 45, word: "dominate", pos: "verb", definition: "(verb) to have control of or power over someone or something", sentence: "One company has dominated the market for years." },
+  { id: 46, word: "diminish", pos: "verb", definition: "(verb) to become or to cause something to become less in size, importance, etc.", sentence: "The passing years did nothing to diminish their friendship." },
+  { id: 47, word: "ensure", pos: "verb", definition: "(verb) to make something sure, certain, or safe", sentence: "They took steps to ensure the safety of the passengers." },
+  { id: 48, word: "omit", pos: "verb", definition: "(verb) to leave out someone or something : to not include someone or something", sentence: "They omitted your name from the list." },
+  { id: 49, word: "revive", pos: "verb", definition: "(verb) to make someone or something strong, healthy, or active again", sentence: "The doctors were trying to revive the patient." },
+  { id: 50, word: "fascinate", pos: "verb", definition: "(verb) to cause someone to be very interested in something or someone", sentence: "His strange behavior fascinated the children." }
+];
+</file>
+
 <file path="src/components/home/Dashboard.tsx">
 "use client";
 import { useState, useEffect, useRef } from "react";
@@ -7021,9 +6944,12 @@ export default function Dashboard() {
   const [atkTrigger, setAtkTrigger] = useState(0);
   const [spcTrigger, setSpcTrigger] = useState(0);
   const [showEnergyAlert, setShowEnergyAlert] = useState(false);
+  const [showFeatureAlert, setShowFeatureAlert] = useState(false);
 
   const [currentSet, setCurrentSet] = useState(0);
   const totalSets = 10;
+
+  const digimonNames = ["", "Digi-Egg", "Botamon", "Koromon", "Agumon", "Tyrannomon", "Greymon", "SkullGreymon", "MetalGreymon", "WarGreymon", "Omnimon"];
 
   // Keep this array for the "Evolve/Next" button labels
   const scheduleDays = [
@@ -7312,13 +7238,13 @@ export default function Dashboard() {
             </div>
 
             <div className="flex gap-2">
-              <Link
-                href="/stickers"
-                className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
-                title="View Sticker Collection"
+              <button
+                onClick={() => setShowFeatureAlert(true)}
+                className="bg-gray-50 hover:bg-gray-100 text-gray-400 border border-gray-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center justify-center"
+                title="Feature Locked"
               >
-                <span className="text-xl">🪄</span>
-              </Link>
+                <span className="text-xl opacity-50">🪄</span>
+              </button>
               <Link
                 href="/collection"
                 className="bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
@@ -7329,19 +7255,24 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl p-6 flex justify-center mb-6 border border-indigo-100/50 relative overflow-visible">
-            <PixelVocabmon
-              feedTrigger={showFireworks ? 1 : 0}
-              attackTrigger={atkTrigger}
-              specialTrigger={spcTrigger}
-              level={levelStats.level}
-              className={
-                isSetComplete && currentSet < totalSets - 1
-                  ? "animate-evo-glow"
-                  : ""
-              }
-            />
-            <div className="absolute bottom-3 left-0 w-full flex justify-center gap-3 px-4 z-20">
+          <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-6 border border-indigo-100/50 relative">
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm border-2 border-indigo-100 text-indigo-800 font-black px-4 py-1 rounded-full text-xs uppercase tracking-widest shadow-sm z-10">
+              {digimonNames[levelStats.level] || "Mystery"}
+            </div>
+            <div className="mb-6">
+              <PixelVocabmon
+                feedTrigger={showFireworks ? 1 : 0}
+                attackTrigger={atkTrigger}
+                specialTrigger={spcTrigger}
+                level={levelStats.level}
+                className={
+                  isSetComplete && currentSet < totalSets - 1
+                    ? "animate-evo-glow"
+                    : ""
+                }
+              />
+            </div>
+            <div className="w-full flex justify-center gap-3 z-20">
               <button onClick={() => { if (atkCharges > 0) { setAtkCharges(p => p - 1); setAtkTrigger(p => p + 1); } else { setShowEnergyAlert(true); } }} className="bg-white/90 backdrop-blur-sm border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-black px-4 py-2 rounded-xl text-sm shadow-sm transition-transform active:scale-95 flex-1">
                 ⚔️ Attack ({atkCharges}/2)
               </button>
@@ -7825,9 +7756,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <StickerPopup />
-      <StickerUnlockCelebration />
-
       {showEnergyAlert && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 animate-fade-in p-4">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-red-400 shadow-2xl">
@@ -7838,6 +7766,21 @@ export default function Dashboard() {
             </p>
             <button onClick={() => setShowEnergyAlert(false)} className="w-full bg-red-500 hover:bg-red-600 text-white text-lg font-black py-4 rounded-xl shadow-md active:scale-95 transition-all">
               I&apos;ll go train! 🏃
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showFeatureAlert && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 animate-fade-in p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-indigo-400 shadow-2xl">
+            <div className="text-5xl mb-4 animate-bounce">🚧</div>
+            <h3 className="text-2xl font-black text-gray-800 mb-2">Under Construction!</h3>
+            <p className="text-gray-500 font-medium mb-8 leading-relaxed">
+              We are building a special game for you! Once it is ready, this button will be enabled again.
+            </p>
+            <button onClick={() => setShowFeatureAlert(false)} className="w-full bg-indigo-500 hover:bg-indigo-600 text-white text-lg font-black py-4 rounded-xl shadow-md active:scale-95 transition-all">
+              Got it! 👍
             </button>
           </div>
         </div>

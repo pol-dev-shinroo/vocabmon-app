@@ -160,6 +160,13 @@ export default function Dashboard() {
         setAtkCharges(2);
         setSpcCharges(2);
         localStorage.setItem("last_attack_exp", exp.toString());
+        localStorage.setItem("atk_charges", "2");
+        localStorage.setItem("spc_charges", "2");
+      } else {
+        const savedAtk = localStorage.getItem("atk_charges");
+        const savedSpc = localStorage.getItem("spc_charges");
+        if (savedAtk !== null) setAtkCharges(parseInt(savedAtk, 10));
+        if (savedSpc !== null) setSpcCharges(parseInt(savedSpc, 10));
       }
     }
   }, [exp, isLoaded]);
@@ -350,10 +357,38 @@ export default function Dashboard() {
               />
             </div>
             <div className="w-full flex justify-center gap-3 z-20">
-              <button onClick={() => { if (atkCharges > 0) { setAtkCharges(p => p - 1); setAtkTrigger(p => p + 1); } else { setShowEnergyAlert(true); } }} className="bg-white/90 backdrop-blur-sm border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-black px-4 py-2 rounded-xl text-sm shadow-sm transition-transform active:scale-95 flex-1">
+              <button
+                onClick={() => {
+                  if (atkCharges > 0) {
+                    setAtkCharges((p) => {
+                      const newVal = p - 1;
+                      localStorage.setItem("atk_charges", newVal.toString());
+                      return newVal;
+                    });
+                    setAtkTrigger((p) => p + 1);
+                  } else {
+                    setShowEnergyAlert(true);
+                  }
+                }}
+                className="bg-white/90 backdrop-blur-sm border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-black px-4 py-2 rounded-xl text-sm shadow-sm transition-transform active:scale-95 flex-1"
+              >
                 ⚔️ Attack ({atkCharges}/2)
               </button>
-              <button onClick={() => { if (spcCharges > 0) { setSpcCharges(p => p - 1); setSpcTrigger(p => p + 1); } else { setShowEnergyAlert(true); } }} className="bg-white/90 backdrop-blur-sm border-2 border-orange-200 text-orange-700 hover:bg-orange-50 font-black px-4 py-2 rounded-xl text-sm shadow-sm transition-transform active:scale-95 flex-1">
+              <button
+                onClick={() => {
+                  if (spcCharges > 0) {
+                    setSpcCharges((p) => {
+                      const newVal = p - 1;
+                      localStorage.setItem("spc_charges", newVal.toString());
+                      return newVal;
+                    });
+                    setSpcTrigger((p) => p + 1);
+                  } else {
+                    setShowEnergyAlert(true);
+                  }
+                }}
+                className="bg-white/90 backdrop-blur-sm border-2 border-orange-200 text-orange-700 hover:bg-orange-50 font-black px-4 py-2 rounded-xl text-sm shadow-sm transition-transform active:scale-95 flex-1"
+              >
                 🔥 Special ({spcCharges}/2)
               </button>
             </div>
