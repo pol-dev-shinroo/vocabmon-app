@@ -31,8 +31,8 @@ export default function PixelVocabmon({
     <DigimonVocabmon
       className={className}
       feedTrigger={feedTrigger}
-      attackTrigger={attackTrigger}
-      specialTrigger={specialTrigger}
+      // Merge specialTrigger into attackTrigger since DigimonVocabmon consolidated them!
+      attackTrigger={attackTrigger || specialTrigger} 
       level={level}
     />
   );
