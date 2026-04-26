@@ -26,6 +26,9 @@ export default function Home() {
           );
           localStorage.setItem("active_week_id", dbProgress.activeWeekId);
 
+          // FIX: Sync local week tracker so Dashboard doesn't wipe progress on fresh login
+          localStorage.setItem("local_activeWeekId", dbProgress.activeWeekId);
+
           const historyExp = dbProgress.history?.reduce((sum: number, week: any) => sum + week.totalExp, 0) || 0;
           localStorage.setItem("lifetime_base_exp", historyExp.toString());
 

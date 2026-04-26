@@ -1,210 +1,125 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from 'react';
 
-export default function DigimonVocabmon({
-  className = "",
-  feedTrigger = 0,
-  attackTrigger = 0,
-  specialTrigger = 0,
-  level = 1,
-}: {
-  className?: string;
+interface Props {
+  level: number;
   feedTrigger?: number;
   attackTrigger?: number;
-  specialTrigger?: number;
-  level?: number;
-}) {
+  className?: string;
+}
+
+export default function PixelVocabmon({ level, feedTrigger, attackTrigger, className = "" }: Props) {
+  const safeLevel = Math.max(1, Math.min(10, level));
   const [isEating, setIsEating] = useState(false);
-  const [isBlinking, setIsBlinking] = useState(false);
   const [isAttacking, setIsAttacking] = useState(false);
-  const [isSpecial, setIsSpecial] = useState(false);
-  const [expPopups, setExpPopups] = useState<{ id: number }[]>([]);
+  const [expPopups, setExpPopups] = useState<{id: number}[]>([]);
+  const [spriteMode, setSpriteMode] = useState<'idle' | 'atk'>('idle');
+  
+  // NEW: Tracks whether we need to use CSS animations because the attack GIF is missing
+  const [useCssFallback, setUseCssFallback] = useState(false);
 
   useEffect(() => {
-    if (attackTrigger > 0) {
-      setIsAttacking(true);
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.frequency.setValueAtTime(880, ctx.currentTime);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.1);
-        }
-      } catch (e) {}
-      const timer = setTimeout(() => setIsAttacking(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [attackTrigger]);
-
-  useEffect(() => {
-    if (specialTrigger > 0) {
-      setIsSpecial(true);
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sawtooth";
-          osc.frequency.setValueAtTime(220, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.4);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.6);
-        }
-      } catch (e) {}
-      const timer = setTimeout(() => setIsSpecial(false), 600);
-      return () => clearTimeout(timer);
-    }
-  }, [specialTrigger]);
-
-  useEffect(() => {
-    if (feedTrigger > 0) {
-      const playExpSound = () => {
-        try {
-          const AudioContextClass =
-            window.AudioContext ||
-            (window as any).webkitAudioContext;
-          if (!AudioContextClass) return;
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sine";
-          const now = ctx.currentTime;
-          osc.frequency.setValueAtTime(987.77, now);
-          osc.frequency.setValueAtTime(1318.51, now + 0.08);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0, now);
-          gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
-          gain.gain.setValueAtTime(0.1, now + 0.1);
-          gain.gain.linearRampToValueAtTime(0, now + 0.2);
-          osc.start(now);
-          osc.stop(now + 0.2);
-        } catch (e) {}
-      };
-      playExpSound();
-
-      const startTimer = setTimeout(() => {
-        setIsEating(true);
-        setExpPopups((prev) => [...prev, { id: Date.now() }]);
-      }, 0);
-      const endTimer = setTimeout(() => setIsEating(false), 600);
-
-      return () => {
-        clearTimeout(startTimer);
-        clearTimeout(endTimer);
-      };
+    if (feedTrigger && feedTrigger > 0) {
+      setIsEating(true);
+      const newId = Date.now();
+      setExpPopups(prev => [...prev, { id: newId }]);
+      const animTimer = setTimeout(() => setIsEating(false), 600);
+      const popupTimer = setTimeout(() => {
+        setExpPopups(prev => prev.filter(p => p.id !== newId));
+      }, 1000);
+      return () => { clearTimeout(animTimer); clearTimeout(popupTimer); };
     }
   }, [feedTrigger]);
 
   useEffect(() => {
-    const blinkInterval = setInterval(() => {
-      if (Math.random() > 0.3) {
-        setIsBlinking(true);
-        setTimeout(() => setIsBlinking(false), 150);
-      }
-    }, 3500);
-
-    return () => clearInterval(blinkInterval);
-  }, []);
-
-  const safeLevel = Math.min(Math.max(level, 1), 10);
+    if (attackTrigger && attackTrigger > 0) {
+      setIsAttacking(true);
+      setSpriteMode('atk');
+      setUseCssFallback(false); // Reset fallback state on new attack
+      
+      // EXTENDED TIMEOUT: Gives long GIFs 2.5 seconds to finish playing
+      const timer = setTimeout(() => {
+        setIsAttacking(false);
+        setSpriteMode('idle');
+        setUseCssFallback(false);
+      }, 2500); 
+      
+      return () => clearTimeout(timer);
+    }
+  }, [attackTrigger]);
 
   const getAnimationClass = () => {
-    if (!isAttacking && !isSpecial) return '';
-    let tier = 'egg';
-    if (safeLevel >= 2 && safeLevel <= 3) tier = 'baby';
-    if (safeLevel >= 4 && safeLevel <= 6) tier = 'dino';
-    if (safeLevel === 7) tier = 'skull';
-    if (safeLevel >= 8 && safeLevel <= 9) tier = 'mega';
-    if (safeLevel === 10) tier = 'omni';
-    return isSpecial ? `animate-[spc-${tier}_0.6s_ease-in-out]` : `animate-[atk-${tier}_0.3s_ease-in-out]`;
+    if (!isAttacking) return '';
+    // ONLY apply the wild CSS movements if the attack GIF failed to load
+    if (useCssFallback) return `anim-spc-${safeLevel}`;
+    // If it's a real attack GIF, just enlarge it slightly for impact, no sliding!
+    return 'scale-110 transition-transform duration-300';
   };
 
-  const renderEyes = (
-    x1: number,
-    x2: number,
-    y: number,
-    color = "#000000",
-    glow = false,
-  ) => {
-    if (isEating || isBlinking) {
-      return (
-        <>
-          <rect x={x1} y={y} width="2" height="1" fill={color} />
-          <rect x={x2} y={y} width="2" height="1" fill={color} />
-        </>
-      );
-    }
-    return (
-      <g className={glow ? "animate-pulse" : ""}>
-        <rect x={x1} y={y} width="2" height="2" fill={color} />
-        <rect x={x2} y={y} width="2" height="2" fill={color} />
-        <rect x={x1} y={y} width="1" height="1" fill="#ffffff" />
-        <rect x={x2} y={y} width="1" height="1" fill="#ffffff" />
-      </g>
-    );
-  };
-
-  const renderSprite = () => {
-    switch (safeLevel) {
-      case 1: // Digi-Egg
-        return <g className="animate-float-slow"><rect x="5" y="4" width="6" height="10" fill="#ffffff" /><rect x="4" y="6" width="8" height="6" fill="#ffffff" /><rect x="4" y="7" width="8" height="2" fill="#f97316" /></g>;
-      case 2: // Botamon
-        return <g className="animate-float-slow"><rect x="4" y="6" width="8" height="8" fill="#171717" /><rect x="3" y="8" width="10" height="4" fill="#171717" />{renderEyes(5, 9, 8, "#facc15", true)}</g>;
-      case 3: // Koromon
-        return <g className="animate-float-slow"><rect x="4" y="5" width="8" height="8" fill="#f472b6" /><rect x="3" y="7" width="10" height="4" fill="#f472b6" /><rect x="2" y="3" width="2" height="5" fill="#f472b6" /><rect x="12" y="3" width="2" height="5" fill="#f472b6" />{renderEyes(5, 9, 8, "#dc2626")}</g>;
-      case 4: // Agumon
-        return <g className="animate-float-slow"><rect x="4" y="2" width="8" height="6" fill="#f97316" /><rect x="5" y="8" width="6" height="6" fill="#f97316" /><rect x="3" y="10" width="2" height="2" fill="#f97316" /><rect x="11" y="10" width="2" height="2" fill="#f97316" /><rect x="5" y="14" width="2" height="2" fill="#f97316" /><rect x="9" y="14" width="2" height="2" fill="#f97316" />{renderEyes(5, 9, 4, "#22c55e")}</g>;
-      case 5: // Tyrannomon
-        return <g className="animate-float-slow"><rect x="4" y="2" width="8" height="12" fill="#dc2626" /><rect x="7" y="0" width="2" height="14" fill="#22c55e" opacity="0.8" /><rect x="2" y="6" width="12" height="6" fill="#dc2626" />{renderEyes(5, 9, 4, "#22c55e")}</g>;
-      case 6: // Greymon
-        return <g className="animate-float-slow"><rect x="3" y="1" width="10" height="6" fill="#78350f" /><rect x="7" y="-1" width="2" height="2" fill="#e5e5e5" /><rect x="2" y="0" width="2" height="3" fill="#e5e5e5" /><rect x="12" y="0" width="2" height="3" fill="#e5e5e5" /><rect x="4" y="7" width="8" height="7" fill="#f97316" /><rect x="4" y="9" width="8" height="2" fill="#3b82f6" /><rect x="3" y="14" width="3" height="2" fill="#f97316" /><rect x="10" y="14" width="3" height="2" fill="#f97316" />{renderEyes(5, 9, 4, "#ef4444", true)}</g>;
-      case 7: // SkullGreymon
-        return <g className="animate-float-slow"><rect x="4" y="4" width="8" height="10" fill="#e5e5e5" /><rect x="3" y="6" width="10" height="2" fill="#171717" /><rect x="7" y="0" width="2" height="4" fill="#94a3b8" /><rect x="5" y="2" width="6" height="2" fill="#94a3b8" />{renderEyes(5, 9, 5, "#dc2626", true)}</g>;
-      case 8: // MetalGreymon
-        return <g className="animate-float-slow"><rect x="-2" y="3" width="4" height="8" fill="#a855f7" /><rect x="14" y="3" width="4" height="8" fill="#a855f7" /><rect x="3" y="1" width="10" height="6" fill="#94a3b8" /><rect x="7" y="-1" width="2" height="2" fill="#94a3b8" /><rect x="4" y="7" width="8" height="7" fill="#f97316" /><rect x="11" y="9" width="5" height="3" fill="#94a3b8" /><rect x="3" y="14" width="3" height="2" fill="#f97316" /><rect x="10" y="14" width="3" height="2" fill="#f97316" />{renderEyes(6, 8, 4, "#ef4444", true)}</g>;
-      case 9: // WarGreymon
-        return <g className="animate-float-slow"><rect x="4" y="4" width="8" height="10" fill="#e5e5e5" /><rect x="4" y="4" width="8" height="3" fill="#facc15" /><rect x="0" y="5" width="4" height="6" fill="#facc15" /><rect x="12" y="5" width="4" height="6" fill="#facc15" /><rect x="5" y="14" width="2" height="2" fill="#e5e5e5" /><rect x="9" y="14" width="2" height="2" fill="#e5e5e5" />{renderEyes(6, 8, 5, "#22c55e", true)}</g>;
-      case 10: // Omnimon
-        return <g className="animate-float-slow"><rect x="-1" y="6" width="18" height="8" fill="#ffffff" opacity="0.8" /><rect x="6" y="0" width="4" height="4" fill="#e5e5e5" /><rect x="7" y="-2" width="2" height="2" fill="#facc15" /><rect x="5" y="4" width="6" height="8" fill="#ffffff" /><rect x="2" y="6" width="3" height="5" fill="#ea580c" /><rect x="11" y="6" width="3" height="5" fill="#3b82f6" /><rect x="5" y="12" width="2" height="4" fill="#ffffff" /><rect x="9" y="12" width="2" height="4" fill="#ffffff" />{renderEyes(6, 8, 1, "#3b82f6", true)}</g>;
-      default:
-        return null;
-    }
-  };
+  const spriteSuffix = spriteMode === 'atk' ? '_atk' : '';
+  const spritePath = `/sprites/lvl${safeLevel}${spriteSuffix}.gif`;
 
   return (
-    <div
-      className={`relative flex flex-col items-center justify-end ${className}`}
-    >
-      <style>{`
-        @keyframes atk-egg { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-10px); } }
-        @keyframes spc-egg { 0%, 100% { transform: rotate(0); filter: brightness(1); } 50% { transform: rotate(15deg) scale(1.2); filter: brightness(1.5) drop-shadow(0 0 10px yellow); } }
-        @keyframes atk-baby { 0%, 100% { transform: translateX(0); } 40% { transform: translateX(-5px) scaleY(0.8); } 60% { transform: translateX(20px) scaleY(1.1); } }
-        @keyframes spc-baby { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px) scale(1.3); filter: drop-shadow(0 0 15px pink); } }
-        @keyframes atk-dino { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-10px) rotate(-5deg); } 60% { transform: translateX(40px) rotate(10deg); } }
-        @keyframes spc-dino { 0%, 100% { transform: scale(1) translateX(0); } 40% { transform: scale(1.2) translateX(-10px); filter: drop-shadow(0 0 20px orange); } 70% { transform: scale(1.1) translateX(50px); filter: drop-shadow(0 0 30px red); } }
-        @keyframes atk-skull { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(20px) rotate(5deg); } 40% { transform: translateX(-5px); } }
-        @keyframes spc-skull { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px) scale(1.2); filter: drop-shadow(0 0 30px purple) grayscale(100%); } }
-        @keyframes atk-mega { 0%, 100% { transform: translate(0,0); } 30% { transform: translate(20px, -20px) scale(1.1); } 60% { transform: translate(-10px, 10px); } }
-        @keyframes spc-mega { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px) scale(1.4); filter: drop-shadow(0 0 40px #facc15) brightness(1.5); } }
-        @keyframes atk-omni { 0%, 100% { transform: translateX(0); opacity: 1; } 20% { transform: translateX(50px); opacity: 0.5; } 40% { transform: translateX(50px); opacity: 1; } }
-        @keyframes spc-omni { 0%, 100% { transform: translateX(0); } 40% { transform: translateX(-20px) scale(1.3); filter: drop-shadow(0 0 50px cyan) brightness(2); } 60% { transform: translateX(10px); filter: drop-shadow(0 0 10px blue); } }
+    <div className={`relative flex flex-col items-center justify-end w-[140px] h-[140px] mx-auto ${className}`}>
+      <style jsx>{`
+        /* ULTRA-DYNAMIC CLASS BINDINGS */
+        .anim-atk-1 { animation: atk-1 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); } 
+        .anim-spc-1 { animation: spc-1 0.8s ease-in-out; }
+        .anim-atk-2 { animation: atk-2 0.6s cubic-bezier(0.5, -0.5, 0.5, 1.5); }    
+        .anim-spc-2 { animation: spc-2 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .anim-atk-3 { animation: atk-3 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); } 
+        .anim-spc-3 { animation: spc-3 0.9s ease-out; }
+        .anim-atk-4 { animation: atk-4 0.4s ease-in-out; } 
+        .anim-spc-4 { animation: spc-4 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .anim-atk-5 { animation: atk-5 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .anim-spc-5 { animation: spc-5 1.0s ease-out; }
+        .anim-atk-6 { animation: atk-6 0.5s cubic-bezier(0.5, -0.5, 0, 1.5); }
+        .anim-spc-6 { animation: spc-6 1.2s cubic-bezier(0.1, 0.9, 0.2, 1); }
+        .anim-atk-7 { animation: atk-7 0.4s steps(4, end); }    
+        .anim-spc-7 { animation: spc-7 1.2s cubic-bezier(0.5, 0, 0.1, 1); }
+        .anim-atk-8 { animation: atk-8 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); }
+        .anim-spc-8 { animation: spc-8 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .anim-atk-9 { animation: atk-9 0.7s ease-in-out; }      
+        .anim-spc-9 { animation: spc-9 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .anim-atk-10{ animation: atk-10 0.5s cubic-bezier(1, 0, 0, 1); }
+        .anim-spc-10{ animation: spc-10 1.2s cubic-bezier(0.1, 1, 0.1, 1); }
+
+        /* LV 1 & 2: Bouncing and Bubbles */
+        @keyframes atk-1 { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-30px) scale(0.8, 1.2); } 60% { transform: translateY(0) scale(1.2, 0.8); } }
+        @keyframes spc-1 { 0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); } 50% { filter: brightness(1.5) drop-shadow(0 0 40px #facc15); transform: scale(1.1); } }
+        @keyframes atk-2 { 0%, 100% { transform: translate(0,0) scale(1); } 30% { transform: translate(-10px, 10px) scale(1.2, 0.8); } 60% { transform: translate(50px, -20px) scale(0.9, 1.2); } }
+        @keyframes spc-2 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(50px 0 20px #0f172a); transform: scale(1.2) translateY(-10px); } }
+
+        /* LV 3 & 4: Koromon & Agumon (Fast Strikes & Fireballs) */
+        @keyframes atk-3 { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(60px) scale(1.1); filter: drop-shadow(-10px 0 5px rgba(0,0,0,0.2)); } }
+        @keyframes spc-3 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(60px -20px 20px #f472b6); transform: scale(1.2) rotate(-5deg); } }
+        @keyframes atk-4 { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(30px); } 40% { transform: translateX(10px); } 60% { transform: translateX(50px); } }
+        @keyframes spc-4 { 0%, 100% { transform: scale(1) translateX(0); filter: brightness(1); } 30% { transform: scale(0.85) translateX(-15px); filter: brightness(0.7); } 50% { transform: scale(1.3) translateX(20px); filter: brightness(2.5) drop-shadow(100px 0 40px #f97316); } }
+
+        /* LV 5 & 6: Tyrannomon & Greymon (Heavy Impacts) */
+        @keyframes atk-5 { 0%, 100% { transform: scaleX(1) translateX(0); } 50% { transform: scaleX(-1) translateX(-50px) translateY(-10px); filter: drop-shadow(10px 10px 5px rgba(0,0,0,0.3)); } }
+        @keyframes spc-5 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); transform: translateY(0); } 50% { transform: translateY(-10px) scale(1.15); filter: brightness(2) drop-shadow(100px 0 50px #ef4444); } }
+        @keyframes atk-6 { 0%, 100% { transform: translate(0, 0); } 30% { transform: translate(-20px, 20px) scale(1.1, 0.9); } 60% { transform: translate(80px, -60px) scale(0.9, 1.1) rotate(15deg); } }
+        @keyframes spc-6 { 0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 0 transparent); } 30% { transform: scale(0.9) translateX(-10px); } 60% { transform: scale(1.6) translateX(10px); filter: brightness(3) drop-shadow(150px 0 80px #ea580c) drop-shadow(50px 0 30px yellow); } }
+
+        /* LV 7 & 8: SkullGreymon & MetalGreymon (Glitch & Missiles) */
+        @keyframes atk-7 { 0%, 100% { transform: translate(0,0); opacity: 1; filter: grayscale(0); } 25% { transform: translate(50px, -30px); opacity: 0.8; filter: grayscale(1) invert(1); } 50% { transform: translate(80px, 20px); filter: hue-rotate(180deg); } }
+        @keyframes spc-7 { 0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 0 transparent); } 40% { transform: translateY(-100px) scale(1.2); filter: drop-shadow(0 -50px 30px #9333ea); } 60% { transform: translateY(-100px); filter: brightness(2) drop-shadow(120px 180px 60px #7e22ce); } }
+        @keyframes atk-8 { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-20px); } 50% { transform: translateX(100px) scaleX(1.2); filter: drop-shadow(-30px 0 10px #94a3b8); } }
+        @keyframes spc-8 { 0%, 100% { transform: translateX(0); filter: drop-shadow(0 0 0 transparent); } 20% { transform: translateX(-25px); filter: brightness(2) drop-shadow(80px -40px 40px #f59e0b); } 40% { transform: translateX(-15px); filter: brightness(2.5) drop-shadow(100px 40px 50px #ef4444); } 60% { transform: translateX(15px); filter: brightness(3) drop-shadow(150px 0px 100px #ea580c); } }
+
+        /* LV 9 & 10: WarGreymon & Omnimon (God-Tier Attacks) */
+        @keyframes atk-9 { 0%, 100% { transform: translateX(0) rotate(0deg); } 20% { transform: translateX(-30px) rotate(-45deg); } 70% { transform: translateX(120px) rotate(1440deg); filter: drop-shadow(0 0 15px #facc15); } }
+        @keyframes spc-9 { 0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 transparent); } 30% { transform: translateY(-120px) scale(1.2); filter: brightness(1.5) drop-shadow(0 -60px 40px #fbbf24); } 50% { transform: translateY(-120px) scale(1.6); filter: brightness(3) drop-shadow(0 -150px 200px #f59e0b) drop-shadow(0 -50px 80px white); } 70% { transform: translate(60px, 30px) scale(1); filter: brightness(2) drop-shadow(150px 0 100px #fbbf24); } }
+        @keyframes atk-10 { 0%, 100% { transform: translateX(0); opacity: 1; filter: brightness(1); } 10% { transform: translateX(-20px); opacity: 0; } 30% { transform: translateX(180px); opacity: 1; filter: brightness(3) drop-shadow(-80px 0 5px white); } 50% { transform: translateX(180px); opacity: 1; filter: brightness(1); } 60% { transform: translateX(180px); opacity: 0; } }
+        @keyframes spc-10 { 0%, 100% { transform: scale(1) translateX(0); filter: drop-shadow(0 0 0 transparent); } 20% { transform: scale(0.8) translateX(-30px); filter: brightness(2) drop-shadow(30px 0 30px #06b6d4); } 40% { transform: scaleX(5) scaleY(0.4) translateX(40px); transform-origin: left; filter: brightness(5) drop-shadow(200px 0 80px #22d3ee) drop-shadow(0 0 40px white); } 60% { transform: scaleX(4) scaleY(0.5) translateX(30px); transform-origin: left; filter: brightness(2) drop-shadow(150px 0 30px #06b6d4); } }
+
+        /* IDLE & COMMON */
         @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
         @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
         @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
         @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
+        
         .animate-breathe { animation: squish-breathe 2s ease-in-out infinite; }
         .animate-jump { animation: happy-jump 0.6s ease-in-out; }
         .exp-float { animation: float-up 1s ease-out forwards; position: absolute; font-weight: 900; color: #f97316; text-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 50; top: -20px; }
@@ -212,24 +127,43 @@ export default function DigimonVocabmon({
       `}</style>
 
       {expPopups.map((popup) => (
-        <div key={popup.id} className="exp-float text-xl">
+        <div key={popup.id} className="exp-float text-xl font-black text-orange-500 drop-shadow-md">
           +15 EXP!
         </div>
       ))}
 
-      <div
-        className={`relative z-10 ${isEating ? "animate-jump" : "animate-breathe"}`}
-      >
-        <svg
-          width="140"
-          height="140"
-          viewBox="-6 -6 28 24"
-          xmlns="http://www.w3.org/2000/svg"
-          className={`drop-shadow-xl overflow-visible ${getAnimationClass()}`}
-        >
-          {renderSprite()}
-        </svg>
+      {/* Notice 'animate-breathe' is removed so the GIF can handle its own idle animation naturally! */}
+      <div className={`relative z-10 w-full h-full flex items-center justify-center ${isEating ? "animate-jump" : ""}`}>
+        
+        <img
+          src={spritePath}
+          alt={`Vocabmon Level ${safeLevel}`}
+          className={`max-w-[130px] max-h-[130px] w-auto h-auto object-contain drop-shadow-2xl transition-transform ${getAnimationClass()}`}
+          style={{ 
+            imageRendering: 'pixelated', // This keeps the DS-era pixel art perfectly crisp
+          }}
+          onError={(e) => {
+            if (e.currentTarget.src.includes('_atk')) {
+              // Trigger the CSS fallback animation and swap the image source
+              setUseCssFallback(true);
+              e.currentTarget.src = `/sprites/lvl${safeLevel}.gif`;
+            } else {
+              e.currentTarget.style.display = 'none';
+              if (e.currentTarget.nextElementSibling) {
+                e.currentTarget.nextElementSibling.classList.remove('hidden');
+              }
+            }
+          }}
+        />
+        
+        {/* Helper UI if the GIF is missing */}
+        <div className="hidden text-[10px] font-black text-gray-400 text-center border-2 border-dashed border-gray-300 bg-white/50 backdrop-blur-sm p-4 rounded-xl shadow-inner">
+          Missing GIF<br/>
+          <span className="text-indigo-500">public/sprites/lvl{safeLevel}.gif</span>
+        </div>
+
       </div>
+      
       <div className="absolute bottom-0 w-24 h-3 bg-black/10 rounded-full blur-[2px]"></div>
     </div>
   );

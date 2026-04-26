@@ -51,6 +51,19 @@ public/file.svg
 public/globe.svg
 public/next.svg
 public/piano.mp3
+public/sprites/lvl1.gif
+public/sprites/lvl10_atk.gif
+public/sprites/lvl10.gif
+public/sprites/lvl2.gif
+public/sprites/lvl3.gif
+public/sprites/lvl4_atk.gif
+public/sprites/lvl4.gif
+public/sprites/lvl5_atk.gif
+public/sprites/lvl5.gif
+public/sprites/lvl6.gif
+public/sprites/lvl7.gif
+public/sprites/lvl8.gif
+public/sprites/lvl9.gif
 public/stickers/1.jpg
 public/stickers/10.jpg
 public/stickers/2.jpg
@@ -64,12 +77,14 @@ public/stickers/9.jpg
 public/vercel.svg
 public/window.svg
 README.md
+scripts/createDev.ts
 scripts/rollover.ts
 src/actions/auth.ts
 src/actions/loadProgress.ts
 src/actions/logout.ts
 src/actions/progress.ts
 src/app/collection/page.tsx
+src/app/design/page.tsx
 src/app/exercise/page.tsx
 src/app/favicon.ico
 src/app/feed/page.tsx
@@ -116,41 +131,273 @@ tsconfig.json
 <files>
 This section contains the contents of the repository's files.
 
-<file path="developer_log.md">
-# Vocabmon - Developer Log
+<file path="scripts/createDev.ts">
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import path from 'path';
 
-## Architecture Overview
-- **Framework:** Next.js 16 (App Router), React 19, TypeScript
-- **Styling:** Tailwind CSS v4
-- **Database:** MongoDB + Mongoose
-- **Auth:** Custom secure cookie sessions (`src/proxy.ts` middleware)
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-## Core Features
-**1. The Vocabmon Engine**
-- Custom React SVG components (`DigimonVocabmon.tsx`, `FireVocabmon.tsx`).
-- Supports 10 stages of evolution based on EXP thresholds (150 EXP per level).
-- Includes CSS-driven idle animations, eating logic, and tier-specific attack/special animations.
+async function run() {
+  await mongoose.connect(process.env.MONGODB_URI as string);
+  const UserSchema = new mongoose.Schema({ username: String, passwordHash: String, role: String }, { strict: false });
+  const User = mongoose.models.User || mongoose.model('User', UserSchema);
+  
+  await User.findOneAndUpdate(
+    { username: 'dev' },
+    { username: 'dev', passwordHash: 'dev123', role: 'dev' },
+    { upsert: true }
+  );
+  
+  console.log('✅ Developer account created! Username: dev | Password: dev123');
+  await mongoose.disconnect();
+  process.exit(0);
+}
+run();
+</file>
 
-**2. Gamified Curriculum (Dashboard)**
-- Weekly sets of 50 words broken into daily chunks.
-- Quests are chronologically locked (Spelling -> Exercise -> Test).
-- Weekend Boss Fights (Midterm and Finals) test cumulative memory.
+<file path="src/app/design/page.tsx">
+"use client";
+import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
+import * as THREE from 'three';
+import { vocabData, VocabWord } from '@/data/vocab';
 
-**3. Interactive Exercises**
-- `SpellingPractice & Test`: Web Speech API dictation and typing.
-- `MeaningPractice`: Rebuilding definitions from word banks.
-- `MeaningMatch`: Interactive SVG line-drawing between words and definitions.
-- `SentenceFill & DragDropTest`: Contextual reading comprehension.
-- `MeaningPuzzle`: Letter-slot guessing games.
+// --- 1. AVATAR COMPONENT ---
+function Avatar({ gender, targetPos }: { gender: 'boy' | 'girl', targetPos: THREE.Vector3 }) {
+  const group = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    if (!group.current) return;
+    const currentPos = group.current.position;
+    const target = new THREE.Vector3(targetPos.x, 0, targetPos.z);
+    const distance = currentPos.distanceTo(target);
 
-**4. 3D Runner Mini-Game**
-- Pseudo-3D CSS runner (`JumpGame.tsx`).
-- Endless survival mode using active weekly vocabulary.
-- 2-Strike life system with custom Suno AI background tracks.
+    if (distance > 0.1) {
+      group.current.lookAt(target.x, group.current.position.y, target.z);
+      currentPos.lerp(target, 0.1);
+      group.current.position.y = Math.abs(Math.sin(state.clock.elapsedTime * 15)) * 0.4;
+    } else {
+      group.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.05;
+    }
+  });
 
-**5. Progress & Archival**
-- `syncHelper.ts` silently pushes `localStorage` state to MongoDB.
-- `scripts/rollover.ts` CLI tool archives the current week to the Hall of Fame and resets the board for next week.
+  const isBoy = gender === 'boy';
+  const skinColor = "#ffcdb2"; const hairColor = isBoy ? "#7f4f24" : "#9d0208";
+  const shirtColor = isBoy ? "#0077b6" : "#d00000"; const pantsColor = isBoy ? "#1d3557" : "#370617";
+
+  return (
+    <group ref={group} position={[0, 0, 0]}>
+      <mesh position={[0, 2.2, 0]} castShadow><boxGeometry args={[1.2, 1.1, 1.2]} /><meshStandardMaterial color={skinColor} /></mesh>
+      <mesh position={[-0.25, 2.2, 0.61]}><boxGeometry args={[0.15, 0.2, 0.05]} /><meshStandardMaterial color="#000" /></mesh>
+      <mesh position={[0.25, 2.2, 0.61]}><boxGeometry args={[0.15, 0.2, 0.05]} /><meshStandardMaterial color="#000" /></mesh>
+      <mesh position={[0, 2.85, 0]} castShadow><boxGeometry args={[1.3, 0.4, 1.3]} /><meshStandardMaterial color={hairColor} /></mesh>
+      {!isBoy && (
+        <>
+          <mesh position={[-0.7, 2.4, 0]} castShadow><boxGeometry args={[0.3, 0.8, 0.4]} /><meshStandardMaterial color={hairColor} /></mesh>
+          <mesh position={[0.7, 2.4, 0]} castShadow><boxGeometry args={[0.3, 0.8, 0.4]} /><meshStandardMaterial color={hairColor} /></mesh>
+        </>
+      )}
+      <mesh position={[0, 1.2, 0]} castShadow><boxGeometry args={[0.9, 1.0, 0.5]} /><meshStandardMaterial color={shirtColor} /></mesh>
+      <mesh position={[-0.6, 1.2, 0]} castShadow><boxGeometry args={[0.3, 0.9, 0.3]} /><meshStandardMaterial color={skinColor} /></mesh>
+      <mesh position={[0.6, 1.2, 0]} castShadow><boxGeometry args={[0.3, 0.9, 0.3]} /><meshStandardMaterial color={skinColor} /></mesh>
+      <mesh position={[-0.22, 0.35, 0]} castShadow><boxGeometry args={[0.35, 0.7, 0.35]} /><meshStandardMaterial color={pantsColor} /></mesh>
+      <mesh position={[0.22, 0.35, 0]} castShadow><boxGeometry args={[0.35, 0.7, 0.35]} /><meshStandardMaterial color={pantsColor} /></mesh>
+    </group>
+  );
+}
+
+// --- 2. MONSTER COMPONENTS ---
+function Slime({ position, color = "#22c55e", speed = 3, onClick }: { position: [number, number, number], color?: string, speed?: number, onClick: () => void }) {
+  const group = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    if (group.current) {
+      const t = state.clock.elapsedTime * speed + position[0];
+      group.current.position.y = position[1] + Math.abs(Math.sin(t)) * 0.5;
+      group.current.scale.y = 1 - Math.abs(Math.sin(t)) * 0.2;
+      group.current.scale.x = 1 + Math.abs(Math.sin(t)) * 0.1;
+      group.current.scale.z = 1 + Math.abs(Math.sin(t)) * 0.1;
+    }
+  });
+  return (
+    <group position={position} ref={group} onClick={(e) => { e.stopPropagation(); onClick(); }} onPointerOver={() => document.body.style.cursor = 'pointer'} onPointerOut={() => document.body.style.cursor = 'crosshair'}>
+      <mesh castShadow position={[0, 0.4, 0]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color={color} transparent opacity={0.9} />
+      </mesh>
+      <mesh position={[-0.25, 0.6, 0.51]}><boxGeometry args={[0.15, 0.15, 0.05]}/><meshStandardMaterial color="black" /></mesh>
+      <mesh position={[0.25, 0.6, 0.51]}><boxGeometry args={[0.15, 0.15, 0.05]}/><meshStandardMaterial color="black" /></mesh>
+    </group>
+  );
+}
+
+function Ghost({ position, onClick }: { position: [number, number, number], onClick: () => void }) {
+  const group = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    if (group.current) {
+      group.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.5;
+      group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.5;
+    }
+  });
+  return (
+    <group position={position} ref={group} onClick={(e) => { e.stopPropagation(); onClick(); }} onPointerOver={() => document.body.style.cursor = 'pointer'} onPointerOut={() => document.body.style.cursor = 'crosshair'}>
+      <mesh castShadow position={[0, 0.8, 0]}>
+        <cylinderGeometry args={[0.6, 0.6, 1.5, 8]} />
+        <meshStandardMaterial color="#f8fafc" transparent opacity={0.8} />
+      </mesh>
+      <mesh position={[-0.25, 1.2, 0.55]}><boxGeometry args={[0.15, 0.15, 0.05]}/><meshStandardMaterial color="#000" /></mesh>
+      <mesh position={[0.25, 1.2, 0.55]}><boxGeometry args={[0.15, 0.15, 0.05]}/><meshStandardMaterial color="#000" /></mesh>
+    </group>
+  );
+}
+
+// --- 3. ENVIRONMENT ---
+function BrightEnvironment({ setTargetPos }: { setTargetPos: (pos: THREE.Vector3) => void }) {
+  return (
+    <group>
+      {/* Massive Bright Grass Floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow onClick={(e) => setTargetPos(e.point)}>
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial color="#bbf7d0" roughness={1} />
+      </mesh>
+      <gridHelper args={[100, 100, '#86efac', '#86efac']} position={[0, 0.01, 0]} />
+      
+      {/* Light Stone Pillars */}
+      {[[-15, 15], [15, 15], [-15, -15], [15, -15]].map(([x, z], i) => (
+        <group key={i} position={[x, 0, z]}>
+          <mesh position={[0, 2, 0]} castShadow><boxGeometry args={[1.5, 4, 1.5]} /><meshStandardMaterial color="#e2e8f0" /></mesh>
+          <mesh position={[0, 4.5, 0]}><sphereGeometry args={[0.5]} /><meshBasicMaterial color="#38bdf8" /></mesh>
+          <pointLight position={[0, 5, 0]} intensity={2} color="#38bdf8" distance={20} />
+        </group>
+      ))}
+    </group>
+  );
+}
+
+// --- 4. MAIN LAB COMPONENT ---
+export default function DesignLab() {
+  const [gender, setGender] = useState<'boy' | 'girl'>('boy');
+  const [targetPos, setTargetPos] = useState(new THREE.Vector3(0, 0, 0));
+  
+  // Monster & Quiz State
+  const [monsters, setMonsters] = useState([
+    { id: 1, type: 'slime', pos: [6, 0, -6] as [number,number,number], color: "#ef4444", alive: true },
+    { id: 2, type: 'slime', pos: [-8, 0, -3] as [number,number,number], color: "#3b82f6", alive: true },
+    { id: 3, type: 'slime', pos: [12, 0, 8] as [number,number,number], color: "#eab308", alive: true },
+    { id: 4, type: 'ghost', pos: [-10, 2, 12] as [number,number,number], color: "", alive: true },
+  ]);
+  const [activeQuiz, setActiveQuiz] = useState<{ monsterId: number, target: VocabWord, options: string[] } | null>(null);
+  const [quizError, setQuizError] = useState(false);
+
+  const handleMonsterClick = (monsterId: number, mPos: [number,number,number]) => {
+    // Move avatar to the monster
+    setTargetPos(new THREE.Vector3(mPos[0], 0, mPos[2]));
+    
+    // Generate a quiz
+    const targetWord = vocabData[Math.floor(Math.random() * vocabData.length)];
+    const distractors = vocabData.filter(w => w.id !== targetWord.id).sort(() => 0.5 - Math.random()).slice(0, 2);
+    const options = [targetWord.word, ...distractors.map(d => d.word)].sort(() => 0.5 - Math.random());
+    
+    setActiveQuiz({ monsterId, target: targetWord, options });
+    setQuizError(false);
+  };
+
+  const handleOptionClick = (option: string) => {
+    if (!activeQuiz) return;
+    if (option === activeQuiz.target.word) {
+      // Correct! Defeat the monster.
+      setMonsters(prev => prev.map(m => m.id === activeQuiz.monsterId ? { ...m, alive: false } : m));
+      setActiveQuiz(null);
+    } else {
+      // Wrong! Show error shake.
+      setQuizError(true);
+      setTimeout(() => setQuizError(false), 500);
+    }
+  };
+
+  return (
+    <main className="h-screen bg-sky-50 flex flex-col p-6 overflow-hidden">
+      <div className="flex justify-between items-center mb-6 z-10 shrink-0">
+        <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-sky-500">
+          Vocabmon Open World
+        </h1>
+        <div className="flex items-center gap-4">
+          <div className="bg-white p-1 rounded-xl flex gap-1 border border-gray-200 shadow-sm">
+            <button onClick={() => setGender('boy')} className={`px-6 py-2 rounded-lg font-bold transition-all ${gender === 'boy' ? 'bg-blue-500 text-white' : 'text-gray-500 hover:text-indigo-500'}`}>Boy</button>
+            <button onClick={() => setGender('girl')} className={`px-6 py-2 rounded-lg font-bold transition-all ${gender === 'girl' ? 'bg-pink-500 text-white' : 'text-gray-500 hover:text-pink-500'}`}>Girl</button>
+          </div>
+          <Link href="/" className="bg-white hover:bg-gray-50 text-indigo-600 font-bold py-2 px-4 rounded-lg transition-all border border-gray-200 shadow-sm">← Dashboard</Link>
+        </div>
+      </div>
+      
+      <div className="flex-1 w-full bg-sky-100 rounded-3xl overflow-hidden border-4 border-white shadow-2xl relative cursor-crosshair">
+        <Canvas camera={{ position: [0, 8, 14], fov: 45 }} shadows>
+          <color attach="background" args={['#e0f2fe']} />
+          
+          <ambientLight intensity={0.7} />
+          <directionalLight position={[10, 20, 10]} intensity={1} castShadow shadow-mapSize={2048} />
+          <Environment preset="city" />
+          
+          <BrightEnvironment setTargetPos={setTargetPos} />
+          <Avatar gender={gender} targetPos={targetPos} />
+          
+          {/* Render Alive Monsters */}
+          {monsters.map(m => m.alive && (
+            m.type === 'slime' 
+              ? <Slime key={m.id} position={m.pos} color={m.color} onClick={() => handleMonsterClick(m.id, m.pos)} />
+              : <Ghost key={m.id} position={m.pos} onClick={() => handleMonsterClick(m.id, m.pos)} />
+          ))}
+
+          <ContactShadows position={[0, 0.05, 0]} opacity={0.3} scale={50} blur={2} far={10} color="#064e3b" />
+          
+          <OrbitControls 
+            makeDefault 
+            enablePan={true}
+            minPolarAngle={Math.PI / 6} 
+            maxPolarAngle={Math.PI / 2.2} 
+            minDistance={5} 
+            maxDistance={30} 
+            target={[0, 1, 0]}
+          />
+        </Canvas>
+        
+        {/* UI Overlays */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full text-sm font-black tracking-widest text-emerald-600 pointer-events-none shadow-lg border-2 border-emerald-100">
+          CLICK MONSTERS TO BATTLE • DRAG TO ROTATE
+        </div>
+
+        {/* Quiz Popup Overlay */}
+        {activeQuiz && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-sky-900/40 backdrop-blur-sm">
+            <style>{`@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } } .animate-shake { animation: shake 0.3s ease-in-out; }`}</style>
+            <div className={`bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full mx-4 border-4 border-emerald-400 ${quizError ? 'animate-shake border-red-500' : ''}`}>
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-2xl font-black text-gray-800">Wild Monster Attacks!</h3>
+                <button onClick={() => setActiveQuiz(null)} className="text-gray-400 hover:text-gray-600 font-black text-xl">✕</button>
+              </div>
+              <p className="text-emerald-600 font-bold text-sm uppercase tracking-widest mb-2">Find the matching word:</p>
+              <p className="text-gray-700 font-medium text-lg leading-relaxed mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                "{activeQuiz.target.definition}"
+              </p>
+              <div className="flex flex-col gap-3">
+                {activeQuiz.options.map(opt => (
+                  <button 
+                    key={opt} 
+                    onClick={() => handleOptionClick(opt)} 
+                    className="bg-white border-2 border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-gray-700 font-bold py-4 px-6 rounded-xl transition-all text-lg shadow-sm hover:shadow-md active:scale-95 text-left uppercase tracking-wider"
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
 </file>
 
 <file path=".gitignore">
@@ -195,6 +442,43 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+</file>
+
+<file path="developer_log.md">
+# Vocabmon - Developer Log
+
+## Architecture Overview
+- **Framework:** Next.js 16 (App Router), React 19, TypeScript
+- **Styling:** Tailwind CSS v4
+- **Database:** MongoDB + Mongoose
+- **Auth:** Custom secure cookie sessions (`src/proxy.ts` middleware)
+
+## Core Features
+**1. The Vocabmon Engine**
+- Custom React SVG components (`DigimonVocabmon.tsx`, `FireVocabmon.tsx`).
+- Supports 10 stages of evolution based on EXP thresholds (150 EXP per level).
+- Includes CSS-driven idle animations, eating logic, and tier-specific attack/special animations.
+
+**2. Gamified Curriculum (Dashboard)**
+- Weekly sets of 50 words broken into daily chunks.
+- Quests are chronologically locked (Spelling -> Exercise -> Test).
+- Weekend Boss Fights (Midterm and Finals) test cumulative memory.
+
+**3. Interactive Exercises**
+- `SpellingPractice & Test`: Web Speech API dictation and typing.
+- `MeaningPractice`: Rebuilding definitions from word banks.
+- `MeaningMatch`: Interactive SVG line-drawing between words and definitions.
+- `SentenceFill & DragDropTest`: Contextual reading comprehension.
+- `MeaningPuzzle`: Letter-slot guessing games.
+
+**4. 3D Runner Mini-Game**
+- Pseudo-3D CSS runner (`JumpGame.tsx`).
+- Endless survival mode using active weekly vocabulary.
+- 2-Strike life system with custom Suno AI background tracks.
+
+**5. Progress & Archival**
+- `syncHelper.ts` silently pushes `localStorage` state to MongoDB.
+- `scripts/rollover.ts` CLI tool archives the current week to the Hall of Fame and resets the board for next week.
 </file>
 
 <file path="eslint.config.mjs">
@@ -1575,13 +1859,13 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 export interface IUser extends Document {
   username: string;
   passwordHash: string;
-  role: "student" | "admin";
+  role: "student" | "admin" | "dev";
 }
 
 const UserSchema: Schema = new Schema({
   username: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
-  role: { type: String, enum: ["student", "admin"], default: "student" },
+  role: { type: String, enum: ["student", "admin", "dev"], default: "student" },
 });
 
 const User: Model<IUser> =
@@ -1635,12 +1919,16 @@ npx tsx scripts/rollover.ts jaylee week_5
 <file path="src/actions/auth.ts">
 "use server";
 
-// test
-
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+// NEW: Safely get the current logged-in username
+export async function getCurrentUsername() {
+  const cookieStore = await cookies();
+  return cookieStore.get("vocabmon_session")?.value || null;
+}
 
 export async function loginUser(
   prevState: { error?: string } | null,
@@ -1649,34 +1937,33 @@ export async function loginUser(
   const username = formData.get("username") as string | null;
   const password = formData.get("password") as string | null;
 
-  if (!username || !password) {
-    return { error: "Please fill out both fields." };
-  }
+  if (!username || !password) return { error: "Please fill out both fields." };
 
   try {
-    // 1. Connect to MongoDB
     await connectToDatabase();
 
-    // 2. SMART SEEDING: If the database is completely empty, create Jay's account!
+    // 1. SMART SEEDING: Auto-create the dev account
+    if (username === "dev") {
+      const devExists = await User.findOne({ username: "dev" });
+      if (!devExists) {
+        console.log("🛠️ Dev account missing! Auto-creating...");
+        await User.create({ username: "dev", passwordHash: "dev123", role: "dev" });
+      }
+    }
+
+    // 2. SMART SEEDING: Auto-create Jay's account if empty
     const userCount = await User.countDocuments();
     if (userCount === 0) {
       console.log("Database is empty! Creating Jay's account...");
-      await User.create({
-        username: "jay",
-        passwordHash: "vocab123", // We will use a simple password for him
-        role: "student",
-      });
+      await User.create({ username: "jay", passwordHash: "vocab123", role: "student" });
     }
 
-    // 3. Find the user in the database
     const user = await User.findOne({ username });
 
-    // 4. Check if user exists and password matches
     if (!user || user.passwordHash !== password) {
       return { error: "Invalid username or password!" };
     }
 
-    // 5. Success! Set a secure cookie so he stays logged in for 30 days
     const cookieStore = await cookies();
     cookieStore.set("vocabmon_session", user.username, {
       httpOnly: true,
@@ -1689,7 +1976,6 @@ export async function loginUser(
     return { error: "Database connection failed. Check your console." };
   }
 
-  // Redirect to the home page after successful login
   redirect("/");
 }
 </file>
@@ -2024,245 +2310,6 @@ export default function CountdownPhase({ onFinish }: { onFinish: () => void }) {
       >
         {count > 0 ? count : "Begin!"}
       </div>
-    </div>
-  );
-}
-</file>
-
-<file path="src/components/shared/DigimonVocabmon.tsx">
-"use client";
-import { useState, useEffect } from "react";
-
-export default function DigimonVocabmon({
-  className = "",
-  feedTrigger = 0,
-  attackTrigger = 0,
-  specialTrigger = 0,
-  level = 1,
-}: {
-  className?: string;
-  feedTrigger?: number;
-  attackTrigger?: number;
-  specialTrigger?: number;
-  level?: number;
-}) {
-  const [isEating, setIsEating] = useState(false);
-  const [isBlinking, setIsBlinking] = useState(false);
-  const [isAttacking, setIsAttacking] = useState(false);
-  const [isSpecial, setIsSpecial] = useState(false);
-  const [expPopups, setExpPopups] = useState<{ id: number }[]>([]);
-
-  useEffect(() => {
-    if (attackTrigger > 0) {
-      setIsAttacking(true);
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.frequency.setValueAtTime(880, ctx.currentTime);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.1);
-        }
-      } catch (e) {}
-      const timer = setTimeout(() => setIsAttacking(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [attackTrigger]);
-
-  useEffect(() => {
-    if (specialTrigger > 0) {
-      setIsSpecial(true);
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sawtooth";
-          osc.frequency.setValueAtTime(220, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.4);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.6);
-        }
-      } catch (e) {}
-      const timer = setTimeout(() => setIsSpecial(false), 600);
-      return () => clearTimeout(timer);
-    }
-  }, [specialTrigger]);
-
-  useEffect(() => {
-    if (feedTrigger > 0) {
-      const playExpSound = () => {
-        try {
-          const AudioContextClass =
-            window.AudioContext ||
-            (window as any).webkitAudioContext;
-          if (!AudioContextClass) return;
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sine";
-          const now = ctx.currentTime;
-          osc.frequency.setValueAtTime(987.77, now);
-          osc.frequency.setValueAtTime(1318.51, now + 0.08);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0, now);
-          gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
-          gain.gain.setValueAtTime(0.1, now + 0.1);
-          gain.gain.linearRampToValueAtTime(0, now + 0.2);
-          osc.start(now);
-          osc.stop(now + 0.2);
-        } catch (e) {}
-      };
-      playExpSound();
-
-      const startTimer = setTimeout(() => {
-        setIsEating(true);
-        setExpPopups((prev) => [...prev, { id: Date.now() }]);
-      }, 0);
-      const endTimer = setTimeout(() => setIsEating(false), 600);
-
-      return () => {
-        clearTimeout(startTimer);
-        clearTimeout(endTimer);
-      };
-    }
-  }, [feedTrigger]);
-
-  useEffect(() => {
-    const blinkInterval = setInterval(() => {
-      if (Math.random() > 0.3) {
-        setIsBlinking(true);
-        setTimeout(() => setIsBlinking(false), 150);
-      }
-    }, 3500);
-
-    return () => clearInterval(blinkInterval);
-  }, []);
-
-  const safeLevel = Math.min(Math.max(level, 1), 10);
-
-  const getAnimationClass = () => {
-    if (!isAttacking && !isSpecial) return '';
-    let tier = 'egg';
-    if (safeLevel >= 2 && safeLevel <= 3) tier = 'baby';
-    if (safeLevel >= 4 && safeLevel <= 6) tier = 'dino';
-    if (safeLevel === 7) tier = 'skull';
-    if (safeLevel >= 8 && safeLevel <= 9) tier = 'mega';
-    if (safeLevel === 10) tier = 'omni';
-    return isSpecial ? `animate-[spc-${tier}_0.6s_ease-in-out]` : `animate-[atk-${tier}_0.3s_ease-in-out]`;
-  };
-
-  const renderEyes = (
-    x1: number,
-    x2: number,
-    y: number,
-    color = "#000000",
-    glow = false,
-  ) => {
-    if (isEating || isBlinking) {
-      return (
-        <>
-          <rect x={x1} y={y} width="2" height="1" fill={color} />
-          <rect x={x2} y={y} width="2" height="1" fill={color} />
-        </>
-      );
-    }
-    return (
-      <g className={glow ? "animate-pulse" : ""}>
-        <rect x={x1} y={y} width="2" height="2" fill={color} />
-        <rect x={x2} y={y} width="2" height="2" fill={color} />
-        <rect x={x1} y={y} width="1" height="1" fill="#ffffff" />
-        <rect x={x2} y={y} width="1" height="1" fill="#ffffff" />
-      </g>
-    );
-  };
-
-  const renderSprite = () => {
-    switch (safeLevel) {
-      case 1: // Digi-Egg
-        return <g className="animate-float-slow"><rect x="5" y="4" width="6" height="10" fill="#ffffff" /><rect x="4" y="6" width="8" height="6" fill="#ffffff" /><rect x="4" y="7" width="8" height="2" fill="#f97316" /></g>;
-      case 2: // Botamon
-        return <g className="animate-float-slow"><rect x="4" y="6" width="8" height="8" fill="#171717" /><rect x="3" y="8" width="10" height="4" fill="#171717" />{renderEyes(5, 9, 8, "#facc15", true)}</g>;
-      case 3: // Koromon
-        return <g className="animate-float-slow"><rect x="4" y="5" width="8" height="8" fill="#f472b6" /><rect x="3" y="7" width="10" height="4" fill="#f472b6" /><rect x="2" y="3" width="2" height="5" fill="#f472b6" /><rect x="12" y="3" width="2" height="5" fill="#f472b6" />{renderEyes(5, 9, 8, "#dc2626")}</g>;
-      case 4: // Agumon
-        return <g className="animate-float-slow"><rect x="4" y="2" width="8" height="6" fill="#f97316" /><rect x="5" y="8" width="6" height="6" fill="#f97316" /><rect x="3" y="10" width="2" height="2" fill="#f97316" /><rect x="11" y="10" width="2" height="2" fill="#f97316" /><rect x="5" y="14" width="2" height="2" fill="#f97316" /><rect x="9" y="14" width="2" height="2" fill="#f97316" />{renderEyes(5, 9, 4, "#22c55e")}</g>;
-      case 5: // Tyrannomon
-        return <g className="animate-float-slow"><rect x="4" y="2" width="8" height="12" fill="#dc2626" /><rect x="7" y="0" width="2" height="14" fill="#22c55e" opacity="0.8" /><rect x="2" y="6" width="12" height="6" fill="#dc2626" />{renderEyes(5, 9, 4, "#22c55e")}</g>;
-      case 6: // Greymon
-        return <g className="animate-float-slow"><rect x="3" y="1" width="10" height="6" fill="#78350f" /><rect x="7" y="-1" width="2" height="2" fill="#e5e5e5" /><rect x="2" y="0" width="2" height="3" fill="#e5e5e5" /><rect x="12" y="0" width="2" height="3" fill="#e5e5e5" /><rect x="4" y="7" width="8" height="7" fill="#f97316" /><rect x="4" y="9" width="8" height="2" fill="#3b82f6" /><rect x="3" y="14" width="3" height="2" fill="#f97316" /><rect x="10" y="14" width="3" height="2" fill="#f97316" />{renderEyes(5, 9, 4, "#ef4444", true)}</g>;
-      case 7: // SkullGreymon
-        return <g className="animate-float-slow"><rect x="4" y="4" width="8" height="10" fill="#e5e5e5" /><rect x="3" y="6" width="10" height="2" fill="#171717" /><rect x="7" y="0" width="2" height="4" fill="#94a3b8" /><rect x="5" y="2" width="6" height="2" fill="#94a3b8" />{renderEyes(5, 9, 5, "#dc2626", true)}</g>;
-      case 8: // MetalGreymon
-        return <g className="animate-float-slow"><rect x="-2" y="3" width="4" height="8" fill="#a855f7" /><rect x="14" y="3" width="4" height="8" fill="#a855f7" /><rect x="3" y="1" width="10" height="6" fill="#94a3b8" /><rect x="7" y="-1" width="2" height="2" fill="#94a3b8" /><rect x="4" y="7" width="8" height="7" fill="#f97316" /><rect x="11" y="9" width="5" height="3" fill="#94a3b8" /><rect x="3" y="14" width="3" height="2" fill="#f97316" /><rect x="10" y="14" width="3" height="2" fill="#f97316" />{renderEyes(6, 8, 4, "#ef4444", true)}</g>;
-      case 9: // WarGreymon
-        return <g className="animate-float-slow"><rect x="4" y="4" width="8" height="10" fill="#e5e5e5" /><rect x="4" y="4" width="8" height="3" fill="#facc15" /><rect x="0" y="5" width="4" height="6" fill="#facc15" /><rect x="12" y="5" width="4" height="6" fill="#facc15" /><rect x="5" y="14" width="2" height="2" fill="#e5e5e5" /><rect x="9" y="14" width="2" height="2" fill="#e5e5e5" />{renderEyes(6, 8, 5, "#22c55e", true)}</g>;
-      case 10: // Omnimon
-        return <g className="animate-float-slow"><rect x="-1" y="6" width="18" height="8" fill="#ffffff" opacity="0.8" /><rect x="6" y="0" width="4" height="4" fill="#e5e5e5" /><rect x="7" y="-2" width="2" height="2" fill="#facc15" /><rect x="5" y="4" width="6" height="8" fill="#ffffff" /><rect x="2" y="6" width="3" height="5" fill="#ea580c" /><rect x="11" y="6" width="3" height="5" fill="#3b82f6" /><rect x="5" y="12" width="2" height="4" fill="#ffffff" /><rect x="9" y="12" width="2" height="4" fill="#ffffff" />{renderEyes(6, 8, 1, "#3b82f6", true)}</g>;
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div
-      className={`relative flex flex-col items-center justify-end ${className}`}
-    >
-      <style>{`
-        @keyframes atk-egg { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-10px); } }
-        @keyframes spc-egg { 0%, 100% { transform: rotate(0); filter: brightness(1); } 50% { transform: rotate(15deg) scale(1.2); filter: brightness(1.5) drop-shadow(0 0 10px yellow); } }
-        @keyframes atk-baby { 0%, 100% { transform: translateX(0); } 40% { transform: translateX(-5px) scaleY(0.8); } 60% { transform: translateX(20px) scaleY(1.1); } }
-        @keyframes spc-baby { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px) scale(1.3); filter: drop-shadow(0 0 15px pink); } }
-        @keyframes atk-dino { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-10px) rotate(-5deg); } 60% { transform: translateX(40px) rotate(10deg); } }
-        @keyframes spc-dino { 0%, 100% { transform: scale(1) translateX(0); } 40% { transform: scale(1.2) translateX(-10px); filter: drop-shadow(0 0 20px orange); } 70% { transform: scale(1.1) translateX(50px); filter: drop-shadow(0 0 30px red); } }
-        @keyframes atk-skull { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(20px) rotate(5deg); } 40% { transform: translateX(-5px); } }
-        @keyframes spc-skull { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px) scale(1.2); filter: drop-shadow(0 0 30px purple) grayscale(100%); } }
-        @keyframes atk-mega { 0%, 100% { transform: translate(0,0); } 30% { transform: translate(20px, -20px) scale(1.1); } 60% { transform: translate(-10px, 10px); } }
-        @keyframes spc-mega { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px) scale(1.4); filter: drop-shadow(0 0 40px #facc15) brightness(1.5); } }
-        @keyframes atk-omni { 0%, 100% { transform: translateX(0); opacity: 1; } 20% { transform: translateX(50px); opacity: 0.5; } 40% { transform: translateX(50px); opacity: 1; } }
-        @keyframes spc-omni { 0%, 100% { transform: translateX(0); } 40% { transform: translateX(-20px) scale(1.3); filter: drop-shadow(0 0 50px cyan) brightness(2); } 60% { transform: translateX(10px); filter: drop-shadow(0 0 10px blue); } }
-        @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
-        @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
-        @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
-        @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
-        .animate-breathe { animation: squish-breathe 2s ease-in-out infinite; }
-        .animate-jump { animation: happy-jump 0.6s ease-in-out; }
-        .exp-float { animation: float-up 1s ease-out forwards; position: absolute; font-weight: 900; color: #f97316; text-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 50; top: -20px; }
-        .animate-float-slow { animation: float-slow 3s ease-in-out infinite; }
-      `}</style>
-
-      {expPopups.map((popup) => (
-        <div key={popup.id} className="exp-float text-xl">
-          +15 EXP!
-        </div>
-      ))}
-
-      <div
-        className={`relative z-10 ${isEating ? "animate-jump" : "animate-breathe"}`}
-      >
-        <svg
-          width="140"
-          height="140"
-          viewBox="-6 -6 28 24"
-          xmlns="http://www.w3.org/2000/svg"
-          className={`drop-shadow-xl overflow-visible ${getAnimationClass()}`}
-        >
-          {renderSprite()}
-        </svg>
-      </div>
-      <div className="absolute bottom-0 w-24 h-3 bg-black/10 rounded-full blur-[2px]"></div>
     </div>
   );
 }
@@ -3020,10 +3067,14 @@ export default nextConfig;
     "lint": "eslint"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.0",
+    "@types/three": "^0.184.0",
     "mongoose": "^9.3.3",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -4662,229 +4713,174 @@ export default function SpellingTest({
 }
 </file>
 
-<file path="src/components/game/JumpGame.tsx">
+<file path="src/components/shared/DigimonVocabmon.tsx">
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { VocabWord } from '@/data/vocab';
-import PixelVocabmon from '../shared/PixelVocabmon';
-import SandTimer from '../shared/SandTimer';
+import React, { useEffect, useState } from 'react';
 
-export default function JumpGame({ words }: { words: VocabWord[] }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [options, setOptions] = useState<string[]>([]);
-  const [playerLane, setPlayerLane] = useState(1);
-  const [doorStatus, setDoorStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
+interface Props {
+  level: number;
+  feedTrigger?: number;
+  attackTrigger?: number;
+  className?: string;
+}
+
+export default function PixelVocabmon({ level, feedTrigger, attackTrigger, className = "" }: Props) {
+  const safeLevel = Math.max(1, Math.min(10, level));
+  const [isEating, setIsEating] = useState(false);
+  const [isAttacking, setIsAttacking] = useState(false);
+  const [expPopups, setExpPopups] = useState<{id: number}[]>([]);
+  const [spriteMode, setSpriteMode] = useState<'idle' | 'atk'>('idle');
   
-  const [hasWon, setHasWon] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [strikes, setStrikes] = useState(0);
-  const [specialTrigger, setSpecialTrigger] = useState(0);
-  
-  const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
-  const [currentLevel, setCurrentLevel] = useState(1);
-
-  const bgmRef = useRef<HTMLAudioElement | null>(null);
-
-  const startBGM = useCallback(() => {
-    if (bgmRef.current) {
-      bgmRef.current.pause();
-      bgmRef.current.currentTime = 0;
-    }
-    const audio = new Audio('/exciting.mp3');
-    audio.loop = true;
-    audio.volume = 0.4;
-    bgmRef.current = audio;
-    audio.play().catch(e => console.log("Audio play blocked"));
-  }, []);
+  // NEW: Tracks whether we need to use CSS animations because the attack GIF is missing
+  const [useCssFallback, setUseCssFallback] = useState(false);
 
   useEffect(() => {
-    const savedExp = parseInt(localStorage.getItem("vocabmon_exp") || "0", 10);
-    setCurrentLevel(Math.min(Math.floor(savedExp / 150) + 1, 10));
-    setHighScore(parseInt(localStorage.getItem("jump_high_score") || "0", 10));
-
-    startBGM();
-
-    return () => {
-      if (bgmRef.current) bgmRef.current.pause();
-    };
-  }, [startBGM]);
+    if (feedTrigger && feedTrigger > 0) {
+      setIsEating(true);
+      const newId = Date.now();
+      setExpPopups(prev => [...prev, { id: newId }]);
+      const animTimer = setTimeout(() => setIsEating(false), 600);
+      const popupTimer = setTimeout(() => {
+        setExpPopups(prev => prev.filter(p => p.id !== newId));
+      }, 1000);
+      return () => { clearTimeout(animTimer); clearTimeout(popupTimer); };
+    }
+  }, [feedTrigger]);
 
   useEffect(() => {
-    if (currentIndex >= words.length) {
-      setHasWon(true);
-      return;
-    }
-    const correctWord = words[currentIndex].word;
-    const distractors = words.filter(w => w.word !== correctWord).sort(() => 0.5 - Math.random()).slice(0, 2).map(w => w.word);
-    while (distractors.length < 2) distractors.push(["abandon", "modify", "derive", "cease"][Math.floor(Math.random() * 4)]);
-    
-    setOptions([correctWord, ...distractors].sort(() => 0.5 - Math.random()));
-    setDoorStatus('idle');
-    setPlayerLane(1);
-  }, [currentIndex, words]);
-
-  const triggerGameOver = useCallback(() => {
-    if (score > highScore) {
-      setHighScore(score);
-      localStorage.setItem("jump_high_score", score.toString());
-    }
-    setIsGameOver(true);
-
-    if (bgmCtxRef.current) bgmCtxRef.current.close();
-    try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioContextClass) {
-        const ctx = new AudioContextClass();
-        const playSadNote = (freq: number, start: number, dur: number) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.value = freq;
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime + start);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
-          osc.start(ctx.currentTime + start);
-          osc.stop(ctx.currentTime + start + dur);
-        };
-        // Sad descending arpeggio
-        playSadNote(300, 0, 0.4);
-        playSadNote(250, 0.3, 0.4);
-        playSadNote(200, 0.6, 0.8);
-      }
-    } catch (e) {}
-  }, [score, highScore]);
-
-  const handleDoorClick = (laneIndex: number, selectedWord: string) => {
-    if (doorStatus !== 'idle' || isGameOver) return;
-    setPlayerLane(laneIndex);
-    
-    if (selectedWord === words[currentIndex].word) {
-      setDoorStatus('correct');
-      setScore(prev => prev + 10);
-      setSpecialTrigger(prev => prev + 1); 
+    if (attackTrigger && attackTrigger > 0) {
+      setIsAttacking(true);
+      setSpriteMode('atk');
+      setUseCssFallback(false); // Reset fallback state on new attack
       
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator(); osc.type = 'sine'; 
-          osc.frequency.setValueAtTime(600, ctx.currentTime); 
-          osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1); 
-          osc.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.1);
-        }
-      } catch (e) {}
-      setTimeout(() => setCurrentIndex(prev => prev + 1), 600);
-    } else {
-      setDoorStatus('wrong');
-      const newStrikes = strikes + 1;
-      setStrikes(newStrikes);
+      // EXTENDED TIMEOUT: Gives long GIFs 2.5 seconds to finish playing
+      const timer = setTimeout(() => {
+        setIsAttacking(false);
+        setSpriteMode('idle');
+        setUseCssFallback(false);
+      }, 2500); 
       
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator(); osc.type = 'sawtooth'; 
-          osc.frequency.setValueAtTime(150, ctx.currentTime); 
-          osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2); 
-          osc.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.2);
-        }
-      } catch (e) {}
-      
-      if (newStrikes >= 2) {
-        setTimeout(() => triggerGameOver(), 800);
-      } else {
-        setTimeout(() => { setDoorStatus('idle'); setPlayerLane(1); }, 800);
-      }
+      return () => clearTimeout(timer);
     }
+  }, [attackTrigger]);
+
+  const getAnimationClass = () => {
+    if (!isAttacking) return '';
+    // ONLY apply the wild CSS movements if the attack GIF failed to load
+    if (useCssFallback) return `anim-spc-${safeLevel}`;
+    // If it's a real attack GIF, just enlarge it slightly for impact, no sliding!
+    return 'scale-110 transition-transform duration-300';
   };
 
-  const handlePlayAgain = () => {
-    setIsGameOver(false);
-    setHasWon(false);
-    setCurrentIndex(0);
-    setScore(0);
-    setStrikes(0);
-    setDoorStatus('idle');
-    setPlayerLane(1);
-    startBGM();
-  };
-
-  const currentDef = words[currentIndex]?.definition || "";
+  const spriteSuffix = spriteMode === 'atk' ? '_atk' : '';
+  const spritePath = `/sprites/lvl${safeLevel}${spriteSuffix}.gif`;
 
   return (
-    <div className="relative w-full h-[450px] bg-sky-900 overflow-hidden rounded-2xl border-4 border-indigo-900 shadow-inner" style={{ perspective: '800px' }}>
-      
-      <div className="absolute top-0 left-0 w-full px-6 pt-3 z-40">
-        <SandTimer key={`${currentIndex}-${isGameOver}`} duration={15} isActive={doorStatus === 'idle' && !isGameOver && !hasWon} onTimeUp={triggerGameOver} />
-      </div>
-
-      {/* Score UI */}
-      <div className="absolute top-12 right-4 bg-amber-400 text-amber-950 font-black px-4 py-2 rounded-xl shadow-lg z-40 border-2 border-white flex items-center gap-2 animate-fade-in">
-        <span className="text-xl">🪙</span> {score}
-      </div>
-      
-      {/* Lives UI */}
-      <div className="absolute top-12 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md z-40 border-2 border-red-100 flex items-center gap-1 text-xl">
-        {strikes === 0 ? "❤️❤️" : strikes === 1 ? "❤️🖤" : "🖤🖤"}
-      </div>
-
-      {isGameOver && (
-        <div className="absolute inset-0 bg-sky-950/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white p-8 text-center animate-fade-in">
-          <div className="text-7xl mb-4 animate-bounce">💥</div>
-          <h2 className="text-4xl font-black mb-2 text-red-400">CRASH!</h2>
-          <div className="bg-sky-900/50 border-2 border-sky-800 rounded-2xl p-6 mb-8 w-full max-w-sm">
-            <p className="text-sky-300 font-bold uppercase tracking-widest text-sm mb-1">Score</p>
-            <p className="text-5xl font-black text-amber-400 mb-4">{score}</p>
-            <div className="h-px w-full bg-sky-800 mb-4"></div>
-            <p className="text-sky-300 font-bold uppercase tracking-widest text-sm mb-1">Top Score</p>
-            <p className="text-2xl font-black text-white">{Math.max(score, highScore)}</p>
-          </div>
-          <button onClick={handlePlayAgain} className="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-8 rounded-xl text-xl transition-transform active:scale-95 shadow-lg border-2 border-emerald-400 w-full max-w-sm">
-            Play Again 🔄
-          </button>
-        </div>
-      )}
-
-      {hasWon && (
-        <div className="absolute inset-0 bg-emerald-500/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white p-8 text-center animate-fade-in">
-          <div className="text-7xl mb-4 animate-bounce">🏆</div>
-          <h2 className="text-4xl font-black mb-2 uppercase italic text-yellow-300">Run Complete!</h2>
-          <p className="text-xl font-bold mb-8">You cleared all doors!</p>
-          <button onClick={handlePlayAgain} className="bg-white hover:bg-gray-100 text-emerald-700 font-black py-4 px-8 rounded-xl text-xl transition-transform active:scale-95 shadow-lg w-full max-w-sm">
-            Play Again 🔄
-          </button>
-        </div>
-      )}
-
-      <div className="absolute inset-x-0 bottom-0 h-[300px] origin-bottom opacity-80" style={{ transform: 'rotateX(60deg)', background: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.2) 40px, rgba(255,255,255,0.2) 80px), linear-gradient(90deg, #1e3a8a 33%, #1e40af 33%, #1e40af 66%, #1e3a8a 66%)', backgroundSize: '100% 160px', animation: 'scroll-track 0.5s linear infinite' }} />
-
-      <div className="absolute top-12 left-[100px] right-[100px] bg-white/95 backdrop-blur-md border-4 border-indigo-300 rounded-2xl p-4 shadow-xl z-30 text-center">
-        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">Meaning {currentIndex + 1}/{words.length}</span>
-        <p className="text-indigo-950 font-bold text-sm line-clamp-3">{currentDef}</p>
-      </div>
-
-      <div className={`absolute top-[45%] left-0 w-full flex justify-center gap-4 px-4 z-20 transition-all duration-500 ${doorStatus === 'correct' ? 'scale-150 opacity-0 translate-y-20' : 'scale-100 opacity-100'}`}>
-        {options.map((word, i) => (
-          <button key={i} onClick={() => handleDoorClick(i, word)} disabled={doorStatus !== 'idle'} className={`flex-1 relative h-32 rounded-t-full border-4 shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:-translate-y-2 active:scale-95 ${doorStatus === 'wrong' && playerLane === i ? 'bg-red-500 border-red-200 animate-shake' : doorStatus === 'correct' && playerLane === i ? 'bg-emerald-400 border-white' : 'bg-indigo-600/90 border-indigo-300 hover:bg-indigo-500'}`}>
-            <div className="absolute inset-0 rounded-t-full bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-            <span className="text-white font-black text-sm shadow-black drop-shadow-md z-10 px-2 break-words text-center">{word}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="absolute bottom-6 left-1/2 w-[80px] h-[80px] z-30 transition-transform duration-300 ease-out" style={{ transform: `translateX(calc(-50% + ${(playerLane - 1) * 110}px))` }}>
-        <PixelVocabmon level={currentLevel} specialTrigger={specialTrigger} className={`w-full h-full drop-shadow-2xl ${doorStatus === 'wrong' ? 'filter grayscale brightness-50' : ''}`} />
-      </div>
-
+    <div className={`relative flex flex-col items-center justify-end w-[140px] h-[140px] mx-auto ${className}`}>
       <style jsx>{`
-        @keyframes scroll-track { from { background-position: 0 0; } to { background-position: 0 160px; } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px) rotate(-5deg); } 75% { transform: translateX(10px) rotate(5deg); } }
-        .animate-shake { animation: shake 0.4s ease-in-out; }
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+        /* ULTRA-DYNAMIC CLASS BINDINGS */
+        .anim-atk-1 { animation: atk-1 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); } 
+        .anim-spc-1 { animation: spc-1 0.8s ease-in-out; }
+        .anim-atk-2 { animation: atk-2 0.6s cubic-bezier(0.5, -0.5, 0.5, 1.5); }    
+        .anim-spc-2 { animation: spc-2 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .anim-atk-3 { animation: atk-3 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); } 
+        .anim-spc-3 { animation: spc-3 0.9s ease-out; }
+        .anim-atk-4 { animation: atk-4 0.4s ease-in-out; } 
+        .anim-spc-4 { animation: spc-4 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .anim-atk-5 { animation: atk-5 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .anim-spc-5 { animation: spc-5 1.0s ease-out; }
+        .anim-atk-6 { animation: atk-6 0.5s cubic-bezier(0.5, -0.5, 0, 1.5); }
+        .anim-spc-6 { animation: spc-6 1.2s cubic-bezier(0.1, 0.9, 0.2, 1); }
+        .anim-atk-7 { animation: atk-7 0.4s steps(4, end); }    
+        .anim-spc-7 { animation: spc-7 1.2s cubic-bezier(0.5, 0, 0.1, 1); }
+        .anim-atk-8 { animation: atk-8 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); }
+        .anim-spc-8 { animation: spc-8 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .anim-atk-9 { animation: atk-9 0.7s ease-in-out; }      
+        .anim-spc-9 { animation: spc-9 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .anim-atk-10{ animation: atk-10 0.5s cubic-bezier(1, 0, 0, 1); }
+        .anim-spc-10{ animation: spc-10 1.2s cubic-bezier(0.1, 1, 0.1, 1); }
+
+        /* LV 1 & 2: Bouncing and Bubbles */
+        @keyframes atk-1 { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-30px) scale(0.8, 1.2); } 60% { transform: translateY(0) scale(1.2, 0.8); } }
+        @keyframes spc-1 { 0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); } 50% { filter: brightness(1.5) drop-shadow(0 0 40px #facc15); transform: scale(1.1); } }
+        @keyframes atk-2 { 0%, 100% { transform: translate(0,0) scale(1); } 30% { transform: translate(-10px, 10px) scale(1.2, 0.8); } 60% { transform: translate(50px, -20px) scale(0.9, 1.2); } }
+        @keyframes spc-2 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(50px 0 20px #0f172a); transform: scale(1.2) translateY(-10px); } }
+
+        /* LV 3 & 4: Koromon & Agumon (Fast Strikes & Fireballs) */
+        @keyframes atk-3 { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(60px) scale(1.1); filter: drop-shadow(-10px 0 5px rgba(0,0,0,0.2)); } }
+        @keyframes spc-3 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(60px -20px 20px #f472b6); transform: scale(1.2) rotate(-5deg); } }
+        @keyframes atk-4 { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(30px); } 40% { transform: translateX(10px); } 60% { transform: translateX(50px); } }
+        @keyframes spc-4 { 0%, 100% { transform: scale(1) translateX(0); filter: brightness(1); } 30% { transform: scale(0.85) translateX(-15px); filter: brightness(0.7); } 50% { transform: scale(1.3) translateX(20px); filter: brightness(2.5) drop-shadow(100px 0 40px #f97316); } }
+
+        /* LV 5 & 6: Tyrannomon & Greymon (Heavy Impacts) */
+        @keyframes atk-5 { 0%, 100% { transform: scaleX(1) translateX(0); } 50% { transform: scaleX(-1) translateX(-50px) translateY(-10px); filter: drop-shadow(10px 10px 5px rgba(0,0,0,0.3)); } }
+        @keyframes spc-5 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); transform: translateY(0); } 50% { transform: translateY(-10px) scale(1.15); filter: brightness(2) drop-shadow(100px 0 50px #ef4444); } }
+        @keyframes atk-6 { 0%, 100% { transform: translate(0, 0); } 30% { transform: translate(-20px, 20px) scale(1.1, 0.9); } 60% { transform: translate(80px, -60px) scale(0.9, 1.1) rotate(15deg); } }
+        @keyframes spc-6 { 0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 0 transparent); } 30% { transform: scale(0.9) translateX(-10px); } 60% { transform: scale(1.6) translateX(10px); filter: brightness(3) drop-shadow(150px 0 80px #ea580c) drop-shadow(50px 0 30px yellow); } }
+
+        /* LV 7 & 8: SkullGreymon & MetalGreymon (Glitch & Missiles) */
+        @keyframes atk-7 { 0%, 100% { transform: translate(0,0); opacity: 1; filter: grayscale(0); } 25% { transform: translate(50px, -30px); opacity: 0.8; filter: grayscale(1) invert(1); } 50% { transform: translate(80px, 20px); filter: hue-rotate(180deg); } }
+        @keyframes spc-7 { 0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 0 transparent); } 40% { transform: translateY(-100px) scale(1.2); filter: drop-shadow(0 -50px 30px #9333ea); } 60% { transform: translateY(-100px); filter: brightness(2) drop-shadow(120px 180px 60px #7e22ce); } }
+        @keyframes atk-8 { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-20px); } 50% { transform: translateX(100px) scaleX(1.2); filter: drop-shadow(-30px 0 10px #94a3b8); } }
+        @keyframes spc-8 { 0%, 100% { transform: translateX(0); filter: drop-shadow(0 0 0 transparent); } 20% { transform: translateX(-25px); filter: brightness(2) drop-shadow(80px -40px 40px #f59e0b); } 40% { transform: translateX(-15px); filter: brightness(2.5) drop-shadow(100px 40px 50px #ef4444); } 60% { transform: translateX(15px); filter: brightness(3) drop-shadow(150px 0px 100px #ea580c); } }
+
+        /* LV 9 & 10: WarGreymon & Omnimon (God-Tier Attacks) */
+        @keyframes atk-9 { 0%, 100% { transform: translateX(0) rotate(0deg); } 20% { transform: translateX(-30px) rotate(-45deg); } 70% { transform: translateX(120px) rotate(1440deg); filter: drop-shadow(0 0 15px #facc15); } }
+        @keyframes spc-9 { 0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 transparent); } 30% { transform: translateY(-120px) scale(1.2); filter: brightness(1.5) drop-shadow(0 -60px 40px #fbbf24); } 50% { transform: translateY(-120px) scale(1.6); filter: brightness(3) drop-shadow(0 -150px 200px #f59e0b) drop-shadow(0 -50px 80px white); } 70% { transform: translate(60px, 30px) scale(1); filter: brightness(2) drop-shadow(150px 0 100px #fbbf24); } }
+        @keyframes atk-10 { 0%, 100% { transform: translateX(0); opacity: 1; filter: brightness(1); } 10% { transform: translateX(-20px); opacity: 0; } 30% { transform: translateX(180px); opacity: 1; filter: brightness(3) drop-shadow(-80px 0 5px white); } 50% { transform: translateX(180px); opacity: 1; filter: brightness(1); } 60% { transform: translateX(180px); opacity: 0; } }
+        @keyframes spc-10 { 0%, 100% { transform: scale(1) translateX(0); filter: drop-shadow(0 0 0 transparent); } 20% { transform: scale(0.8) translateX(-30px); filter: brightness(2) drop-shadow(30px 0 30px #06b6d4); } 40% { transform: scaleX(5) scaleY(0.4) translateX(40px); transform-origin: left; filter: brightness(5) drop-shadow(200px 0 80px #22d3ee) drop-shadow(0 0 40px white); } 60% { transform: scaleX(4) scaleY(0.5) translateX(30px); transform-origin: left; filter: brightness(2) drop-shadow(150px 0 30px #06b6d4); } }
+
+        /* IDLE & COMMON */
+        @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
+        @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
+        @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
+        @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
+        
+        .animate-breathe { animation: squish-breathe 2s ease-in-out infinite; }
+        .animate-jump { animation: happy-jump 0.6s ease-in-out; }
+        .exp-float { animation: float-up 1s ease-out forwards; position: absolute; font-weight: 900; color: #f97316; text-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 50; top: -20px; }
+        .animate-float-slow { animation: float-slow 3s ease-in-out infinite; }
       `}</style>
+
+      {expPopups.map((popup) => (
+        <div key={popup.id} className="exp-float text-xl font-black text-orange-500 drop-shadow-md">
+          +15 EXP!
+        </div>
+      ))}
+
+      {/* Notice 'animate-breathe' is removed so the GIF can handle its own idle animation naturally! */}
+      <div className={`relative z-10 w-full h-full flex items-center justify-center ${isEating ? "animate-jump" : ""}`}>
+        
+        <img
+          src={spritePath}
+          alt={`Vocabmon Level ${safeLevel}`}
+          className={`max-w-[130px] max-h-[130px] w-auto h-auto object-contain drop-shadow-2xl transition-transform ${getAnimationClass()}`}
+          style={{ 
+            imageRendering: 'pixelated', // This keeps the DS-era pixel art perfectly crisp
+          }}
+          onError={(e) => {
+            if (e.currentTarget.src.includes('_atk')) {
+              // Trigger the CSS fallback animation and swap the image source
+              setUseCssFallback(true);
+              e.currentTarget.src = `/sprites/lvl${safeLevel}.gif`;
+            } else {
+              e.currentTarget.style.display = 'none';
+              if (e.currentTarget.nextElementSibling) {
+                e.currentTarget.nextElementSibling.classList.remove('hidden');
+              }
+            }
+          }}
+        />
+        
+        {/* Helper UI if the GIF is missing */}
+        <div className="hidden text-[10px] font-black text-gray-400 text-center border-2 border-dashed border-gray-300 bg-white/50 backdrop-blur-sm p-4 rounded-xl shadow-inner">
+          Missing GIF<br/>
+          <span className="text-indigo-500">public/sprites/lvl{safeLevel}.gif</span>
+        </div>
+
+      </div>
+      
+      <div className="absolute bottom-0 w-24 h-3 bg-black/10 rounded-full blur-[2px]"></div>
     </div>
   );
 }
@@ -6630,6 +6626,234 @@ export default function SpellingPractice({
 }
 </file>
 
+<file path="src/components/game/JumpGame.tsx">
+"use client";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { VocabWord } from '@/data/vocab';
+import PixelVocabmon from '../shared/PixelVocabmon';
+import SandTimer from '../shared/SandTimer';
+
+export default function JumpGame({ words }: { words: VocabWord[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [options, setOptions] = useState<string[]>([]);
+  const [playerLane, setPlayerLane] = useState(1);
+  const [doorStatus, setDoorStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
+  
+  const [hasWon, setHasWon] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [strikes, setStrikes] = useState(0);
+  const [specialTrigger, setSpecialTrigger] = useState(0);
+  
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+  const [currentLevel, setCurrentLevel] = useState(1);
+
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+
+  const startBGM = useCallback(() => {
+    if (bgmRef.current) {
+      bgmRef.current.pause();
+      bgmRef.current.currentTime = 0;
+    }
+    const audio = new Audio('/exciting.mp3');
+    audio.loop = true;
+    audio.volume = 0.4;
+    bgmRef.current = audio;
+    audio.play().catch(e => console.log("Audio play blocked"));
+  }, []);
+
+  useEffect(() => {
+    const savedExp = parseInt(localStorage.getItem("vocabmon_exp") || "0", 10);
+    setCurrentLevel(Math.min(Math.floor(savedExp / 150) + 1, 10));
+    setHighScore(parseInt(localStorage.getItem("jump_high_score") || "0", 10));
+
+    startBGM();
+
+    return () => {
+      if (bgmRef.current) bgmRef.current.pause();
+    };
+  }, [startBGM]);
+
+  useEffect(() => {
+    if (currentIndex >= words.length) {
+      setHasWon(true);
+      return;
+    }
+    const correctWord = words[currentIndex].word;
+    const distractors = words.filter(w => w.word !== correctWord).sort(() => 0.5 - Math.random()).slice(0, 2).map(w => w.word);
+    while (distractors.length < 2) distractors.push(["abandon", "modify", "derive", "cease"][Math.floor(Math.random() * 4)]);
+    
+    setOptions([correctWord, ...distractors].sort(() => 0.5 - Math.random()));
+    setDoorStatus('idle');
+    setPlayerLane(1);
+  }, [currentIndex, words]);
+
+  const triggerGameOver = useCallback(() => {
+    if (score > highScore) {
+      setHighScore(score);
+      localStorage.setItem("jump_high_score", score.toString());
+    }
+    setIsGameOver(true);
+
+    if (bgmRef.current) bgmRef.current.pause();
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContextClass) {
+        const ctx = new AudioContextClass();
+        const playSadNote = (freq: number, start: number, dur: number) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.value = freq;
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+          osc.start(ctx.currentTime + start);
+          osc.stop(ctx.currentTime + start + dur);
+        };
+        // Sad descending arpeggio
+        playSadNote(300, 0, 0.4);
+        playSadNote(250, 0.3, 0.4);
+        playSadNote(200, 0.6, 0.8);
+      }
+    } catch (e) {}
+  }, [score, highScore]);
+
+  const handleDoorClick = (laneIndex: number, selectedWord: string) => {
+    if (doorStatus !== 'idle' || isGameOver) return;
+    setPlayerLane(laneIndex);
+    
+    if (selectedWord === words[currentIndex].word) {
+      setDoorStatus('correct');
+      setScore(prev => prev + 10);
+      setSpecialTrigger(prev => prev + 1); 
+      
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator(); osc.type = 'sine'; 
+          osc.frequency.setValueAtTime(600, ctx.currentTime); 
+          osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1); 
+          osc.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.1);
+        }
+      } catch (e) {}
+      setTimeout(() => setCurrentIndex(prev => prev + 1), 600);
+    } else {
+      setDoorStatus('wrong');
+      const newStrikes = strikes + 1;
+      setStrikes(newStrikes);
+      
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          const osc = ctx.createOscillator(); osc.type = 'sawtooth'; 
+          osc.frequency.setValueAtTime(150, ctx.currentTime); 
+          osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2); 
+          osc.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.2);
+        }
+      } catch (e) {}
+      
+      if (newStrikes >= 2) {
+        setTimeout(() => triggerGameOver(), 800);
+      } else {
+        setTimeout(() => { setDoorStatus('idle'); setPlayerLane(1); }, 800);
+      }
+    }
+  };
+
+  const handlePlayAgain = () => {
+    setIsGameOver(false);
+    setHasWon(false);
+    setCurrentIndex(0);
+    setScore(0);
+    setStrikes(0);
+    setDoorStatus('idle');
+    setPlayerLane(1);
+    startBGM();
+  };
+
+  const currentDef = words[currentIndex]?.definition || "";
+
+  return (
+    <div className="relative w-full h-[450px] bg-sky-900 overflow-hidden rounded-2xl border-4 border-indigo-900 shadow-inner" style={{ perspective: '800px' }}>
+      
+      <div className="absolute top-0 left-0 w-full px-6 pt-3 z-40">
+        <SandTimer key={`${currentIndex}-${isGameOver}`} duration={15} isActive={doorStatus === 'idle' && !isGameOver && !hasWon} onTimeUp={triggerGameOver} />
+      </div>
+
+      {/* Score UI */}
+      <div className="absolute top-12 right-4 bg-amber-400 text-amber-950 font-black px-4 py-2 rounded-xl shadow-lg z-40 border-2 border-white flex items-center gap-2 animate-fade-in">
+        <span className="text-xl">🪙</span> {score}
+      </div>
+      
+      {/* Lives UI */}
+      <div className="absolute top-12 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md z-40 border-2 border-red-100 flex items-center gap-1 text-xl">
+        {strikes === 0 ? "❤️❤️" : strikes === 1 ? "❤️🖤" : "🖤🖤"}
+      </div>
+
+      {isGameOver && (
+        <div className="absolute inset-0 bg-sky-950/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white p-8 text-center animate-fade-in">
+          <div className="text-7xl mb-4 animate-bounce">💥</div>
+          <h2 className="text-4xl font-black mb-2 text-red-400">CRASH!</h2>
+          <div className="bg-sky-900/50 border-2 border-sky-800 rounded-2xl p-6 mb-8 w-full max-w-sm">
+            <p className="text-sky-300 font-bold uppercase tracking-widest text-sm mb-1">Score</p>
+            <p className="text-5xl font-black text-amber-400 mb-4">{score}</p>
+            <div className="h-px w-full bg-sky-800 mb-4"></div>
+            <p className="text-sky-300 font-bold uppercase tracking-widest text-sm mb-1">Top Score</p>
+            <p className="text-2xl font-black text-white">{Math.max(score, highScore)}</p>
+          </div>
+          <button onClick={handlePlayAgain} className="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-8 rounded-xl text-xl transition-transform active:scale-95 shadow-lg border-2 border-emerald-400 w-full max-w-sm">
+            Play Again 🔄
+          </button>
+        </div>
+      )}
+
+      {hasWon && (
+        <div className="absolute inset-0 bg-emerald-500/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white p-8 text-center animate-fade-in">
+          <div className="text-7xl mb-4 animate-bounce">🏆</div>
+          <h2 className="text-4xl font-black mb-2 uppercase italic text-yellow-300">Run Complete!</h2>
+          <p className="text-xl font-bold mb-8">You cleared all doors!</p>
+          <button onClick={handlePlayAgain} className="bg-white hover:bg-gray-100 text-emerald-700 font-black py-4 px-8 rounded-xl text-xl transition-transform active:scale-95 shadow-lg w-full max-w-sm">
+            Play Again 🔄
+          </button>
+        </div>
+      )}
+
+      <div className="absolute inset-x-0 bottom-0 h-[300px] origin-bottom opacity-80" style={{ transform: 'rotateX(60deg)', background: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.2) 40px, rgba(255,255,255,0.2) 80px), linear-gradient(90deg, #1e3a8a 33%, #1e40af 33%, #1e40af 66%, #1e3a8a 66%)', backgroundSize: '100% 160px', animation: 'scroll-track 0.5s linear infinite' }} />
+
+      <div className="absolute top-12 left-[100px] right-[100px] bg-white/95 backdrop-blur-md border-4 border-indigo-300 rounded-2xl p-4 shadow-xl z-30 text-center">
+        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">Meaning {currentIndex + 1}/{words.length}</span>
+        <p className="text-indigo-950 font-bold text-sm line-clamp-3">{currentDef}</p>
+      </div>
+
+      <div className={`absolute top-[45%] left-0 w-full flex justify-center gap-4 px-4 z-20 transition-all duration-500 ${doorStatus === 'correct' ? 'scale-150 opacity-0 translate-y-20' : 'scale-100 opacity-100'}`}>
+        {options.map((word, i) => (
+          <button key={i} onClick={() => handleDoorClick(i, word)} disabled={doorStatus !== 'idle'} className={`flex-1 relative h-32 rounded-t-full border-4 shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:-translate-y-2 active:scale-95 ${doorStatus === 'wrong' && playerLane === i ? 'bg-red-500 border-red-200 animate-shake' : doorStatus === 'correct' && playerLane === i ? 'bg-emerald-400 border-white' : 'bg-indigo-600/90 border-indigo-300 hover:bg-indigo-500'}`}>
+            <div className="absolute inset-0 rounded-t-full bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+            <span className="text-white font-black text-sm shadow-black drop-shadow-md z-10 px-2 break-words text-center">{word}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="absolute bottom-6 left-1/2 w-[80px] h-[80px] z-30 transition-transform duration-300 ease-out" style={{ transform: `translateX(calc(-50% + ${(playerLane - 1) * 110}px))` }}>
+        <PixelVocabmon level={currentLevel} specialTrigger={specialTrigger} className={`w-full h-full drop-shadow-2xl ${doorStatus === 'wrong' ? 'filter grayscale brightness-50' : ''}`} />
+      </div>
+
+      <style jsx>{`
+        @keyframes scroll-track { from { background-position: 0 0; } to { background-position: 0 160px; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px) rotate(-5deg); } 75% { transform: translateX(10px) rotate(5deg); } }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+      `}</style>
+    </div>
+  );
+}
+</file>
+
 <file path="src/components/shared/PixelVocabmon.tsx">
 import FireVocabmon from "./FireVocabmon";
 import DigimonVocabmon from "./DigimonVocabmon";
@@ -7251,188 +7475,122 @@ export const vocabData: VocabWord[] = [
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import PixelVocabmon from "../shared/PixelVocabmon";
-import StickerPopup from "./StickerPopup";
-import StickerUnlockCelebration from "./StickerUnlockCelebration";
 import { triggerSilentSync } from "@/lib/syncHelper";
 import { logoutUser } from "@/actions/logout";
+import { getCurrentUsername } from "@/actions/auth";
+
+// 💥 GLOBAL SINGLETON: Absolutely guarantees only ONE audio instance exists
+let globalDashboardAudio: HTMLAudioElement | null = null;
 
 export default function Dashboard() {
   const [exp, setExp] = useState(0);
+  const [username, setUsername] = useState<string>("");
   const [spellingDone, setSpellingDone] = useState(false);
   const [exerciseDone, setExerciseDone] = useState(false);
   const [testDone, setTestDone] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const [atkCharges, setAtkCharges] = useState(2);
-  const [spcCharges, setSpcCharges] = useState(2);
+  const [atkCharges, setAtkCharges] = useState(10);
   const [atkTrigger, setAtkTrigger] = useState(0);
-  const [spcTrigger, setSpcTrigger] = useState(0);
   const [showEnergyAlert, setShowEnergyAlert] = useState(false);
-
   const [currentSet, setCurrentSet] = useState(0);
   const totalSets = 10;
+  const [midtermDone, setMidtermDone] = useState(false);
+  const [final1Done, setFinal1Done] = useState(false);
+  const [finaleDone, setFinaleDone] = useState(false);
+  const activeQuestRef = useRef<HTMLDivElement>(null);
 
   const [isMusicOn, setIsMusicOn] = useState(false);
-  const bgmRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    getCurrentUsername().then(name => setUsername(name || ""));
+
+    // Clean up any existing global audio immediately
+    if (globalDashboardAudio) {
+      globalDashboardAudio.pause();
+      globalDashboardAudio.src = '';
+    }
+
     const audio = new Audio('/piano.mp3');
     audio.loop = true;
     audio.volume = 0.2;
-    bgmRef.current = audio;
+    globalDashboardAudio = audio;
 
-    // Force the UI state to ON immediately
-    setIsMusicOn(true);
-    
-    // Tell the browser to play immediately
-    audio.play().catch(err => {
-      console.log("Browser blocked autoplay. Waiting for interaction...");
-      // If blocked, we silently wait for their first click on the screen
-      const unlockAudio = () => {
-        audio.play().catch(e => {});
-        document.removeEventListener('click', unlockAudio);
-        document.removeEventListener('touchstart', unlockAudio);
-      };
-      document.addEventListener('click', unlockAudio);
-      document.addEventListener('touchstart', unlockAudio);
-    });
+    let interactionHandler: (() => void) | null = null;
+
+    const tryPlay = () => {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setIsMusicOn(true);
+        }).catch(err => {
+          setIsMusicOn(false);
+          interactionHandler = () => {
+            audio.play().then(() => setIsMusicOn(true)).catch(e => {});
+            if (interactionHandler) {
+              document.removeEventListener('click', interactionHandler);
+              document.removeEventListener('touchstart', interactionHandler);
+            }
+            interactionHandler = null;
+          };
+          document.addEventListener('click', interactionHandler);
+          document.addEventListener('touchstart', interactionHandler);
+        });
+      }
+    };
+
+    tryPlay();
 
     return () => {
-      audio.pause();
-      audio.currentTime = 0;
+      if (globalDashboardAudio === audio) {
+        audio.pause();
+        audio.src = '';
+        globalDashboardAudio = null;
+      }
+      if (interactionHandler) {
+        document.removeEventListener('click', interactionHandler);
+        document.removeEventListener('touchstart', interactionHandler);
+      }
     };
   }, []);
 
   const toggleMusic = () => {
-    if (!bgmRef.current) return;
+    if (!globalDashboardAudio) return;
     if (isMusicOn) {
-      bgmRef.current.pause();
+      globalDashboardAudio.pause();
     } else {
-      bgmRef.current.play().catch(e => console.log("Audio play blocked"));
+      globalDashboardAudio.play().catch(e => console.log("Audio play blocked"));
     }
     setIsMusicOn(!isMusicOn);
   };
-
+  
   const digimonNames = ["", "Digi-Egg", "Botamon", "Koromon", "Agumon", "Tyrannomon", "Greymon", "SkullGreymon", "MetalGreymon", "WarGreymon", "Omnimon"];
-
-  // Keep this array for the "Evolve/Next" button labels
-  const scheduleDays = [
-    "Friday (Part 1)",
-    "Friday (Part 2)",
-    "Saturday (Part 1)",
-    "Saturday (Part 2)",
-    "Sunday (Morning)",
-    "Monday (Part 1)",
-    "Monday (Part 2)",
-    "Tuesday (Part 1)",
-    "Tuesday (Part 2)",
-    "Wednesday",
-  ];
-
-  // NEW: Group the sets by day to build the visual UI
-  const weeklyPlan = [
-    { day: "Friday", sets: [0, 1] },
-    { day: "Saturday", sets: [2, 3] },
-    { day: "Sunday", sets: [4], hasMidterm: true },
-    { day: "Monday", sets: [5, 6] },
-    { day: "Tuesday", sets: [7, 8] },
-    { day: "Wednesday", sets: [9], hasFinals: true },
-  ];
-
-  const [midtermDone, setMidtermDone] = useState(false);
-  const [final1Done, setFinal1Done] = useState(false);
-  const [finaleDone, setFinaleDone] = useState(false);
-
-  const activeQuestRef = useRef<HTMLDivElement>(null);
+  const scheduleDays = ["Friday (Part 1)", "Friday (Part 2)", "Saturday (Part 1)", "Saturday (Part 2)", "Sunday (Morning)", "Monday (Part 1)", "Monday (Part 2)", "Tuesday (Part 1)", "Tuesday (Part 2)", "Wednesday"];
+  const weeklyPlan = [ { day: "Friday", sets: [0, 1] }, { day: "Saturday", sets: [2, 3] }, { day: "Sunday", sets: [4], hasMidterm: true }, { day: "Monday", sets: [5, 6] }, { day: "Tuesday", sets: [7, 8] }, { day: "Wednesday", sets: [9], hasFinals: true } ];
 
   useEffect(() => {
     const initTimer = setTimeout(() => {
       const activeWeekId = localStorage.getItem("active_week_id") || "week_1";
       const localActiveWeekId = localStorage.getItem("local_activeWeekId");
-
       if (localActiveWeekId !== activeWeekId) {
-        // Roll over! Clear quest data and current set.
-        const questKeys = [
-          "current_word_set",
-          "quest_spelling_done",
-          "quest_exercise_done",
-          "quest_test_done",
-          "quest_midterm_done",
-          "quest_final1_done",
-          "quest_finale_done",
-          "completedQuests",
-        ];
+        const questKeys = ["current_word_set", "quest_spelling_done", "quest_exercise_done", "quest_test_done", "quest_midterm_done", "quest_final1_done", "quest_finale_done", "completedQuests"];
         questKeys.forEach((key) => localStorage.removeItem(key));
         localStorage.setItem("local_activeWeekId", activeWeekId);
       }
-
-      const savedExp = parseInt(
-        localStorage.getItem("vocabmon_exp") || "0",
-        10,
-      );
-      const isSpellDone =
-        localStorage.getItem("quest_spelling_done") === "true";
-      const isExDone = localStorage.getItem("quest_exercise_done") === "true";
-      const isTestDone = localStorage.getItem("quest_test_done") === "true";
-      const triggerFX = localStorage.getItem("trigger_fireworks") === "true";
-      const savedSet = parseInt(
-        localStorage.getItem("current_word_set") || "0",
-        10,
-      );
-
-      setSpellingDone(isSpellDone);
-      setExerciseDone(isExDone);
-      setTestDone(isTestDone);
-      setCurrentSet(savedSet);
-
+      const savedExp = parseInt(localStorage.getItem("vocabmon_exp") || "0", 10);
+      setSpellingDone(localStorage.getItem("quest_spelling_done") === "true");
+      setExerciseDone(localStorage.getItem("quest_exercise_done") === "true");
+      setTestDone(localStorage.getItem("quest_test_done") === "true");
+      setCurrentSet(parseInt(localStorage.getItem("current_word_set") || "0", 10));
       setMidtermDone(localStorage.getItem("quest_midterm_done") === "true");
       setFinal1Done(localStorage.getItem("quest_final1_done") === "true");
       setFinaleDone(localStorage.getItem("quest_finale_done") === "true");
-
       setIsLoaded(true);
-
-      if (triggerFX) {
+      if (localStorage.getItem("trigger_fireworks") === "true") {
         setShowFireworks(true);
         setExp(Math.max(0, savedExp - 50));
         setTimeout(() => setExp(savedExp), 600);
-        try {
-          const AudioContextClass =
-            window.AudioContext ||
-            (
-              window as Window & {
-                webkitAudioContext?: typeof window.AudioContext;
-              }
-            ).webkitAudioContext;
-
-          if (AudioContextClass) {
-            const ctx = new AudioContextClass();
-            const playNote = (
-              freq: number,
-              startTime: number,
-              duration: number,
-            ) => {
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-              osc.type = "sine";
-              osc.frequency.value = freq;
-              osc.connect(gain);
-              gain.connect(ctx.destination);
-              gain.gain.setValueAtTime(0, startTime);
-              gain.gain.linearRampToValueAtTime(0.1, startTime + 0.05);
-              gain.gain.setValueAtTime(0.1, startTime + duration - 0.1);
-              gain.gain.linearRampToValueAtTime(0, startTime + duration);
-              osc.start(startTime);
-              osc.stop(startTime + duration);
-            };
-            const now = ctx.currentTime;
-            playNote(523.25, now, 0.15);
-            playNote(659.25, now + 0.15, 0.15);
-            playNote(783.99, now + 0.3, 0.15);
-            playNote(1046.5, now + 0.45, 0.4);
-          }
-        } catch (e) {}
         localStorage.removeItem("trigger_fireworks");
         setTimeout(() => setShowFireworks(false), 4000);
       } else {
@@ -7446,111 +7604,38 @@ export default function Dashboard() {
     if (isLoaded) {
       const lastExp = parseInt(localStorage.getItem("last_attack_exp") || "0", 10);
       if (exp > lastExp) {
-        setAtkCharges(2);
-        setSpcCharges(2);
+        setAtkCharges(10);
         localStorage.setItem("last_attack_exp", exp.toString());
-        localStorage.setItem("atk_charges", "2");
-        localStorage.setItem("spc_charges", "2");
-        localStorage.setItem("game_attempts", "2");
+        localStorage.setItem("atk_charges", "10"); localStorage.setItem("game_attempts", "2");
       } else {
         const savedAtk = localStorage.getItem("atk_charges");
-        const savedSpc = localStorage.getItem("spc_charges");
         if (savedAtk !== null) setAtkCharges(parseInt(savedAtk, 10));
-        if (savedSpc !== null) setSpcCharges(parseInt(savedSpc, 10));
       }
     }
   }, [exp, isLoaded]);
 
-  useEffect(() => {
-    if (isLoaded && activeQuestRef.current) {
-      setTimeout(() => {
-        activeQuestRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }, 300);
-    }
-  }, [isLoaded]);
+  useEffect(() => { if (isLoaded && activeQuestRef.current) setTimeout(() => { activeQuestRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); }, 300); }, [isLoaded]);
 
   const calculateLevelInfo = (totalExp: number) => {
-    const rawLevel = Math.floor(totalExp / 150) + 1;
-    const currentLevel = Math.min(rawLevel, 10);
-    const expIntoCurrentLevel = totalExp % 150;
-    const targetExpForLevel = 150;
-
-    if (totalExp >= 1500) {
-      return {
-        level: 10,
-        currentExpInLevel: 150,
-        targetExpForLevel: 150,
-        percentage: 100,
-      };
-    }
-    const progressPercentage = (expIntoCurrentLevel / targetExpForLevel) * 100;
-    return {
-      level: currentLevel,
-      currentExpInLevel: expIntoCurrentLevel,
-      targetExpForLevel,
-      percentage: progressPercentage,
-    };
+    const rawLevel = Math.floor(totalExp / 150) + 1; const currentLevel = Math.min(rawLevel, 10); const expIntoCurrentLevel = totalExp % 150; const targetExpForLevel = 150;
+    if (totalExp >= 1500) return { level: 10, currentExpInLevel: 150, targetExpForLevel: 150, percentage: 100 };
+    return { level: currentLevel, currentExpInLevel: expIntoCurrentLevel, targetExpForLevel, percentage: (expIntoCurrentLevel / targetExpForLevel) * 100 };
   };
-
   const levelStats = calculateLevelInfo(exp);
 
   const advanceToNextSet = () => {
     const nextSet = currentSet + 1;
     if (nextSet < totalSets) {
       localStorage.setItem("current_word_set", nextSet.toString());
-      localStorage.removeItem("quest_spelling_done");
-      localStorage.removeItem("quest_exercise_done");
-      localStorage.removeItem("quest_test_done");
-
-      setCurrentSet(nextSet);
-      setSpellingDone(false);
-      setExerciseDone(false);
-      setTestDone(false);
-
-      triggerSilentSync();
-
-      try {
-        const AudioContextClass =
-          window.AudioContext ||
-          (
-            window as Window & {
-              webkitAudioContext?: typeof window.AudioContext;
-            }
-          ).webkitAudioContext;
-
-        if (AudioContextClass) {
-          const ctx = new AudioContextClass();
-          const osc = ctx.createOscillator();
-          osc.frequency.setValueAtTime(880, ctx.currentTime);
-          osc.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.1);
-        }
-      } catch (e) {}
-
-      setTimeout(() => {
-        activeQuestRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }, 100);
+      localStorage.removeItem("quest_spelling_done"); localStorage.removeItem("quest_exercise_done"); localStorage.removeItem("quest_test_done");
+      setCurrentSet(nextSet); setSpellingDone(false); setExerciseDone(false); setTestDone(false); triggerSilentSync();
+      setTimeout(() => { activeQuestRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); }, 100);
     }
   };
 
   if (!isLoaded) return <div className="w-full max-w-md min-h-[50vh]"></div>;
-
   const isSetComplete = spellingDone && exerciseDone && testDone;
-
-  // Logic to find the current active day index
-  const activeDayIndex = weeklyPlan.findIndex((dayPlan) =>
-    dayPlan.sets.includes(currentSet)
-  ) !== -1 ? weeklyPlan.findIndex((dayPlan) =>
-    dayPlan.sets.includes(currentSet)
-  ) : weeklyPlan.length - 1;
-
+  const activeDayIndex = weeklyPlan.findIndex((dayPlan) => dayPlan.sets.includes(currentSet)) !== -1 ? weeklyPlan.findIndex((dayPlan) => dayPlan.sets.includes(currentSet)) : weeklyPlan.length - 1;
   const renderedPlan = isExpanded ? weeklyPlan : [weeklyPlan[activeDayIndex]];
 
   return (
@@ -7582,16 +7667,7 @@ export default function Dashboard() {
       {showFireworks && (
         <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center overflow-hidden">
           {[...Array(12)].map((_, i) => (
-            <div
-              key={i}
-              className="fw-particle"
-              style={
-                {
-                  "--tx": `${Math.cos(i * 30 * (Math.PI / 180)) * 150}px`,
-                  "--ty": `${Math.sin(i * 30 * (Math.PI / 180)) * 150}px`,
-                } as React.CSSProperties
-              }
-            >
+            <div key={i} className="fw-particle" style={{ "--tx": `${Math.cos(i * 30 * (Math.PI / 180)) * 150}px`, "--ty": `${Math.sin(i * 30 * (Math.PI / 180)) * 150}px` } as React.CSSProperties}>
               {i % 2 === 0 ? "🌟" : "🎉"}
             </div>
           ))}
@@ -7599,11 +7675,13 @@ export default function Dashboard() {
       )}
 
       {/* Logout button */}
-      <div className="w-full flex justify-end px-6 pt-6 z-20 relative">
-        <button
-          onClick={() => logoutUser()}
-          className="text-sm font-bold text-gray-400 hover:text-gray-700 transition-colors flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200"
-        >
+      <div className="w-full flex justify-end px-6 pt-6 z-20 relative gap-3">
+        {username === 'dev' && (
+          <Link href="/design" className="bg-purple-600 hover:bg-purple-700 text-white font-black py-2 px-4 rounded-full shadow-sm transition-all flex items-center gap-2">
+            <span>🎨</span> Design Lab
+          </Link>
+        )}
+        <button onClick={() => logoutUser()} className="text-sm font-bold text-gray-400 hover:text-gray-700 transition-colors flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
           Log Out
         </button>
       </div>
@@ -7613,104 +7691,81 @@ export default function Dashboard() {
         <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100 relative">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="text-2xl font-black text-gray-800 mb-2">
-                Jay&apos;s Partner
-              </h2>
-              <span className="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-sm">
-                Lv. {levelStats.level}
-              </span>
+              <h2 className="text-2xl font-black text-gray-800 mb-2">Jay&apos;s Partner</h2>
+              <span className="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-sm">Lv. {levelStats.level}</span>
             </div>
-
             <div className="flex gap-2">
-              <Link
-                href="/game"
-                className="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
-                title="Play Jump Game"
-              >
-                <span className="text-xl">🎮</span>
-              </Link>
-              <Link
-                href="/collection"
-                className="bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center"
-                title="View Hall of Fame"
-              >
-                <span className="text-xl">🏆</span>
-              </Link>
+              <Link href="/game" className="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center" title="Play Jump Game"><span className="text-xl">🎮</span></Link>
+              <Link href="/collection" className="bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 font-bold p-3 rounded-2xl shadow-sm transition-all transform hover:scale-105 flex items-center justify-center" title="View Hall of Fame"><span className="text-xl">🏆</span></Link>
             </div>
           </div>
 
           <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-6 border border-indigo-100/50 relative">
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm border-2 border-indigo-100 text-indigo-800 font-black px-4 py-1 rounded-full text-xs uppercase tracking-widest shadow-sm z-10">
-              {digimonNames[levelStats.level] || "Mystery"}
-            </div>
-            <div className="mb-6">
-              <PixelVocabmon
-                feedTrigger={showFireworks ? 1 : 0}
-                attackTrigger={atkTrigger}
-                specialTrigger={spcTrigger}
-                level={levelStats.level}
-                className={
-                  isSetComplete && currentSet < totalSets - 1
-                    ? "animate-evo-glow"
-                    : ""
-                }
-              />
-            </div>
-            <div className="w-full flex justify-center gap-3 z-20">
-              <button
-                onClick={() => {
-                  if (atkCharges > 0) {
-                    setAtkCharges((p) => {
-                      const newVal = p - 1;
-                      localStorage.setItem("atk_charges", newVal.toString());
-                      return newVal;
-                    });
-                    setAtkTrigger((p) => p + 1);
-                  } else {
-                    setShowEnergyAlert(true);
-                  }
-                }}
-                className="bg-white/90 backdrop-blur-sm border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-black px-4 py-2 rounded-xl text-sm shadow-sm transition-transform active:scale-95 flex-1"
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm border-2 border-indigo-100 text-indigo-800 font-black px-4 py-1 rounded-full text-xs uppercase tracking-widest shadow-sm z-10">{digimonNames[levelStats.level] || "Mystery"}</div>
+            
+            {/* DEV CHEAT MENU */}
+            {username === 'dev' && (
+              <div className="absolute top-4 right-4 bg-purple-900/95 backdrop-blur-md p-3 rounded-xl shadow-2xl border-2 border-purple-400 z-50 flex flex-col gap-2 items-center animate-fade-in">
+                <span className="text-[10px] font-black text-purple-200 uppercase tracking-widest">Dev Tools</span>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => { const cl = levelStats.level; if(cl > 1) { const nx = (cl - 2) * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); } }} 
+                    className="bg-purple-600 hover:bg-purple-500 text-white font-black w-10 h-10 rounded-lg shadow-md transition-transform active:scale-95 text-sm"
+                  >
+                    -LV
+                  </button>
+                  <button 
+                    onClick={() => { const cl = levelStats.level; if(cl < 10) { const nx = cl * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); } }} 
+                    className="bg-purple-600 hover:bg-purple-500 text-white font-black w-10 h-10 rounded-lg shadow-md transition-transform active:scale-95 text-sm"
+                  >
+                    +LV
+                  </button>
+                </div>
+                <button 
+                  onClick={() => { setAtkCharges(10); localStorage.setItem("atk_charges", "10"); }} 
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-2 rounded-lg shadow-md transition-transform active:scale-95 text-[10px] uppercase tracking-wider"
+                >
+                  Refill Energy
+                </button>
+              </div>
+            )}
+
+            <div className="mb-6"><PixelVocabmon feedTrigger={showFireworks ? 1 : 0} attackTrigger={atkTrigger} level={levelStats.level} className={isSetComplete && currentSet < totalSets - 1 ? "animate-evo-glow" : ""} /></div>
+            <div className="w-full flex justify-center z-20">
+              <button 
+                onClick={() => { 
+                  // 🔊 Play Sound Effect
+                  try {
+                    const sfx = new Audio('/attack.mp3'); // Change filename if needed!
+                    sfx.volume = 0.6;
+                    sfx.play().catch(e => console.log('SFX blocked'));
+                  } catch (e) {}
+
+                  // ⚔️ Trigger Attack Logic
+                  if (atkCharges > 0) { 
+                    setAtkCharges((p) => { 
+                      const newVal = p - 1; 
+                      localStorage.setItem("atk_charges", newVal.toString()); 
+                      return newVal; 
+                    }); 
+                    setAtkTrigger((p) => p + 1); 
+                  } else { 
+                    setShowEnergyAlert(true); 
+                  } 
+                }} 
+                className="bg-white/90 backdrop-blur-sm border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-black px-6 py-3 rounded-xl shadow-sm transition-transform active:scale-95 w-full flex items-center justify-center gap-2 text-lg"
               >
-                ⚔️ Attack ({atkCharges}/2)
-              </button>
-              <button
-                onClick={() => {
-                  if (spcCharges > 0) {
-                    setSpcCharges((p) => {
-                      const newVal = p - 1;
-                      localStorage.setItem("spc_charges", newVal.toString());
-                      return newVal;
-                    });
-                    setSpcTrigger((p) => p + 1);
-                  } else {
-                    setShowEnergyAlert(true);
-                  }
-                }}
-                className="bg-white/90 backdrop-blur-sm border-2 border-orange-200 text-orange-700 hover:bg-orange-50 font-black px-4 py-2 rounded-xl text-sm shadow-sm transition-transform active:scale-95 flex-1"
-              >
-                🔥 Special ({spcCharges}/2)
+                ⚔️ Attack ({atkCharges}/10)
               </button>
             </div>
           </div>
 
           <div>
             <div className="flex justify-between text-sm font-bold text-gray-500 mb-2">
-              <span>
-                {levelStats.level === 10
-                  ? "MAX LEVEL"
-                  : `EXP to Level ${levelStats.level + 1}`}
-              </span>
-              <span>
-                {levelStats.currentExpInLevel} / {levelStats.targetExpForLevel}
-              </span>
+              <span>{levelStats.level === 10 ? "MAX LEVEL" : `EXP to Level ${levelStats.level + 1}`}</span>
+              <span>{levelStats.currentExpInLevel} / {levelStats.targetExpForLevel}</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-4 overflow-hidden relative">
-              <div
-                className="bg-indigo-500 h-full rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${levelStats.percentage}%` }}
-              ></div>
-            </div>
+            <div className="w-full bg-gray-100 rounded-full h-4 overflow-hidden relative"><div className="bg-indigo-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${levelStats.percentage}%` }}></div></div>
           </div>
         </div>
       </div>
@@ -7718,469 +7773,149 @@ export default function Dashboard() {
       {/* Quest List Grouped By Day */}
       <div className="px-6 pb-12 pt-4 relative z-10">
         <div className="flex justify-between items-center mb-6 px-2">
-          <h3 className="text-2xl font-black text-gray-800">
-            {isExpanded ? "Weekly Schedule" : "Today's Quests"}
-          </h3>
-          {!isExpanded && (
-            <span className="text-xs font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-tighter">
-              Active Focus
-            </span>
-          )}
+          <h3 className="text-2xl font-black text-gray-800">{isExpanded ? "Weekly Schedule" : "Today's Quests"}</h3>
+          {!isExpanded && <span className="text-xs font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-tighter">Active Focus</span>}
         </div>
 
         <div className="space-y-12">
           {renderedPlan.map((dayPlan) => (
-            <div
-              key={dayPlan.day}
-              className="bg-white rounded-3xl shadow-sm border border-gray-200 p-5 relative overflow-hidden"
-            >
-              <h3 className="text-xl font-black text-gray-800 border-b-2 border-gray-100 pb-3 mb-6 flex items-center gap-2">
-                📅 {dayPlan.day}
-              </h3>
-
+            <div key={dayPlan.day} className="bg-white rounded-3xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
+              <h3 className="text-xl font-black text-gray-800 border-b-2 border-gray-100 pb-3 mb-6 flex items-center gap-2">📅 {dayPlan.day}</h3>
               <div className="space-y-10">
                 {dayPlan.sets.map((setIndex) => {
-                  const isPastSet = setIndex < currentSet;
-                  const isActiveSet = setIndex === currentSet;
-                  const isFutureSet = setIndex > currentSet;
-
-                  const isQ1Done = isPastSet || (isActiveSet && spellingDone);
-                  const isQ2Done = isPastSet || (isActiveSet && exerciseDone);
-                  const isQ3Done = isPastSet || (isActiveSet && testDone);
-
-                  const isQ1Locked = isFutureSet;
-                  const isQ2Locked =
-                    isFutureSet || (isActiveSet && !spellingDone);
-                  const isQ3Locked =
-                    isFutureSet || (isActiveSet && !exerciseDone);
-
-                  const isQ1Active = isActiveSet && !spellingDone;
-                  const isQ2Active =
-                    isActiveSet && spellingDone && !exerciseDone;
-                  const isQ3Active = isActiveSet && exerciseDone && !testDone;
-
-                  const q1Num = setIndex * 3 + 1;
-                  const q2Num = setIndex * 3 + 2;
-                  const q3Num = setIndex * 3 + 3;
-
+                  const isPastSet = setIndex < currentSet; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet;
+                  const isQ1Done = isPastSet || (isActiveSet && spellingDone); const isQ2Done = isPastSet || (isActiveSet && exerciseDone); const isQ3Done = isPastSet || (isActiveSet && testDone);
+                  const isQ1Locked = isFutureSet; const isQ2Locked = isFutureSet || (isActiveSet && !spellingDone); const isQ3Locked = isFutureSet || (isActiveSet && !exerciseDone);
+                  const isQ1Active = isActiveSet && !spellingDone; const isQ2Active = isActiveSet && spellingDone && !exerciseDone; const isQ3Active = isActiveSet && exerciseDone && !testDone;
+                  const q1Num = setIndex * 3 + 1; const q2Num = setIndex * 3 + 2; const q3Num = setIndex * 3 + 3;
                   return (
-                    <div
-                      key={setIndex}
-                      className={`relative ${isFutureSet ? "opacity-60" : ""}`}
-                    >
-                      <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 flex items-center gap-2">
-                        📍 {scheduleDays[setIndex]}{" "}
-                        <span className="text-xs font-bold text-gray-300">
-                          (Words {1 + setIndex * 5} - {5 + setIndex * 5})
-                        </span>
-                      </h4>
-
+                    <div key={setIndex} className={`relative ${isFutureSet ? "opacity-60" : ""}`}>
+                      <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 flex items-center gap-2">📍 {scheduleDays[setIndex]} <span className="text-xs font-bold text-gray-300">(Words {1 + setIndex * 5} - {5 + setIndex * 5})</span></h4>
                       <div className="space-y-4">
-                        <div
-                          ref={isQ1Active ? activeQuestRef : null}
-                          className="relative"
-                        >
-                          {isQ1Active && (
-                            <div className="absolute -top-3 left-4 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">
-                              📍 Current Quest
-                            </div>
-                          )}
-                          <Link
-                            href={isQ1Done || isQ1Locked ? "#" : "/feed"}
-                            className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ1Active ? "bg-white border-2 border-indigo-400 ring-4 ring-indigo-100 scale-[1.02] shadow-lg animate-ready-indigo" : isQ1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ1Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-indigo-400 hover:border-indigo-500 shadow-md"}`}
-                          >
-                            <div className="flex items-center justify-between relative z-10">
-                              <div>
-                                <h4
-                                  className={`font-bold text-lg ${isQ1Done || isQ1Locked ? "text-gray-500" : "text-indigo-900 group-hover:text-indigo-600"}`}
-                                >
-                                  {q1Num}. Feed Vocabmon
-                                </h4>
-                                <p
-                                  className={`text-sm font-medium mt-1 ${isQ1Done ? "text-emerald-500" : "text-indigo-400"}`}
-                                >
-                                  {isQ1Done
-                                    ? "Completed! ✅"
-                                    : "Reward: +50 EXP"}
-                                </p>
-                              </div>
-                              <div
-                                className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ1Done ? "bg-green-100 text-green-600" : isQ1Locked ? "text-2xl text-gray-300" : "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white"}`}
-                              >
-                                {isQ1Done ? "✓" : isQ1Locked ? "🔒" : "→"}
-                              </div>
-                            </div>
+                        <div ref={isQ1Active ? activeQuestRef : null} className="relative">
+                          {isQ1Active && <div className="absolute -top-3 left-4 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
+                          <Link href={isQ1Done || isQ1Locked ? "#" : "/feed"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ1Active ? "bg-white border-2 border-indigo-400 ring-4 ring-indigo-100 scale-[1.02] shadow-lg animate-ready-indigo" : isQ1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ1Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-indigo-400 hover:border-indigo-500 shadow-md"}`}>
+                            <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ1Done || isQ1Locked ? "text-gray-500" : "text-indigo-900 group-hover:text-indigo-600"}`}>{q1Num}. Feed Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ1Done ? "text-emerald-500" : "text-indigo-400"}`}>{isQ1Done ? "Completed! ✅" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ1Done ? "bg-green-100 text-green-600" : isQ1Locked ? "text-2xl text-gray-300" : "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white"}`}>{isQ1Done ? "✓" : isQ1Locked ? "🔒" : "→"}</div></div>
                           </Link>
                         </div>
-
-                        <div
-                          ref={isQ2Active ? activeQuestRef : null}
-                          className="relative"
-                        >
-                          {isQ2Active && (
-                            <div className="absolute -top-3 left-4 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">
-                              📍 Current Quest
-                            </div>
-                          )}
-                          <Link
-                            href={isQ2Done || isQ2Locked ? "#" : "/exercise"}
-                            className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ2Active ? "bg-white border-2 border-green-400 ring-4 ring-green-100 scale-[1.02] shadow-lg animate-ready-green" : isQ2Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ2Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-green-400 hover:border-green-500 shadow-md cursor-pointer"}`}
-                          >
-                            <div className="flex items-center justify-between relative z-10">
-                              <div>
-                                <h4
-                                  className={`font-bold text-lg ${isQ2Done || isQ2Locked ? "text-gray-500" : "text-green-900 group-hover:text-green-600"}`}
-                                >
-                                  {q2Num}. Exercise Vocabmon
-                                </h4>
-                                <p
-                                  className={`text-sm font-medium mt-1 ${isQ2Done ? "text-emerald-500" : isQ2Locked ? "text-gray-400" : "text-green-500"}`}
-                                >
-                                  {isQ2Done
-                                    ? "Completed! ✅"
-                                    : isQ2Locked
-                                      ? "Locked"
-                                      : "Reward: +50 EXP"}
-                                </p>
-                              </div>
-                              <div
-                                className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ2Done ? "bg-green-100 text-green-600" : isQ2Locked ? "text-2xl text-gray-300" : "bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white"}`}
-                              >
-                                {isQ2Done ? "✓" : isQ2Locked ? "🔒" : "→"}
-                              </div>
-                            </div>
+                        <div ref={isQ2Active ? activeQuestRef : null} className="relative">
+                          {isQ2Active && <div className="absolute -top-3 left-4 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
+                          <Link href={isQ2Done || isQ2Locked ? "#" : "/exercise"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ2Active ? "bg-white border-2 border-green-400 ring-4 ring-green-100 scale-[1.02] shadow-lg animate-ready-green" : isQ2Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ2Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-green-400 hover:border-green-500 shadow-md cursor-pointer"}`}>
+                            <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ2Done || isQ2Locked ? "text-gray-500" : "text-green-900 group-hover:text-green-600"}`}>{q2Num}. Exercise Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ2Done ? "text-emerald-500" : isQ2Locked ? "text-gray-400" : "text-green-500"}`}>{isQ2Done ? "Completed! ✅" : isQ2Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ2Done ? "bg-green-100 text-green-600" : isQ2Locked ? "text-2xl text-gray-300" : "bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white"}`}>{isQ2Done ? "✓" : isQ2Locked ? "🔒" : "→"}</div></div>
                           </Link>
                         </div>
-
-                        <div
-                          ref={isQ3Active ? activeQuestRef : null}
-                          className="relative"
-                        >
-                          {isQ3Active && (
-                            <div className="absolute -top-3 left-4 bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">
-                              📍 Current Quest
-                            </div>
-                          )}
-                          <Link
-                            href={isQ3Done || isQ3Locked ? "#" : "/test"}
-                            className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ3Active ? "bg-white border-2 border-blue-400 ring-4 ring-blue-100 scale-[1.02] shadow-lg animate-ready-blue" : isQ3Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ3Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-blue-400 hover:border-blue-500 shadow-md cursor-pointer"}`}
-                          >
-                            <div className="flex items-center justify-between relative z-10">
-                              <div>
-                                <h4
-                                  className={`font-bold text-lg ${isQ3Done || isQ3Locked ? "text-gray-500" : "text-blue-900 group-hover:text-blue-600"}`}
-                                >
-                                  {q3Num}. Final Exam
-                                </h4>
-                                <p
-                                  className={`text-sm font-medium mt-1 ${isQ3Done ? "text-emerald-500" : isQ3Locked ? "text-gray-400" : "text-blue-500"}`}
-                                >
-                                  {isQ3Done
-                                    ? "Completed! ✅"
-                                    : isQ3Locked
-                                      ? "Locked"
-                                      : "Reward: +50 EXP"}
-                                </p>
-                              </div>
-                              <div
-                                className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ3Done ? "bg-green-100 text-green-600" : isQ3Locked ? "text-2xl text-gray-300" : "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"}`}
-                              >
-                                {isQ3Done ? "✓" : isQ3Locked ? "🔒" : "→"}
-                              </div>
-                            </div>
+                        <div ref={isQ3Active ? activeQuestRef : null} className="relative">
+                          {isQ3Active && <div className="absolute -top-3 left-4 bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
+                          <Link href={isQ3Done || isQ3Locked ? "#" : "/test"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ3Active ? "bg-white border-2 border-blue-400 ring-4 ring-blue-100 scale-[1.02] shadow-lg animate-ready-blue" : isQ3Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ3Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-blue-400 hover:border-blue-500 shadow-md cursor-pointer"}`}>
+                            <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ3Done || isQ3Locked ? "text-gray-500" : "text-blue-900 group-hover:text-blue-600"}`}>{q3Num}. Final Exam</h4><p className={`text-sm font-medium mt-1 ${isQ3Done ? "text-emerald-500" : isQ3Locked ? "text-gray-400" : "text-blue-500"}`}>{isQ3Done ? "Completed! ✅" : isQ3Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ3Done ? "bg-green-100 text-green-600" : isQ3Locked ? "text-2xl text-gray-300" : "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"}`}>{isQ3Done ? "✓" : isQ3Locked ? "🔒" : "→"}</div></div>
                           </Link>
                         </div>
                       </div>
-
-                      {isActiveSet &&
-                        isQ3Done &&
-                        setIndex !== 4 &&
-                        setIndex < totalSets - 1 && (
-                          <div className="mt-8 bg-emerald-50 border-4 border-emerald-400 rounded-3xl p-6 text-center animate-fade-in shadow-xl">
-                            <div className="text-4xl mb-2 animate-bounce">
-                              ✨
-                            </div>
-                            <h3 className="text-2xl font-black text-emerald-800 mb-2">
-                              Vocabmon Evolved!
-                            </h3>
-                            <p className="text-emerald-700 font-bold mb-6">
-                              Congratulations! You reached Level{" "}
-                              {levelStats.level} and unlocked the next 5 words.
+                      {isActiveSet && isQ3Done && setIndex !== 4 && setIndex < totalSets - 1 && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+                          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
+                            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
+                            <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
+                            <p className="text-gray-600 font-bold mb-6 leading-relaxed">
+                              Congratulations! You evolved<br/>
+                              <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
+                              into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
                             </p>
-                            <button
-                              onClick={advanceToNextSet}
-                              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-all shadow-md transform hover:scale-105"
-                            >
+                            <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
+                              <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
+                            </div>
+                            <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
                               Start {scheduleDays[setIndex + 1]} 🚀
                             </button>
                           </div>
-                        )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
-
-                {dayPlan.hasMidterm &&
-                  (() => {
-                    const setIndex = 4;
-                    const isActiveSet = setIndex === currentSet;
-                    const isFutureSet = setIndex > currentSet;
-                    const isQ3Done =
-                      setIndex < currentSet || (isActiveSet && testDone);
-
-                    return (
-                      <div
-                        className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${isFutureSet || (!isQ3Done && isActiveSet) ? "opacity-60" : ""}`}
-                      >
-                        <h4 className="text-sm font-black text-purple-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">
-                          🌟 Sunday: Midterm Exam{" "}
-                          <span className="text-xs font-bold text-purple-300">
-                            (Words 1 - 25)
-                          </span>
-                        </h4>
-                        {(() => {
-                          const isMidtermActive =
-                            isQ3Done && !midtermDone && isActiveSet;
-                          const isMidtermLocked = !isQ3Done;
-
-                          return (
-                            <div
-                              ref={isMidtermActive ? activeQuestRef : null}
-                              className="relative"
-                            >
-                              {isMidtermActive && (
-                                <div className="absolute -top-3 left-4 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">
-                                  📍 Current Boss
-                                </div>
-                              )}
-                              <Link
-                                href={
-                                  midtermDone || isMidtermLocked
-                                    ? "#"
-                                    : "/review?type=midterm"
-                                }
-                                className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isMidtermActive ? "bg-white border-2 border-purple-400 ring-4 ring-purple-100 scale-[1.02] shadow-lg animate-ready-purple" : midtermDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}
-                              >
-                                <div className="flex items-center justify-between relative z-10">
-                                  <div>
-                                    <h4
-                                      className={`font-bold text-lg ${midtermDone || isMidtermLocked ? "text-gray-500" : "text-purple-900 group-hover:text-purple-600"}`}
-                                    >
-                                      Midterm Review Boss
-                                    </h4>
-                                    <p
-                                      className={`text-sm font-medium mt-1 ${midtermDone ? "text-emerald-500" : isMidtermLocked ? "text-gray-400" : "text-purple-500"}`}
-                                    >
-                                      {midtermDone
-                                        ? "Completed! ✅"
-                                        : isMidtermLocked
-                                          ? "Locked"
-                                          : "Reward: Midterm Badge 🏅"}
-                                    </p>
-                                  </div>
-                                  <div
-                                    className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${midtermDone ? "bg-green-100 text-green-600" : isMidtermLocked ? "text-2xl text-gray-300" : "bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"}`}
-                                  >
-                                    {midtermDone
-                                      ? "✓"
-                                      : isMidtermLocked
-                                        ? "🔒"
-                                        : "→"}
-                                  </div>
-                                </div>
-                              </Link>
-                            </div>
-                          );
-                        })()}
-
-                        {isActiveSet && midtermDone && (
-                          <div className="mt-8 bg-emerald-50 border-4 border-emerald-400 rounded-3xl p-6 text-center animate-fade-in shadow-xl">
-                            <div className="text-4xl mb-2 animate-bounce">
-                              ✨
-                            </div>
-                            <h3 className="text-2xl font-black text-emerald-800 mb-2">
-                              Vocabmon Evolved!
-                            </h3>
-                            <p className="text-emerald-700 font-bold mb-6">
-                              Congratulations! You reached Level{" "}
-                              {levelStats.level} and unlocked the next 5 words.
+                {dayPlan.hasMidterm && (() => {
+                  const setIndex = 4; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                  return (
+                    <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${isFutureSet || (!isQ3Done && isActiveSet) ? "opacity-60" : ""}`}>
+                      <h4 className="text-sm font-black text-purple-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🌟 Sunday: Midterm Exam <span className="text-xs font-bold text-purple-300">(Words 1 - 25)</span></h4>
+                      {(() => {
+                        const isMidtermActive = isQ3Done && !midtermDone && isActiveSet; const isMidtermLocked = !isQ3Done;
+                        return (
+                          <div ref={isMidtermActive ? activeQuestRef : null} className="relative">
+                            {isMidtermActive && <div className="absolute -top-3 left-4 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
+                            <Link href={midtermDone || isMidtermLocked ? "#" : "/review?type=midterm"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isMidtermActive ? "bg-white border-2 border-purple-400 ring-4 ring-purple-100 scale-[1.02] shadow-lg animate-ready-purple" : midtermDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
+                              <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${midtermDone || isMidtermLocked ? "text-gray-500" : "text-purple-900 group-hover:text-purple-600"}`}>Midterm Review Boss</h4><p className={`text-sm font-medium mt-1 ${midtermDone ? "text-emerald-500" : isMidtermLocked ? "text-gray-400" : "text-purple-500"}`}>{midtermDone ? "Completed! ✅" : isMidtermLocked ? "Locked" : "Reward: Midterm Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${midtermDone ? "bg-green-100 text-green-600" : isMidtermLocked ? "text-2xl text-gray-300" : "bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"}`}>{midtermDone ? "✓" : isMidtermLocked ? "🔒" : "→"}</div></div>
+                            </Link>
+                          </div>
+                        );
+                      })()}
+                      {isActiveSet && midtermDone && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+                          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
+                            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
+                            <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
+                            <p className="text-gray-600 font-bold mb-6 leading-relaxed">
+                              Congratulations! You evolved<br/>
+                              <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
+                              into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
                             </p>
-                            <button
-                              onClick={advanceToNextSet}
-                              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-all shadow-md transform hover:scale-105"
-                            >
+                            <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
+                              <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
+                            </div>
+                            <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
                               Start {scheduleDays[setIndex + 1]} 🚀
                             </button>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                {dayPlan.hasFinals &&
-                  (() => {
-                    const setIndex = 9;
-                    const isActiveSet = setIndex === currentSet;
-                    const isQ3Done =
-                      setIndex < currentSet || (isActiveSet && testDone);
-
-                    return (
-                      <div
-                        className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done ? "opacity-60" : ""}`}
-                      >
-                        <h4 className="text-sm font-black text-amber-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">
-                          🔥 Wednesday: Final Part 1{" "}
-                          <span className="text-xs font-bold text-amber-300">
-                            (Words 26 - 50)
-                          </span>
-                        </h4>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+                {dayPlan.hasFinals && (() => {
+                  const setIndex = 9; const isActiveSet = setIndex === currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                  return (
+                    <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done ? "opacity-60" : ""}`}>
+                      <h4 className="text-sm font-black text-amber-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🔥 Wednesday: Final Part 1 <span className="text-xs font-bold text-amber-300">(Words 26 - 50)</span></h4>
+                      {(() => {
+                        const isF1Active = isQ3Done && !final1Done; const isF1Locked = !isQ3Done;
+                        return (
+                          <div ref={isF1Active ? activeQuestRef : null} className="relative mb-10">
+                            {isF1Active && <div className="absolute -top-3 left-4 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
+                            <Link href={final1Done || isF1Locked ? "#" : "/review?type=final1"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isF1Active ? "bg-white border-2 border-amber-400 ring-4 ring-amber-100 scale-[1.02] shadow-lg animate-ready-amber" : final1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
+                              <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${final1Done || isF1Locked ? "text-gray-500" : "text-amber-900 group-hover:text-amber-600"}`}>Final Review: Part 1</h4><p className={`text-sm font-medium mt-1 ${final1Done ? "text-emerald-500" : isF1Locked ? "text-gray-400" : "text-amber-500"}`}>{final1Done ? "Completed! ✅" : isF1Locked ? "Locked" : "Reward: Fire Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${final1Done ? "bg-green-100 text-green-600" : isF1Locked ? "text-2xl text-gray-300" : "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white"}`}>{final1Done ? "✓" : isF1Locked ? "🔒" : "→"}</div></div>
+                            </Link>
+                          </div>
+                        );
+                      })()}
+                      <div className={`relative ${!final1Done ? "opacity-60" : ""}`}>
+                        <h4 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">👑 Wednesday: Grand Finale <span className="text-xs font-bold text-red-300">(All 50 Words)</span></h4>
                         {(() => {
-                          const isF1Active = isQ3Done && !final1Done;
-                          const isF1Locked = !isQ3Done;
-
+                          const isFinaleActive = final1Done && !finaleDone; const isFinaleLocked = !final1Done;
                           return (
-                            <div
-                              ref={isF1Active ? activeQuestRef : null}
-                              className="relative mb-10"
-                            >
-                              {isF1Active && (
-                                <div className="absolute -top-3 left-4 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">
-                                  📍 Current Boss
-                                </div>
-                              )}
-                              <Link
-                                href={
-                                  final1Done || isF1Locked
-                                    ? "#"
-                                    : "/review?type=final1"
-                                }
-                                className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isF1Active ? "bg-white border-2 border-amber-400 ring-4 ring-amber-100 scale-[1.02] shadow-lg animate-ready-amber" : final1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}
-                              >
-                                <div className="flex items-center justify-between relative z-10">
-                                  <div>
-                                    <h4
-                                      className={`font-bold text-lg ${final1Done || isF1Locked ? "text-gray-500" : "text-amber-900 group-hover:text-amber-600"}`}
-                                    >
-                                      Final Review: Part 1
-                                    </h4>
-                                    <p
-                                      className={`text-sm font-medium mt-1 ${final1Done ? "text-emerald-500" : isF1Locked ? "text-gray-400" : "text-amber-500"}`}
-                                    >
-                                      {final1Done
-                                        ? "Completed! ✅"
-                                        : isF1Locked
-                                          ? "Locked"
-                                          : "Reward: Fire Badge 🏅"}
-                                    </p>
-                                  </div>
-                                  <div
-                                    className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${final1Done ? "bg-green-100 text-green-600" : isF1Locked ? "text-2xl text-gray-300" : "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white"}`}
-                                  >
-                                    {final1Done ? "✓" : isF1Locked ? "🔒" : "→"}
-                                  </div>
-                                </div>
+                            <div ref={isFinaleActive ? activeQuestRef : null} className="relative">
+                              {isFinaleActive && <div className="absolute -top-3 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
+                              <Link href={finaleDone || isFinaleLocked ? "#" : "/review?type=finale"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isFinaleActive ? "bg-white border-2 border-red-400 ring-4 ring-red-100 scale-[1.02] shadow-lg animate-ready-red" : finaleDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
+                                <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${finaleDone || isFinaleLocked ? "text-gray-500" : "text-red-900 group-hover:text-red-600"}`}>Ultimate Boss Fight</h4><p className={`text-sm font-medium mt-1 ${finaleDone ? "text-emerald-500" : isFinaleLocked ? "text-gray-400" : "text-red-500"}`}>{finaleDone ? "Completed! 🎉" : isFinaleLocked ? "Locked" : "Reward: Master Badge 🏆"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${finaleDone ? "bg-green-100 text-green-600" : isFinaleLocked ? "text-2xl text-gray-300" : "bg-red-50 text-red-600 group-hover:bg-red-600 group-hover:text-white"}`}>{finaleDone ? "✓" : isFinaleLocked ? "🔒" : "→"}</div></div>
                               </Link>
                             </div>
                           );
                         })()}
-
-                        <div
-                          className={`relative ${!final1Done ? "opacity-60" : ""}`}
-                        >
-                          <h4 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">
-                            👑 Wednesday: Grand Finale{" "}
-                            <span className="text-xs font-bold text-red-300">
-                              (All 50 Words)
-                            </span>
-                          </h4>
-                          {(() => {
-                            const isFinaleActive = final1Done && !finaleDone;
-                            const isFinaleLocked = !final1Done;
-
-                            return (
-                              <div
-                                ref={isFinaleActive ? activeQuestRef : null}
-                                className="relative"
-                              >
-                                {isFinaleActive && (
-                                  <div className="absolute -top-3 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">
-                                    📍 Current Boss
-                                  </div>
-                                )}
-                                <Link
-                                  href={
-                                    finaleDone || isFinaleLocked
-                                      ? "#"
-                                      : "/review?type=finale"
-                                  }
-                                  className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isFinaleActive ? "bg-white border-2 border-red-400 ring-4 ring-red-100 scale-[1.02] shadow-lg animate-ready-red" : finaleDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}
-                                >
-                                  <div className="flex items-center justify-between relative z-10">
-                                    <div>
-                                      <h4
-                                        className={`font-bold text-lg ${finaleDone || isFinaleLocked ? "text-gray-500" : "text-red-900 group-hover:text-red-600"}`}
-                                      >
-                                        Ultimate Boss Fight
-                                      </h4>
-                                      <p
-                                        className={`text-sm font-medium mt-1 ${finaleDone ? "text-emerald-500" : isFinaleLocked ? "text-gray-400" : "text-red-500"}`}
-                                      >
-                                        {finaleDone
-                                          ? "Completed! 🎉"
-                                          : isFinaleLocked
-                                            ? "Locked"
-                                            : "Reward: Master Badge 🏆"}
-                                      </p>
-                                    </div>
-                                    <div
-                                      className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${finaleDone ? "bg-green-100 text-green-600" : isFinaleLocked ? "text-2xl text-gray-300" : "bg-red-50 text-red-600 group-hover:bg-red-600 group-hover:text-white"}`}
-                                    >
-                                      {finaleDone
-                                        ? "✓"
-                                        : isFinaleLocked
-                                          ? "🔒"
-                                          : "→"}
-                                    </div>
-                                  </div>
-                                </Link>
-                              </div>
-                            );
-                          })()}
-                        </div>
                       </div>
-                    );
-                  })()}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Toggle Button for Schedule */}
         <div className="mt-8 flex justify-center">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="bg-white border-2 border-gray-200 hover:border-indigo-400 text-gray-600 hover:text-indigo-600 font-black py-4 px-8 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center gap-3 group"
-          >
-            <span className="text-xl transition-transform group-hover:scale-125">
-              {isExpanded ? "🎯" : "📅"}
-            </span>
-            {isExpanded ? "Hide Future Quests" : "Show Full Week"}
-          </button>
+          <button onClick={() => setIsExpanded(!isExpanded)} className="bg-white border-2 border-gray-200 hover:border-indigo-400 text-gray-600 hover:text-indigo-600 font-black py-4 px-8 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center gap-3 group"><span className="text-xl transition-transform group-hover:scale-125">${isExpanded ? "🎯" : "📅"}</span>{isExpanded ? "Hide Future Quests" : "Show Full Week"}</button>
         </div>
       </div>
 
       {showEnergyAlert && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 animate-fade-in p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-red-400 shadow-2xl">
-            <div className="text-5xl mb-4 animate-bounce">💤</div>
-            <h3 className="text-2xl font-black text-gray-800 mb-2">Out of Energy!</h3>
-            <p className="text-gray-500 font-medium mb-8 leading-relaxed">
-              Your partner needs to rest. Complete a quest to gain EXP and recharge their energy!
-            </p>
-            <button onClick={() => setShowEnergyAlert(false)} className="w-full bg-red-500 hover:bg-red-600 text-white text-lg font-black py-4 rounded-xl shadow-md active:scale-95 transition-all">
-              I&apos;ll go train! 🏃
-            </button>
-          </div>
-        </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 animate-fade-in p-4"><div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-red-400 shadow-2xl"><div className="text-5xl mb-4 animate-bounce">💤</div><h3 className="text-2xl font-black text-gray-800 mb-2">Out of Energy!</h3><p className="text-gray-500 font-medium mb-8 leading-relaxed">Your partner needs to rest. Complete a quest to gain EXP and recharge their energy!</p><button onClick={() => setShowEnergyAlert(false)} className="w-full bg-red-500 hover:bg-red-600 text-white text-lg font-black py-4 rounded-xl shadow-md active:scale-95 transition-all">I&apos;ll go train! 🏃</button></div></div>
       )}
     </div>
   );
