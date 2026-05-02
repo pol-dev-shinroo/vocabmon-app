@@ -5,6 +5,7 @@ import PixelVocabmon from "../shared/PixelVocabmon";
 import { triggerSilentSync } from "@/lib/syncHelper";
 import { logoutUser } from "@/actions/logout";
 import { getCurrentUsername } from "@/actions/auth";
+import { executeInAppRollover, startNewWeek } from "@/actions/progress";
 
 // 💥 GLOBAL SINGLETON: Absolutely guarantees only ONE audio instance exists
 let globalDashboardAudio: HTMLAudioElement | null = null;
@@ -28,6 +29,9 @@ export default function Dashboard() {
   const [finaleDone, setFinaleDone] = useState(false);
   const [devEvoModal, setDevEvoModal] = useState<{from: number, to: number} | null>(null);
   const activeQuestRef = useRef<HTMLDivElement>(null);
+
+  const [targetWeek, setTargetWeek] = useState("Week 6");
+  const [isRollingOver, setIsRollingOver] = useState(false);
 
   const [isMusicOn, setIsMusicOn] = useState(false);
 
@@ -164,7 +168,7 @@ export default function Dashboard() {
   if (!isLoaded) return <div className="w-full max-w-md min-h-[50vh]"></div>;
   const isSetComplete = spellingDone && exerciseDone && testDone;
   const activeDayIndex = weeklyPlan.findIndex((dayPlan) => dayPlan.sets.includes(currentSet)) !== -1 ? weeklyPlan.findIndex((dayPlan) => dayPlan.sets.includes(currentSet)) : weeklyPlan.length - 1;
-  const renderedPlan = isExpanded ? weeklyPlan : [weeklyPlan[activeDayIndex]];
+  const renderedPlan = (isExpanded || finaleDone) ? weeklyPlan : [weeklyPlan[activeDayIndex]];
 
   return (
     <div className="w-full max-w-md min-h-screen flex flex-col mx-auto bg-gray-50 relative animate-fade-in pb-16">
@@ -233,28 +237,41 @@ export default function Dashboard() {
             
             {/* DEV CHEAT MENU */}
             {username === 'dev' && (
-              <div className="absolute top-4 right-4 bg-purple-900/95 backdrop-blur-md p-3 rounded-xl shadow-2xl border-2 border-purple-400 z-50 flex flex-col gap-2 items-center animate-fade-in">
-                <span className="text-[10px] font-black text-purple-200 uppercase tracking-widest">Dev Tools</span>
-                <div className="flex gap-2">
+              <div className="absolute top-4 right-4 bg-purple-900/95 backdrop-blur-md p-4 rounded-2xl shadow-2xl border-2 border-purple-400 z-50 flex flex-col gap-3 items-center animate-fade-in w-48">
+                <span className="text-xs font-black text-purple-200 uppercase tracking-widest border-b border-purple-700 w-full text-center pb-1">Dev Tools</span>
+                
+                <div className="flex gap-2 w-full">
+                  <button onClick={() => { const cl = levelStats.level; if(cl > 1) { const nx = (cl - 2) * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); } }} className="bg-purple-600 hover:bg-purple-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">-LV</button>
+                  <button onClick={() => { const cl = levelStats.level; if(cl < 10) { const nx = cl * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); setDevEvoModal({ from: cl, to: cl + 1 }); } }} className="bg-purple-600 hover:bg-purple-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">+LV</button>
+                </div>
+                
+                <button onClick={() => { setAtkCharges(10); localStorage.setItem("atk_charges", "10"); }} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-2 rounded-lg shadow-md transition-transform active:scale-95 text-[10px] uppercase tracking-wider">Refill Energy</button>
+                
+                <div className="w-full bg-purple-950 p-2 rounded-lg border border-purple-700 mt-1">
+                  <input 
+                    type="text" 
+                    value={targetWeek} 
+                    onChange={(e) => setTargetWeek(e.target.value)}
+                    className="w-full bg-purple-900 text-white text-xs font-bold px-2 py-1 rounded border border-purple-600 mb-2 outline-none text-center"
+                  />
                   <button 
-                    onClick={() => { const cl = levelStats.level; if(cl > 1) { const nx = (cl - 2) * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); } }} 
-                    className="bg-purple-600 hover:bg-purple-500 text-white font-black w-10 h-10 rounded-lg shadow-md transition-transform active:scale-95 text-sm"
+                    disabled={isRollingOver}
+                    onClick={async () => {
+                      setIsRollingOver(true);
+                      // 1. Force RAM to save to Hard Drive
+                      await triggerSilentSync(); 
+                      // 2. Tell Hard Drive to Archive and Reset
+                      await executeInAppRollover(targetWeek);
+                      // 3. Nuke the RAM
+                      localStorage.clear();
+                      // 4. Force a clean reboot
+                      window.location.reload();
+                    }} 
+                    className="w-full bg-red-500 hover:bg-red-400 text-white font-black py-2 rounded shadow-md transition-transform active:scale-95 text-[10px] uppercase tracking-wider disabled:opacity-50"
                   >
-                    -LV
-                  </button>
-                  <button 
-                    onClick={() => { const cl = levelStats.level; if(cl < 10) { const nx = cl * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); setDevEvoModal({ from: cl, to: cl + 1 }); } }} 
-                    className="bg-purple-600 hover:bg-purple-500 text-white font-black w-10 h-10 rounded-lg shadow-md transition-transform active:scale-95 text-sm"
-                  >
-                    +LV
+                    {isRollingOver ? "Syncing..." : "Archive & Reset"}
                   </button>
                 </div>
-                <button 
-                  onClick={() => { setAtkCharges(10); localStorage.setItem("atk_charges", "10"); }} 
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-2 rounded-lg shadow-md transition-transform active:scale-95 text-[10px] uppercase tracking-wider"
-                >
-                  Refill Energy
-                </button>
               </div>
             )}
 
@@ -300,146 +317,174 @@ export default function Dashboard() {
 
       {/* Quest List Grouped By Day */}
       <div className="px-6 pb-12 pt-4 relative z-10">
-        <div className="flex justify-between items-center mb-6 px-2">
-          <h3 className="text-2xl font-black text-gray-800">{isExpanded ? "Weekly Schedule" : "Today's Quests"}</h3>
-          {!isExpanded && <span className="text-xs font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-tighter">Active Focus</span>}
-        </div>
+        {finaleDone ? (
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-8 text-white text-center shadow-xl mb-12 animate-fade-in border-4 border-emerald-400">
+            <div className="text-6xl mb-4">🏆</div>
+            <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter">Week Conquered!</h3>
+            <p className="font-bold text-emerald-50 opacity-90 mb-6">Absolutely legendary! You mastered all 50 words and reached your potential. Your partner is proud!</p>
+            <Link href="/game" className="bg-white text-emerald-600 font-black py-4 px-8 rounded-2xl shadow-lg transition-transform active:scale-95 inline-block text-xl">
+              Play Mini-Game 🎮
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-6 px-2">
+              <h3 className="text-2xl font-black text-gray-800">{isExpanded ? "Weekly Schedule" : "Today's Quests"}</h3>
+              {!isExpanded && <span className="text-xs font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-tighter">Active Focus</span>}
+            </div>
 
-        <div className="space-y-12">
-          {renderedPlan.map((dayPlan) => (
-            <div key={dayPlan.day} className="bg-white rounded-3xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
-              <h3 className="text-xl font-black text-gray-800 border-b-2 border-gray-100 pb-3 mb-6 flex items-center gap-2">📅 {dayPlan.day}</h3>
-              <div className="space-y-10">
-                {dayPlan.sets.map((setIndex) => {
-                  const isPastSet = setIndex < currentSet; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet;
-                  const isQ1Done = isPastSet || (isActiveSet && spellingDone); const isQ2Done = isPastSet || (isActiveSet && exerciseDone); const isQ3Done = isPastSet || (isActiveSet && testDone);
-                  const isQ1Locked = isFutureSet; const isQ2Locked = isFutureSet || (isActiveSet && !spellingDone); const isQ3Locked = isFutureSet || (isActiveSet && !exerciseDone);
-                  const isQ1Active = isActiveSet && !spellingDone; const isQ2Active = isActiveSet && spellingDone && !exerciseDone; const isQ3Active = isActiveSet && exerciseDone && !testDone;
-                  const q1Num = setIndex * 3 + 1; const q2Num = setIndex * 3 + 2; const q3Num = setIndex * 3 + 3;
-                  return (
-                    <div key={setIndex} className={`relative ${isFutureSet ? "opacity-60" : ""}`}>
-                      <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 flex items-center gap-2">📍 {scheduleDays[setIndex]} <span className="text-xs font-bold text-gray-300">(Words {1 + setIndex * 5} - {5 + setIndex * 5})</span></h4>
-                      <div className="space-y-4">
-                        <div ref={isQ1Active ? activeQuestRef : null} className="relative">
-                          {isQ1Active && <div className="absolute -top-3 left-4 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
-                          <Link href={isQ1Done || isQ1Locked ? "#" : "/feed"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ1Active ? "bg-white border-2 border-indigo-400 ring-4 ring-indigo-100 scale-[1.02] shadow-lg animate-ready-indigo" : isQ1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ1Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-indigo-400 hover:border-indigo-500 shadow-md"}`}>
-                            <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ1Done || isQ1Locked ? "text-gray-500" : "text-indigo-900 group-hover:text-indigo-600"}`}>{q1Num}. Feed Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ1Done ? "text-emerald-500" : "text-indigo-400"}`}>{isQ1Done ? "Completed! ✅" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ1Done ? "bg-green-100 text-green-600" : isQ1Locked ? "text-2xl text-gray-300" : "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white"}`}>{isQ1Done ? "✓" : isQ1Locked ? "🔒" : "→"}</div></div>
-                          </Link>
-                        </div>
-                        <div ref={isQ2Active ? activeQuestRef : null} className="relative">
-                          {isQ2Active && <div className="absolute -top-3 left-4 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
-                          <Link href={isQ2Done || isQ2Locked ? "#" : "/exercise"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ2Active ? "bg-white border-2 border-green-400 ring-4 ring-green-100 scale-[1.02] shadow-lg animate-ready-green" : isQ2Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ2Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-green-400 hover:border-green-500 shadow-md cursor-pointer"}`}>
-                            <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ2Done || isQ2Locked ? "text-gray-500" : "text-green-900 group-hover:text-green-600"}`}>{q2Num}. Exercise Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ2Done ? "text-emerald-500" : isQ2Locked ? "text-gray-400" : "text-green-500"}`}>{isQ2Done ? "Completed! ✅" : isQ2Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ2Done ? "bg-green-100 text-green-600" : isQ2Locked ? "text-2xl text-gray-300" : "bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white"}`}>{isQ2Done ? "✓" : isQ2Locked ? "🔒" : "→"}</div></div>
-                          </Link>
-                        </div>
-                        <div ref={isQ3Active ? activeQuestRef : null} className="relative">
-                          {isQ3Active && <div className="absolute -top-3 left-4 bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
-                          <Link href={isQ3Done || isQ3Locked ? "#" : "/test"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ3Active ? "bg-white border-2 border-blue-400 ring-4 ring-blue-100 scale-[1.02] shadow-lg animate-ready-blue" : isQ3Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ3Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-blue-400 hover:border-blue-500 shadow-md cursor-pointer"}`}>
-                            <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ3Done || isQ3Locked ? "text-gray-500" : "text-blue-900 group-hover:text-blue-600"}`}>{q3Num}. Final Exam</h4><p className={`text-sm font-medium mt-1 ${isQ3Done ? "text-emerald-500" : isQ3Locked ? "text-gray-400" : "text-blue-500"}`}>{isQ3Done ? "Completed! ✅" : isQ3Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ3Done ? "bg-green-100 text-green-600" : isQ3Locked ? "text-2xl text-gray-300" : "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"}`}>{isQ3Done ? "✓" : isQ3Locked ? "🔒" : "→"}</div></div>
-                          </Link>
-                        </div>
-                      </div>
-                      {isActiveSet && isQ3Done && setIndex !== 4 && setIndex < totalSets - 1 && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
-                          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
-                            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
-                            <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
-                            <p className="text-gray-600 font-bold mb-6 leading-relaxed">
-                              Congratulations! You evolved<br/>
-                              <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
-                              into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
-                            </p>
-                            <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
-                              <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
-                            </div>
-                            <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
-                              Start {scheduleDays[setIndex + 1]} 🚀
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                {dayPlan.hasMidterm && (() => {
-                  const setIndex = 4; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
-                  return (
-                    <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${isFutureSet || (!isQ3Done && isActiveSet) ? "opacity-60" : ""}`}>
-                      <h4 className="text-sm font-black text-purple-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🌟 Sunday: Midterm Exam <span className="text-xs font-bold text-purple-300">(Words 1 - 25)</span></h4>
-                      {(() => {
-                        const isMidtermActive = isQ3Done && !midtermDone && isActiveSet; const isMidtermLocked = !isQ3Done;
-                        return (
-                          <div ref={isMidtermActive ? activeQuestRef : null} className="relative">
-                            {isMidtermActive && <div className="absolute -top-3 left-4 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
-                            <Link href={midtermDone || isMidtermLocked ? "#" : "/review?type=midterm"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isMidtermActive ? "bg-white border-2 border-purple-400 ring-4 ring-purple-100 scale-[1.02] shadow-lg animate-ready-purple" : midtermDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
-                              <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${midtermDone || isMidtermLocked ? "text-gray-500" : "text-purple-900 group-hover:text-purple-600"}`}>Midterm Review Boss</h4><p className={`text-sm font-medium mt-1 ${midtermDone ? "text-emerald-500" : isMidtermLocked ? "text-gray-400" : "text-purple-500"}`}>{midtermDone ? "Completed! ✅" : isMidtermLocked ? "Locked" : "Reward: Midterm Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${midtermDone ? "bg-green-100 text-green-600" : isMidtermLocked ? "text-2xl text-gray-300" : "bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"}`}>{midtermDone ? "✓" : isMidtermLocked ? "🔒" : "→"}</div></div>
-                            </Link>
-                          </div>
-                        );
-                      })()}
-                      {isActiveSet && midtermDone && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
-                          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
-                            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
-                            <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
-                            <p className="text-gray-600 font-bold mb-6 leading-relaxed">
-                              Congratulations! You evolved<br/>
-                              <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
-                              into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
-                            </p>
-                            <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
-                              <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
-                            </div>
-                            <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
-                              Start {scheduleDays[setIndex + 1]} 🚀
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-                {dayPlan.hasFinals && (() => {
-                  const setIndex = 9; const isActiveSet = setIndex === currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
-                  return (
-                    <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done ? "opacity-60" : ""}`}>
-                      <h4 className="text-sm font-black text-amber-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🔥 Wednesday: Final Part 1 <span className="text-xs font-bold text-amber-300">(Words 26 - 50)</span></h4>
-                      {(() => {
-                        const isF1Active = isQ3Done && !final1Done; const isF1Locked = !isQ3Done;
-                        return (
-                          <div ref={isF1Active ? activeQuestRef : null} className="relative mb-10">
-                            {isF1Active && <div className="absolute -top-3 left-4 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
-                            <Link href={final1Done || isF1Locked ? "#" : "/review?type=final1"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isF1Active ? "bg-white border-2 border-amber-400 ring-4 ring-amber-100 scale-[1.02] shadow-lg animate-ready-amber" : final1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
-                              <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${final1Done || isF1Locked ? "text-gray-500" : "text-amber-900 group-hover:text-amber-600"}`}>Final Review: Part 1</h4><p className={`text-sm font-medium mt-1 ${final1Done ? "text-emerald-500" : isF1Locked ? "text-gray-400" : "text-amber-500"}`}>{final1Done ? "Completed! ✅" : isF1Locked ? "Locked" : "Reward: Fire Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${final1Done ? "bg-green-100 text-green-600" : isF1Locked ? "text-2xl text-gray-300" : "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white"}`}>{final1Done ? "✓" : isF1Locked ? "🔒" : "→"}</div></div>
-                            </Link>
-                          </div>
-                        );
-                      })()}
-                      <div className={`relative ${!final1Done ? "opacity-60" : ""}`}>
-                        <h4 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">👑 Wednesday: Grand Finale <span className="text-xs font-bold text-red-300">(All 50 Words)</span></h4>
-                        {(() => {
-                          const isFinaleActive = final1Done && !finaleDone; const isFinaleLocked = !final1Done;
-                          return (
-                            <div ref={isFinaleActive ? activeQuestRef : null} className="relative">
-                              {isFinaleActive && <div className="absolute -top-3 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
-                              <Link href={finaleDone || isFinaleLocked ? "#" : "/review?type=finale"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isFinaleActive ? "bg-white border-2 border-red-400 ring-4 ring-red-100 scale-[1.02] shadow-lg animate-ready-red" : finaleDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
-                                <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${finaleDone || isFinaleLocked ? "text-gray-500" : "text-red-900 group-hover:text-red-600"}`}>Ultimate Boss Fight</h4><p className={`text-sm font-medium mt-1 ${finaleDone ? "text-emerald-500" : isFinaleLocked ? "text-gray-400" : "text-red-500"}`}>{finaleDone ? "Completed! 🎉" : isFinaleLocked ? "Locked" : "Reward: Master Badge 🏆"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${finaleDone ? "bg-green-100 text-green-600" : isFinaleLocked ? "text-2xl text-gray-300" : "bg-red-50 text-red-600 group-hover:bg-red-600 group-hover:text-white"}`}>{finaleDone ? "✓" : isFinaleLocked ? "🔒" : "→"}</div></div>
+            <div className="space-y-12">
+              {renderedPlan.map((dayPlan) => (
+                <div key={dayPlan.day} className="bg-white rounded-3xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
+                  <h3 className="text-xl font-black text-gray-800 border-b-2 border-gray-100 pb-3 mb-6 flex items-center gap-2">📅 {dayPlan.day}</h3>
+                  <div className="space-y-10">
+                    {dayPlan.sets.map((setIndex) => {
+                      const isPastSet = setIndex < currentSet; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet;
+                      const isQ1Done = isPastSet || (isActiveSet && spellingDone); const isQ2Done = isPastSet || (isActiveSet && exerciseDone); const isQ3Done = isPastSet || (isActiveSet && testDone);
+                      const isQ1Locked = isFutureSet; const isQ2Locked = isFutureSet || (isActiveSet && !spellingDone); const isQ3Locked = isFutureSet || (isActiveSet && !exerciseDone);
+                      const isQ1Active = isActiveSet && !spellingDone; const isQ2Active = isActiveSet && spellingDone && !exerciseDone; const isQ3Active = isActiveSet && exerciseDone && !testDone;
+                      const q1Num = setIndex * 3 + 1; const q2Num = setIndex * 3 + 2; const q3Num = setIndex * 3 + 3;
+                      return (
+                        <div key={setIndex} className={`relative ${isFutureSet ? "opacity-60" : ""}`}>
+                          <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 flex items-center gap-2">📍 {scheduleDays[setIndex]} <span className="text-xs font-bold text-gray-300">(Words {1 + setIndex * 5} - {5 + setIndex * 5})</span></h4>
+                          <div className="space-y-4">
+                            <div ref={isQ1Active ? activeQuestRef : null} className="relative">
+                              {isQ1Active && <div className="absolute -top-3 left-4 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
+                              <Link href={isQ1Done || isQ1Locked ? "#" : "/feed"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ1Active ? "bg-white border-2 border-indigo-400 ring-4 ring-indigo-100 scale-[1.02] shadow-lg animate-ready-indigo" : isQ1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ1Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-indigo-400 hover:border-indigo-500 shadow-md"}`}>
+                                <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ1Done || isQ1Locked ? "text-gray-500" : "text-indigo-900 group-hover:text-indigo-600"}`}>{q1Num}. Feed Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ1Done ? "text-emerald-500" : "text-indigo-400"}`}>{isQ1Done ? "Completed! ✅" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ1Done ? "bg-green-100 text-green-600" : isQ1Locked ? "text-2xl text-gray-300" : "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white"}`}>{isQ1Done ? "✓" : isQ1Locked ? "🔒" : "→"}</div></div>
                               </Link>
                             </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
+                            <div ref={isQ2Active ? activeQuestRef : null} className="relative">
+                              {isQ2Active && <div className="absolute -top-3 left-4 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
+                              <Link href={isQ2Done || isQ2Locked ? "#" : "/exercise"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ2Active ? "bg-white border-2 border-green-400 ring-4 ring-green-100 scale-[1.02] shadow-lg animate-ready-green" : isQ2Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ2Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-green-400 hover:border-green-500 shadow-md cursor-pointer"}`}>
+                                <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ2Done || isQ2Locked ? "text-gray-500" : "text-green-900 group-hover:text-green-600"}`}>{q2Num}. Exercise Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ2Done ? "text-emerald-500" : isQ2Locked ? "text-gray-400" : "text-green-500"}`}>{isQ2Done ? "Completed! ✅" : isQ2Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ2Done ? "bg-green-100 text-green-600" : isQ2Locked ? "text-2xl text-gray-300" : "bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white"}`}>{isQ2Done ? "✓" : isQ2Locked ? "🔒" : "→"}</div></div>
+                              </Link>
+                            </div>
+                            <div ref={isQ3Active ? activeQuestRef : null} className="relative">
+                              {isQ3Active && <div className="absolute -top-3 left-4 bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
+                              <Link href={isQ3Done || isQ3Locked ? "#" : "/test"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ3Active ? "bg-white border-2 border-blue-400 ring-4 ring-blue-100 scale-[1.02] shadow-lg animate-ready-blue" : isQ3Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ3Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-blue-400 hover:border-blue-500 shadow-md cursor-pointer"}`}>
+                                <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ3Done || isQ3Locked ? "text-gray-500" : "text-blue-900 group-hover:text-blue-600"}`}>{q3Num}. Final Exam</h4><p className={`text-sm font-medium mt-1 ${isQ3Done ? "text-emerald-500" : isQ3Locked ? "text-gray-400" : "text-blue-500"}`}>{isQ3Done ? "Completed! ✅" : isQ3Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ3Done ? "bg-green-100 text-green-600" : isQ3Locked ? "text-2xl text-gray-300" : "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"}`}>{isQ3Done ? "✓" : isQ3Locked ? "🔒" : "→"}</div></div>
+                              </Link>
+                            </div>
+                          </div>
+                          {isActiveSet && isQ3Done && setIndex !== 4 && setIndex < totalSets - 1 && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+                              <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
+                                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
+                                <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
+                                <p className="text-gray-600 font-bold mb-6 leading-relaxed">
+                                  Congratulations! You evolved<br/>
+                                  <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
+                                  into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
+                                </p>
+                                <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
+                                  <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
+                                </div>
+                                <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
+                                  Start {scheduleDays[setIndex + 1]} 🚀
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {dayPlan.hasMidterm && (() => {
+                      const setIndex = 4; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                      return (
+                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${isFutureSet || (!isQ3Done && isActiveSet) ? "opacity-60" : ""}`}>
+                          <h4 className="text-sm font-black text-purple-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🌟 Sunday: Midterm Exam <span className="text-xs font-bold text-purple-300">(Words 1 - 25)</span></h4>
+                          {(() => {
+                            const isMidtermActive = isQ3Done && !midtermDone && isActiveSet; const isMidtermLocked = !isQ3Done;
+                            return (
+                              <div ref={isMidtermActive ? activeQuestRef : null} className="relative">
+                                {isMidtermActive && <div className="absolute -top-3 left-4 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
+                                <Link href={midtermDone || isMidtermLocked ? "#" : "/review?type=midterm"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isMidtermActive ? "bg-white border-2 border-purple-400 ring-4 ring-purple-100 scale-[1.02] shadow-lg animate-ready-purple" : midtermDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
+                                  <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${midtermDone || isMidtermLocked ? "text-gray-500" : "text-purple-900 group-hover:text-purple-600"}`}>Midterm Review Boss</h4><p className={`text-sm font-medium mt-1 ${midtermDone ? "text-emerald-500" : isMidtermLocked ? "text-gray-400" : "text-purple-500"}`}>{midtermDone ? "Completed! ✅" : isMidtermLocked ? "Locked" : "Reward: Midterm Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${midtermDone ? "bg-green-100 text-green-600" : isMidtermLocked ? "text-2xl text-gray-300" : "bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"}`}>{midtermDone ? "✓" : isMidtermLocked ? "🔒" : "→"}</div></div>
+                                </Link>
+                              </div>
+                            );
+                          })()}
+                          {isActiveSet && midtermDone && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+                              <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
+                                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
+                                <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
+                                <p className="text-gray-600 font-bold mb-6 leading-relaxed">
+                                  Congratulations! You evolved<br/>
+                                  <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
+                                  into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
+                                </p>
+                                <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
+                                  <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
+                                </div>
+                                <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
+                                  Start {scheduleDays[setIndex + 1]} 🚀
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    {dayPlan.hasFinals && (() => {
+                      const setIndex = 9; const isActiveSet = setIndex === currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                      return (
+                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done ? "opacity-60" : ""}`}>
+                          <h4 className="text-sm font-black text-amber-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🔥 Wednesday: Final Part 1 <span className="text-xs font-bold text-amber-300">(Words 26 - 50)</span></h4>
+                          {(() => {
+                            const isF1Active = isQ3Done && !final1Done; const isF1Locked = !isQ3Done;
+                            return (
+                              <div ref={isF1Active ? activeQuestRef : null} className="relative mb-10">
+                                {isF1Active && <div className="absolute -top-3 left-4 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
+                                <Link href={final1Done || isF1Locked ? "#" : "/review?type=final1"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isF1Active ? "bg-white border-2 border-amber-400 ring-4 ring-amber-100 scale-[1.02] shadow-lg animate-ready-amber" : final1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
+                                  <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${final1Done || isF1Locked ? "text-gray-500" : "text-amber-900 group-hover:text-amber-600"}`}>Final Review: Part 1</h4><p className={`text-sm font-medium mt-1 ${final1Done ? "text-emerald-500" : isF1Locked ? "text-gray-400" : "text-amber-500"}`}>{final1Done ? "Completed! ✅" : isF1Locked ? "Locked" : "Reward: Fire Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${final1Done ? "bg-green-100 text-green-600" : isF1Locked ? "text-2xl text-gray-300" : "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white"}`}>{final1Done ? "✓" : isF1Locked ? "🔒" : "→"}</div></div>
+                                </Link>
+                              </div>
+                            );
+                          })()}
+                          <div className={`relative ${!final1Done ? "opacity-60" : ""}`}>
+                            <h4 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">👑 Wednesday: Grand Finale <span className="text-xs font-bold text-red-300">(All 50 Words)</span></h4>
+                            {(() => {
+                              const isFinaleActive = final1Done && !finaleDone; const isFinaleLocked = !final1Done;
+                              return (
+                                <div ref={isFinaleActive ? activeQuestRef : null} className="relative">
+                                  {isFinaleActive && <div className="absolute -top-3 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
+                                  <Link href={finaleDone || isFinaleLocked ? "#" : "/review?type=finale"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isFinaleActive ? "bg-white border-2 border-red-400 ring-4 ring-red-100 scale-[1.02] shadow-lg animate-ready-red" : finaleDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
+                                    <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${finaleDone || isFinaleLocked ? "text-gray-500" : "text-red-900 group-hover:text-red-600"}`}>Ultimate Boss Fight</h4><p className={`text-sm font-medium mt-1 ${finaleDone ? "text-emerald-500" : isFinaleLocked ? "text-gray-400" : "text-red-500"}`}>{finaleDone ? "Completed! 🎉" : isFinaleLocked ? "Locked" : "Reward: Master Badge 🏆"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${finaleDone ? "bg-green-100 text-green-600" : isFinaleLocked ? "text-2xl text-gray-300" : "bg-red-50 text-red-600 group-hover:bg-red-600 group-hover:text-white"}`}>{finaleDone ? "✓" : isFinaleLocked ? "🔒" : "→"}</div></div>
+                                  </Link>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="mt-8 flex justify-center">
-          <button onClick={() => setIsExpanded(!isExpanded)} className="bg-white border-2 border-gray-200 hover:border-indigo-400 text-gray-600 hover:text-indigo-600 font-black py-4 px-8 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center gap-3 group"><span className="text-xl transition-transform group-hover:scale-125">${isExpanded ? "🎯" : "📅"}</span>{isExpanded ? "Hide Future Quests" : "Show Full Week"}</button>
-        </div>
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <button onClick={() => setIsExpanded(!isExpanded)} className="bg-white border-2 border-gray-200 hover:border-indigo-400 text-gray-600 hover:text-indigo-600 font-black py-4 px-8 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center gap-3 group">
+                <span className="text-xl transition-transform group-hover:scale-125">{isExpanded ? "🎯" : "📅"}</span>{isExpanded ? "Hide Future Quests" : "Show Full Week"}
+              </button>
+              
+              <button 
+                onClick={async () => {
+                  if (confirm("Teacher Override: Archive this week to the Hall of Fame and start Week 6?")) {
+                    await startNewWeek(username, "week_6");
+                    localStorage.clear();
+                    window.location.reload();
+                  }
+                }} 
+                className="text-[10px] font-black text-gray-300 hover:text-red-500 uppercase tracking-widest transition-colors mt-8 cursor-pointer"
+              >
+                ⚠️ Force Rollover to Week 6
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {showEnergyAlert && (

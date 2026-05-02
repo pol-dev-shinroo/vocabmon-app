@@ -58,14 +58,6 @@ export default function ExercisePage() {
       localStorage.setItem("quest_exercise_done", "true");
       localStorage.setItem("trigger_fireworks", "true");
 
-      // Handle the completedQuests array
-      const storedQuests = localStorage.getItem("completedQuests");
-      const completedQuests: string[] = storedQuests ? JSON.parse(storedQuests) : [];
-      if (!completedQuests.includes("exercise")) {
-        completedQuests.push("exercise");
-      }
-      localStorage.setItem("completedQuests", JSON.stringify(completedQuests));
-
       // 🚀 NEW: Silently back up to MongoDB!
       triggerSilentSync();
 

@@ -51,42 +51,22 @@ export default function ReviewPage() {
         const currentExp = parseInt(localStorage.getItem("vocabmon_exp") || "0", 10);
         localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
 
-        // 2. Sync to MongoDB (ensure DB gets the +50 before archival)
+        // 2. Set Local Storage Flags FIRST
+        if (reviewType === "midterm") localStorage.setItem("quest_midterm_done", "true");
+        if (reviewType === "final1") localStorage.setItem("quest_final1_done", "true");
+        if (reviewType === "finale") localStorage.setItem("quest_finale_done", "true");
+        
+        localStorage.setItem("trigger_fireworks", "true");
+
+        // 3. NOW sync to MongoDB so the database captures the flags
         await triggerSilentSync();
 
-        if (reviewType === "midterm")
-          localStorage.setItem("quest_midterm_done", "true");
-        if (reviewType === "final1")
-          localStorage.setItem("quest_final1_done", "true");
-        
+        // 4. Redirect after the celebration
         if (reviewType === "finale") {
-          localStorage.setItem("quest_finale_done", "true");
-          
-          // 🏆 ARCHIVE WEEK: Move current stats to Hall of Fame & Reset
-          const activeWeek = localStorage.getItem("active_week_id") || "week_1";
-          await archiveWeekProgress(activeWeek);
-
-          // Clear local progress so next week starts fresh
-          const keysToClear = [
-            "vocabmon_exp",
-            "current_word_set",
-            "quest_spelling_done",
-            "quest_exercise_done",
-            "quest_test_done",
-            "quest_midterm_done",
-            "quest_final1_done",
-            "quest_finale_done",
-            "completedQuests"
-          ];
-          keysToClear.forEach(key => localStorage.removeItem(key));
-          
-          // Redirect to Hall of Fame after fireworks
           setTimeout(() => {
-            router.push("/collection");
+            router.push("/");
           }, 3500);
         }
-
-        localStorage.setItem("trigger_fireworks", "true");
       };
 
       runArchive();

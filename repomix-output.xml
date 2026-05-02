@@ -131,6 +131,138 @@ tsconfig.json
 <files>
 This section contains the contents of the repository's files.
 
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="developer_log.md">
+# Vocabmon - Developer Log
+
+## Architecture Overview
+- **Framework:** Next.js 16 (App Router), React 19, TypeScript
+- **Styling:** Tailwind CSS v4
+- **Database:** MongoDB + Mongoose
+- **Auth:** Custom secure cookie sessions (`src/proxy.ts` middleware)
+
+## Core Features
+**1. The Vocabmon Engine**
+- Custom React SVG components (`DigimonVocabmon.tsx`, `FireVocabmon.tsx`).
+- Supports 10 stages of evolution based on EXP thresholds (150 EXP per level).
+- Includes CSS-driven idle animations, eating logic, and tier-specific attack/special animations.
+
+**2. Gamified Curriculum (Dashboard)**
+- Weekly sets of 50 words broken into daily chunks.
+- Quests are chronologically locked (Spelling -> Exercise -> Test).
+- Weekend Boss Fights (Midterm and Finals) test cumulative memory.
+
+**3. Interactive Exercises**
+- `SpellingPractice & Test`: Web Speech API dictation and typing.
+- `MeaningPractice`: Rebuilding definitions from word banks.
+- `MeaningMatch`: Interactive SVG line-drawing between words and definitions.
+- `SentenceFill & DragDropTest`: Contextual reading comprehension.
+- `MeaningPuzzle`: Letter-slot guessing games.
+
+**4. 3D Runner Mini-Game**
+- Pseudo-3D CSS runner (`JumpGame.tsx`).
+- Endless survival mode using active weekly vocabulary.
+- 2-Strike life system with custom Suno AI background tracks.
+
+**5. Progress & Archival**
+- `syncHelper.ts` silently pushes `localStorage` state to MongoDB.
+- `scripts/rollover.ts` CLI tool archives the current week to the Hall of Fame and resets the board for next week.
+</file>
+
+<file path="eslint.config.mjs">
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;
+</file>
+
+<file path="postcss.config.mjs">
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+
+export default config;
+</file>
+
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
 <file path="scripts/createDev.ts">
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -154,6 +286,129 @@ async function run() {
   process.exit(0);
 }
 run();
+</file>
+
+<file path="scripts/rollover.ts">
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load the environment variables from .env.local
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI is missing in .env.local');
+  process.exit(1);
+}
+
+async function run() {
+  const username = process.argv[2];
+  const newWeekId = process.argv[3];
+
+  if (!username || !newWeekId) {
+    console.log('⚠️ Usage: npx tsx scripts/rollover.ts <username> <new_week_id>');
+    console.log('Example: npx tsx scripts/rollover.ts jaylee week_5');
+    process.exit(1);
+  }
+
+  console.log(`⏳ Connecting to MongoDB...`);
+  await mongoose.connect(MONGODB_URI as string);
+  
+  // Define a flexible schema for the script
+  const ProgressSchema = new mongoose.Schema({
+    username: String,
+    activeWeekId: String,
+    exp: Number,
+    currentSet: Number,
+    completedQuests: [String],
+    history: Array
+  }, { strict: false });
+
+  const Progress = mongoose.models.Progress || mongoose.model('Progress', ProgressSchema);
+  const userProgress = await Progress.findOne({ username });
+
+  if (!userProgress) {
+    console.error(`❌ Could not find progress for user: ${username}`);
+    process.exit(1);
+  }
+
+  console.log(`👤 Found user: ${username} (Currently on ${userProgress.activeWeekId} with ${userProgress.exp} EXP)`);
+
+  // 1. Calculate final level
+  const rawLevel = Math.floor(userProgress.exp / 150) + 1;
+  const finalLevel = Math.min(rawLevel, 10);
+
+  // 2. Archive to history
+  const historyEntry = {
+    weekId: userProgress.activeWeekId,
+    finalLevel: finalLevel,
+    totalExp: userProgress.exp,
+    completedAt: new Date()
+  };
+  
+  userProgress.history.push(historyEntry);
+
+  // 3. Reset stats for the new week
+  userProgress.activeWeekId = newWeekId;
+  userProgress.exp = 0;
+  userProgress.currentSet = 0;
+  userProgress.completedQuests = [];
+
+  await userProgress.save();
+
+  console.log(`🎉 Successfully archived ${historyEntry.weekId} to the Hall of Fame!`);
+  console.log(`🆕 Reset stats for ${newWeekId}. Ready to learn!`);
+
+  await mongoose.disconnect();
+  process.exit(0);
+}
+
+run();
+</file>
+
+<file path="src/actions/loadProgress.ts">
+"use server";
+
+import { connectToDatabase } from "@/lib/mongodb";
+import Progress from "@/models/Progress";
+import { cookies } from "next/headers";
+
+export async function getStudentProgress() {
+  try {
+    const cookieStore = await cookies();
+    const username = cookieStore.get("vocabmon_session")?.value;
+
+    if (!username) return null;
+
+    await connectToDatabase();
+
+    // Fetch Jay's save file from the database
+    const progress = await Progress.findOne({ username }).lean();
+
+    if (!progress) return null;
+
+    // We have to stringify/parse to safely pass MongoDB objects to the frontend
+    return JSON.parse(JSON.stringify(progress));
+  } catch (error) {
+    console.error("Failed to load progress:", error);
+    return null;
+  }
+}
+</file>
+
+<file path="src/actions/logout.ts">
+"use server";
+
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+export async function logoutUser() {
+  const cookieStore = await cookies();
+  cookieStore.delete("vocabmon_session");
+  redirect("/login");
+}
 </file>
 
 <file path="src/app/design/page.tsx">
@@ -397,261 +652,6 @@ export default function DesignLab() {
       </div>
     </main>
   );
-}
-</file>
-
-<file path=".gitignore">
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-</file>
-
-<file path="developer_log.md">
-# Vocabmon - Developer Log
-
-## Architecture Overview
-- **Framework:** Next.js 16 (App Router), React 19, TypeScript
-- **Styling:** Tailwind CSS v4
-- **Database:** MongoDB + Mongoose
-- **Auth:** Custom secure cookie sessions (`src/proxy.ts` middleware)
-
-## Core Features
-**1. The Vocabmon Engine**
-- Custom React SVG components (`DigimonVocabmon.tsx`, `FireVocabmon.tsx`).
-- Supports 10 stages of evolution based on EXP thresholds (150 EXP per level).
-- Includes CSS-driven idle animations, eating logic, and tier-specific attack/special animations.
-
-**2. Gamified Curriculum (Dashboard)**
-- Weekly sets of 50 words broken into daily chunks.
-- Quests are chronologically locked (Spelling -> Exercise -> Test).
-- Weekend Boss Fights (Midterm and Finals) test cumulative memory.
-
-**3. Interactive Exercises**
-- `SpellingPractice & Test`: Web Speech API dictation and typing.
-- `MeaningPractice`: Rebuilding definitions from word banks.
-- `MeaningMatch`: Interactive SVG line-drawing between words and definitions.
-- `SentenceFill & DragDropTest`: Contextual reading comprehension.
-- `MeaningPuzzle`: Letter-slot guessing games.
-
-**4. 3D Runner Mini-Game**
-- Pseudo-3D CSS runner (`JumpGame.tsx`).
-- Endless survival mode using active weekly vocabulary.
-- 2-Strike life system with custom Suno AI background tracks.
-
-**5. Progress & Archival**
-- `syncHelper.ts` silently pushes `localStorage` state to MongoDB.
-- `scripts/rollover.ts` CLI tool archives the current week to the Hall of Fame and resets the board for next week.
-</file>
-
-<file path="eslint.config.mjs">
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
-
-const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
-]);
-
-export default eslintConfig;
-</file>
-
-<file path="postcss.config.mjs">
-const config = {
-  plugins: {
-    "@tailwindcss/postcss": {},
-  },
-};
-
-export default config;
-</file>
-
-<file path="public/file.svg">
-<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
-</file>
-
-<file path="public/globe.svg">
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
-</file>
-
-<file path="public/next.svg">
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
-</file>
-
-<file path="public/vercel.svg">
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
-</file>
-
-<file path="public/window.svg">
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
-</file>
-
-<file path="scripts/rollover.ts">
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Load the environment variables from .env.local
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
-
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  console.error('❌ MONGODB_URI is missing in .env.local');
-  process.exit(1);
-}
-
-async function run() {
-  const username = process.argv[2];
-  const newWeekId = process.argv[3];
-
-  if (!username || !newWeekId) {
-    console.log('⚠️ Usage: npx tsx scripts/rollover.ts <username> <new_week_id>');
-    console.log('Example: npx tsx scripts/rollover.ts jaylee week_5');
-    process.exit(1);
-  }
-
-  console.log(`⏳ Connecting to MongoDB...`);
-  await mongoose.connect(MONGODB_URI as string);
-  
-  // Define a flexible schema for the script
-  const ProgressSchema = new mongoose.Schema({
-    username: String,
-    activeWeekId: String,
-    exp: Number,
-    currentSet: Number,
-    completedQuests: [String],
-    history: Array
-  }, { strict: false });
-
-  const Progress = mongoose.models.Progress || mongoose.model('Progress', ProgressSchema);
-  const userProgress = await Progress.findOne({ username });
-
-  if (!userProgress) {
-    console.error(`❌ Could not find progress for user: ${username}`);
-    process.exit(1);
-  }
-
-  console.log(`👤 Found user: ${username} (Currently on ${userProgress.activeWeekId} with ${userProgress.exp} EXP)`);
-
-  // 1. Calculate final level
-  const rawLevel = Math.floor(userProgress.exp / 150) + 1;
-  const finalLevel = Math.min(rawLevel, 10);
-
-  // 2. Archive to history
-  const historyEntry = {
-    weekId: userProgress.activeWeekId,
-    finalLevel: finalLevel,
-    totalExp: userProgress.exp,
-    completedAt: new Date()
-  };
-  
-  userProgress.history.push(historyEntry);
-
-  // 3. Reset stats for the new week
-  userProgress.activeWeekId = newWeekId;
-  userProgress.exp = 0;
-  userProgress.currentSet = 0;
-  userProgress.completedQuests = [];
-
-  await userProgress.save();
-
-  console.log(`🎉 Successfully archived ${historyEntry.weekId} to the Hall of Fame!`);
-  console.log(`🆕 Reset stats for ${newWeekId}. Ready to learn!`);
-
-  await mongoose.disconnect();
-  process.exit(0);
-}
-
-run();
-</file>
-
-<file path="src/actions/loadProgress.ts">
-"use server";
-
-import { connectToDatabase } from "@/lib/mongodb";
-import Progress from "@/models/Progress";
-import { cookies } from "next/headers";
-
-export async function getStudentProgress() {
-  try {
-    const cookieStore = await cookies();
-    const username = cookieStore.get("vocabmon_session")?.value;
-
-    if (!username) return null;
-
-    await connectToDatabase();
-
-    // Fetch Jay's save file from the database
-    const progress = await Progress.findOne({ username }).lean();
-
-    if (!progress) return null;
-
-    // We have to stringify/parse to safely pass MongoDB objects to the frontend
-    return JSON.parse(JSON.stringify(progress));
-  } catch (error) {
-    console.error("Failed to load progress:", error);
-    return null;
-  }
-}
-</file>
-
-<file path="src/actions/logout.ts">
-"use server";
-
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
-export async function logoutUser() {
-  const cookieStore = await cookies();
-  cookieStore.delete("vocabmon_session");
-  redirect("/login");
 }
 </file>
 
@@ -1853,27 +1853,6 @@ export async function connectToDatabase() {
 }
 </file>
 
-<file path="src/models/User.ts">
-import mongoose, { Schema, Document, Model } from "mongoose";
-
-export interface IUser extends Document {
-  username: string;
-  passwordHash: string;
-  role: "student" | "admin" | "dev";
-}
-
-const UserSchema: Schema = new Schema({
-  username: { type: String, required: true, unique: true },
-  passwordHash: { type: String, required: true },
-  role: { type: String, enum: ["student", "admin", "dev"], default: "student" },
-});
-
-const User: Model<IUser> =
-  mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
-
-export default User;
-</file>
-
 <file path="tsconfig.json">
 {
   "compilerOptions": {
@@ -1908,75 +1887,6 @@ export default User;
     "**/*.mts"
   ],
   "exclude": ["node_modules"]
-}
-</file>
-
-<file path="README.md">
-to update mongodb
-npx tsx scripts/rollover.ts jaylee week_5
-</file>
-
-<file path="src/actions/auth.ts">
-"use server";
-
-import { connectToDatabase } from "@/lib/mongodb";
-import User from "@/models/User";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
-// NEW: Safely get the current logged-in username
-export async function getCurrentUsername() {
-  const cookieStore = await cookies();
-  return cookieStore.get("vocabmon_session")?.value || null;
-}
-
-export async function loginUser(
-  prevState: { error?: string } | null,
-  formData: FormData,
-) {
-  const username = formData.get("username") as string | null;
-  const password = formData.get("password") as string | null;
-
-  if (!username || !password) return { error: "Please fill out both fields." };
-
-  try {
-    await connectToDatabase();
-
-    // 1. SMART SEEDING: Auto-create the dev account
-    if (username === "dev") {
-      const devExists = await User.findOne({ username: "dev" });
-      if (!devExists) {
-        console.log("🛠️ Dev account missing! Auto-creating...");
-        await User.create({ username: "dev", passwordHash: "dev123", role: "dev" });
-      }
-    }
-
-    // 2. SMART SEEDING: Auto-create Jay's account if empty
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-      console.log("Database is empty! Creating Jay's account...");
-      await User.create({ username: "jay", passwordHash: "vocab123", role: "student" });
-    }
-
-    const user = await User.findOne({ username });
-
-    if (!user || user.passwordHash !== password) {
-      return { error: "Invalid username or password!" };
-    }
-
-    const cookieStore = await cookies();
-    cookieStore.set("vocabmon_session", user.username, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: "/",
-    });
-  } catch (error) {
-    console.error("Database error:", error);
-    return { error: "Database connection failed. Check your console." };
-  }
-
-  redirect("/");
 }
 </file>
 
@@ -3009,6 +2919,27 @@ export default mongoose.models.Progress ||
   mongoose.model<IProgress>("Progress", ProgressSchema);
 </file>
 
+<file path="src/models/User.ts">
+import mongoose, { Schema, Document, Model } from "mongoose";
+
+export interface IUser extends Document {
+  username: string;
+  passwordHash: string;
+  role: "student" | "admin" | "dev";
+}
+
+const UserSchema: Schema = new Schema({
+  username: { type: String, required: true, unique: true },
+  passwordHash: { type: String, required: true },
+  role: { type: String, enum: ["student", "admin", "dev"], default: "student" },
+});
+
+const User: Model<IUser> =
+  mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+
+export default User;
+</file>
+
 <file path="src/proxy.ts">
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -3055,40 +2986,77 @@ const nextConfig = {
 export default nextConfig;
 </file>
 
-<file path="package.json">
-{
-  "name": "vocab-mvp",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.6.0",
-    "@types/three": "^0.184.0",
-    "mongoose": "^9.3.3",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "three": "^0.184.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "babel-plugin-react-compiler": "1.0.0",
-    "dotenv": "^17.4.2",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4",
-    "tsx": "^4.21.0",
-    "typescript": "^5"
+<file path="README.md">
+to update mongodb
+npx tsx scripts/rollover.ts jaylee week_5
+
+to update repomix
+npx repomix --style xml
+
+test
+</file>
+
+<file path="src/actions/auth.ts">
+"use server";
+
+import { connectToDatabase } from "@/lib/mongodb";
+import User from "@/models/User";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+// NEW: Safely get the current logged-in username
+export async function getCurrentUsername() {
+  const cookieStore = await cookies();
+  return cookieStore.get("vocabmon_session")?.value || null;
+}
+
+export async function loginUser(
+  prevState: { error?: string } | null,
+  formData: FormData,
+) {
+  const username = formData.get("username") as string | null;
+  const password = formData.get("password") as string | null;
+
+  if (!username || !password) return { error: "Please fill out both fields." };
+
+  try {
+    await connectToDatabase();
+
+    // 1. SMART SEEDING: Auto-create the dev account
+    if (username === "dev") {
+      const devExists = await User.findOne({ username: "dev" });
+      if (!devExists) {
+        console.log("🛠️ Dev account missing! Auto-creating...");
+        await User.create({ username: "dev", passwordHash: "dev123", role: "dev" });
+      }
+    }
+
+    // 2. SMART SEEDING: Auto-create Jay's account if empty
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log("Database is empty! Creating Jay's account...");
+      await User.create({ username: "jay", passwordHash: "vocab123", role: "student" });
+    }
+
+    const user = await User.findOne({ username });
+
+    if (!user || user.passwordHash !== password) {
+      return { error: "Invalid username or password!" };
+    }
+
+    const cookieStore = await cookies();
+    cookieStore.set("vocabmon_session", user.username, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: "/",
+    });
+  } catch (error) {
+    console.error("Database error:", error);
+    return { error: "Database connection failed. Check your console." };
   }
+
+  redirect("/");
 }
 </file>
 
@@ -4713,179 +4681,6 @@ export default function SpellingTest({
 }
 </file>
 
-<file path="src/components/shared/DigimonVocabmon.tsx">
-"use client";
-import React, { useEffect, useState } from 'react';
-
-interface Props {
-  level: number;
-  feedTrigger?: number;
-  attackTrigger?: number;
-  className?: string;
-}
-
-export default function PixelVocabmon({ level, feedTrigger, attackTrigger, className = "" }: Props) {
-  const safeLevel = Math.max(1, Math.min(10, level));
-  const [isEating, setIsEating] = useState(false);
-  const [isAttacking, setIsAttacking] = useState(false);
-  const [expPopups, setExpPopups] = useState<{id: number}[]>([]);
-  const [spriteMode, setSpriteMode] = useState<'idle' | 'atk'>('idle');
-  
-  // NEW: Tracks whether we need to use CSS animations because the attack GIF is missing
-  const [useCssFallback, setUseCssFallback] = useState(false);
-
-  useEffect(() => {
-    if (feedTrigger && feedTrigger > 0) {
-      setIsEating(true);
-      const newId = Date.now();
-      setExpPopups(prev => [...prev, { id: newId }]);
-      const animTimer = setTimeout(() => setIsEating(false), 600);
-      const popupTimer = setTimeout(() => {
-        setExpPopups(prev => prev.filter(p => p.id !== newId));
-      }, 1000);
-      return () => { clearTimeout(animTimer); clearTimeout(popupTimer); };
-    }
-  }, [feedTrigger]);
-
-  useEffect(() => {
-    if (attackTrigger && attackTrigger > 0) {
-      setIsAttacking(true);
-      setSpriteMode('atk');
-      setUseCssFallback(false); // Reset fallback state on new attack
-      
-      // EXTENDED TIMEOUT: Gives long GIFs 2.5 seconds to finish playing
-      const timer = setTimeout(() => {
-        setIsAttacking(false);
-        setSpriteMode('idle');
-        setUseCssFallback(false);
-      }, 2500); 
-      
-      return () => clearTimeout(timer);
-    }
-  }, [attackTrigger]);
-
-  const getAnimationClass = () => {
-    if (!isAttacking) return '';
-    // ONLY apply the wild CSS movements if the attack GIF failed to load
-    if (useCssFallback) return `anim-spc-${safeLevel}`;
-    // If it's a real attack GIF, just enlarge it slightly for impact, no sliding!
-    return 'scale-110 transition-transform duration-300';
-  };
-
-  const spriteSuffix = spriteMode === 'atk' ? '_atk' : '';
-  const spritePath = `/sprites/lvl${safeLevel}${spriteSuffix}.gif`;
-
-  return (
-    <div className={`relative flex flex-col items-center justify-end w-[140px] h-[140px] mx-auto ${className}`}>
-      <style jsx>{`
-        /* ULTRA-DYNAMIC CLASS BINDINGS */
-        .anim-atk-1 { animation: atk-1 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); } 
-        .anim-spc-1 { animation: spc-1 0.8s ease-in-out; }
-        .anim-atk-2 { animation: atk-2 0.6s cubic-bezier(0.5, -0.5, 0.5, 1.5); }    
-        .anim-spc-2 { animation: spc-2 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .anim-atk-3 { animation: atk-3 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); } 
-        .anim-spc-3 { animation: spc-3 0.9s ease-out; }
-        .anim-atk-4 { animation: atk-4 0.4s ease-in-out; } 
-        .anim-spc-4 { animation: spc-4 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .anim-atk-5 { animation: atk-5 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-        .anim-spc-5 { animation: spc-5 1.0s ease-out; }
-        .anim-atk-6 { animation: atk-6 0.5s cubic-bezier(0.5, -0.5, 0, 1.5); }
-        .anim-spc-6 { animation: spc-6 1.2s cubic-bezier(0.1, 0.9, 0.2, 1); }
-        .anim-atk-7 { animation: atk-7 0.4s steps(4, end); }    
-        .anim-spc-7 { animation: spc-7 1.2s cubic-bezier(0.5, 0, 0.1, 1); }
-        .anim-atk-8 { animation: atk-8 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); }
-        .anim-spc-8 { animation: spc-8 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .anim-atk-9 { animation: atk-9 0.7s ease-in-out; }      
-        .anim-spc-9 { animation: spc-9 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .anim-atk-10{ animation: atk-10 0.5s cubic-bezier(1, 0, 0, 1); }
-        .anim-spc-10{ animation: spc-10 1.2s cubic-bezier(0.1, 1, 0.1, 1); }
-
-        /* LV 1 & 2: Bouncing and Bubbles */
-        @keyframes atk-1 { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-30px) scale(0.8, 1.2); } 60% { transform: translateY(0) scale(1.2, 0.8); } }
-        @keyframes spc-1 { 0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); } 50% { filter: brightness(1.5) drop-shadow(0 0 40px #facc15); transform: scale(1.1); } }
-        @keyframes atk-2 { 0%, 100% { transform: translate(0,0) scale(1); } 30% { transform: translate(-10px, 10px) scale(1.2, 0.8); } 60% { transform: translate(50px, -20px) scale(0.9, 1.2); } }
-        @keyframes spc-2 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(50px 0 20px #0f172a); transform: scale(1.2) translateY(-10px); } }
-
-        /* LV 3 & 4: Koromon & Agumon (Fast Strikes & Fireballs) */
-        @keyframes atk-3 { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(60px) scale(1.1); filter: drop-shadow(-10px 0 5px rgba(0,0,0,0.2)); } }
-        @keyframes spc-3 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(60px -20px 20px #f472b6); transform: scale(1.2) rotate(-5deg); } }
-        @keyframes atk-4 { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(30px); } 40% { transform: translateX(10px); } 60% { transform: translateX(50px); } }
-        @keyframes spc-4 { 0%, 100% { transform: scale(1) translateX(0); filter: brightness(1); } 30% { transform: scale(0.85) translateX(-15px); filter: brightness(0.7); } 50% { transform: scale(1.3) translateX(20px); filter: brightness(2.5) drop-shadow(100px 0 40px #f97316); } }
-
-        /* LV 5 & 6: Tyrannomon & Greymon (Heavy Impacts) */
-        @keyframes atk-5 { 0%, 100% { transform: scaleX(1) translateX(0); } 50% { transform: scaleX(-1) translateX(-50px) translateY(-10px); filter: drop-shadow(10px 10px 5px rgba(0,0,0,0.3)); } }
-        @keyframes spc-5 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); transform: translateY(0); } 50% { transform: translateY(-10px) scale(1.15); filter: brightness(2) drop-shadow(100px 0 50px #ef4444); } }
-        @keyframes atk-6 { 0%, 100% { transform: translate(0, 0); } 30% { transform: translate(-20px, 20px) scale(1.1, 0.9); } 60% { transform: translate(80px, -60px) scale(0.9, 1.1) rotate(15deg); } }
-        @keyframes spc-6 { 0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 0 transparent); } 30% { transform: scale(0.9) translateX(-10px); } 60% { transform: scale(1.6) translateX(10px); filter: brightness(3) drop-shadow(150px 0 80px #ea580c) drop-shadow(50px 0 30px yellow); } }
-
-        /* LV 7 & 8: SkullGreymon & MetalGreymon (Glitch & Missiles) */
-        @keyframes atk-7 { 0%, 100% { transform: translate(0,0); opacity: 1; filter: grayscale(0); } 25% { transform: translate(50px, -30px); opacity: 0.8; filter: grayscale(1) invert(1); } 50% { transform: translate(80px, 20px); filter: hue-rotate(180deg); } }
-        @keyframes spc-7 { 0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 0 transparent); } 40% { transform: translateY(-100px) scale(1.2); filter: drop-shadow(0 -50px 30px #9333ea); } 60% { transform: translateY(-100px); filter: brightness(2) drop-shadow(120px 180px 60px #7e22ce); } }
-        @keyframes atk-8 { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-20px); } 50% { transform: translateX(100px) scaleX(1.2); filter: drop-shadow(-30px 0 10px #94a3b8); } }
-        @keyframes spc-8 { 0%, 100% { transform: translateX(0); filter: drop-shadow(0 0 0 transparent); } 20% { transform: translateX(-25px); filter: brightness(2) drop-shadow(80px -40px 40px #f59e0b); } 40% { transform: translateX(-15px); filter: brightness(2.5) drop-shadow(100px 40px 50px #ef4444); } 60% { transform: translateX(15px); filter: brightness(3) drop-shadow(150px 0px 100px #ea580c); } }
-
-        /* LV 9 & 10: WarGreymon & Omnimon (God-Tier Attacks) */
-        @keyframes atk-9 { 0%, 100% { transform: translateX(0) rotate(0deg); } 20% { transform: translateX(-30px) rotate(-45deg); } 70% { transform: translateX(120px) rotate(1440deg); filter: drop-shadow(0 0 15px #facc15); } }
-        @keyframes spc-9 { 0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 transparent); } 30% { transform: translateY(-120px) scale(1.2); filter: brightness(1.5) drop-shadow(0 -60px 40px #fbbf24); } 50% { transform: translateY(-120px) scale(1.6); filter: brightness(3) drop-shadow(0 -150px 200px #f59e0b) drop-shadow(0 -50px 80px white); } 70% { transform: translate(60px, 30px) scale(1); filter: brightness(2) drop-shadow(150px 0 100px #fbbf24); } }
-        @keyframes atk-10 { 0%, 100% { transform: translateX(0); opacity: 1; filter: brightness(1); } 10% { transform: translateX(-20px); opacity: 0; } 30% { transform: translateX(180px); opacity: 1; filter: brightness(3) drop-shadow(-80px 0 5px white); } 50% { transform: translateX(180px); opacity: 1; filter: brightness(1); } 60% { transform: translateX(180px); opacity: 0; } }
-        @keyframes spc-10 { 0%, 100% { transform: scale(1) translateX(0); filter: drop-shadow(0 0 0 transparent); } 20% { transform: scale(0.8) translateX(-30px); filter: brightness(2) drop-shadow(30px 0 30px #06b6d4); } 40% { transform: scaleX(5) scaleY(0.4) translateX(40px); transform-origin: left; filter: brightness(5) drop-shadow(200px 0 80px #22d3ee) drop-shadow(0 0 40px white); } 60% { transform: scaleX(4) scaleY(0.5) translateX(30px); transform-origin: left; filter: brightness(2) drop-shadow(150px 0 30px #06b6d4); } }
-
-        /* IDLE & COMMON */
-        @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
-        @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
-        @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
-        @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
-        
-        .animate-breathe { animation: squish-breathe 2s ease-in-out infinite; }
-        .animate-jump { animation: happy-jump 0.6s ease-in-out; }
-        .exp-float { animation: float-up 1s ease-out forwards; position: absolute; font-weight: 900; color: #f97316; text-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 50; top: -20px; }
-        .animate-float-slow { animation: float-slow 3s ease-in-out infinite; }
-      `}</style>
-
-      {expPopups.map((popup) => (
-        <div key={popup.id} className="exp-float text-xl font-black text-orange-500 drop-shadow-md">
-          +15 EXP!
-        </div>
-      ))}
-
-      {/* Notice 'animate-breathe' is removed so the GIF can handle its own idle animation naturally! */}
-      <div className={`relative z-10 w-full h-full flex items-center justify-center ${isEating ? "animate-jump" : ""}`}>
-        
-        <img
-          src={spritePath}
-          alt={`Vocabmon Level ${safeLevel}`}
-          className={`max-w-[130px] max-h-[130px] w-auto h-auto object-contain drop-shadow-2xl transition-transform ${getAnimationClass()}`}
-          style={{ 
-            imageRendering: 'pixelated', // This keeps the DS-era pixel art perfectly crisp
-          }}
-          onError={(e) => {
-            if (e.currentTarget.src.includes('_atk')) {
-              // Trigger the CSS fallback animation and swap the image source
-              setUseCssFallback(true);
-              e.currentTarget.src = `/sprites/lvl${safeLevel}.gif`;
-            } else {
-              e.currentTarget.style.display = 'none';
-              if (e.currentTarget.nextElementSibling) {
-                e.currentTarget.nextElementSibling.classList.remove('hidden');
-              }
-            }
-          }}
-        />
-        
-        {/* Helper UI if the GIF is missing */}
-        <div className="hidden text-[10px] font-black text-gray-400 text-center border-2 border-dashed border-gray-300 bg-white/50 backdrop-blur-sm p-4 rounded-xl shadow-inner">
-          Missing GIF<br/>
-          <span className="text-indigo-500">public/sprites/lvl{safeLevel}.gif</span>
-        </div>
-
-      </div>
-      
-      <div className="absolute bottom-0 w-24 h-3 bg-black/10 rounded-full blur-[2px]"></div>
-    </div>
-  );
-}
-</file>
-
 <file path="src/components/test/DragDropTest.tsx">
 import { useState, useEffect, useCallback } from "react";
 import { VocabWord } from "@/data/vocab";
@@ -5317,6 +5112,43 @@ export async function triggerSilentSync() {
 }
 </file>
 
+<file path="package.json">
+{
+  "name": "vocab-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.0",
+    "@types/three": "^0.184.0",
+    "mongoose": "^9.3.3",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "dotenv": "^17.4.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}
+</file>
+
 <file path="src/actions/progress.ts">
 "use server";
 
@@ -5414,7 +5246,7 @@ export async function startNewWeek(username: string, newWeekId: string) {
     const progress = await Progress.findOne({ username });
     if (!progress) return { success: false, error: "No progress found" };
 
-    // B) Archive the current week
+    // Archive the current week
     const finalLevel = Math.min(Math.floor(progress.exp / 150) + 1, 10);
     progress.history.push({
       weekId: progress.activeWeekId,
@@ -5423,19 +5255,227 @@ export async function startNewWeek(username: string, newWeekId: string) {
       completedAt: new Date(),
     });
 
-    // C) Reset the state for the new week
+    // Reset the state for the new week (Including EXP!)
     progress.activeWeekId = newWeekId;
     progress.currentSet = 0;
     progress.completedQuests = [];
+    progress.exp = 0; // CRITICAL FIX: Reset EXP to 0 for the new egg!
 
-    // CRITICAL: Do not modify the exp, unlockedStickers, or hideStickerPopupUntil fields.
     await progress.save();
-
     return { success: true };
   } catch (error) {
     console.error("Failed to start new week:", error);
     return { success: false, error: "Failed to start new week" };
   }
+}
+
+export async function executeInAppRollover(newWeekId: string) {
+  try {
+    const cookieStore = await cookies();
+    const username = cookieStore.get("vocabmon_session")?.value;
+    if (!username) return { success: false, error: "Not logged in" };
+
+    await connectToDatabase();
+    const progress = await Progress.findOne({ username });
+    if (!progress) return { success: false, error: "No progress found" };
+
+    // 1. Calculate final level based on the MOST RECENT synced EXP
+    const rawLevel = Math.floor(progress.exp / 150) + 1;
+    const finalLevel = Math.min(rawLevel, 10);
+
+    // 2. Archive the current state into the Hall of Fame
+    progress.history.push({
+      weekId: progress.activeWeekId,
+      finalLevel,
+      totalExp: progress.exp,
+      completedAt: new Date(),
+    });
+
+    // 3. Reset the DB for the new week
+    progress.activeWeekId = newWeekId;
+    progress.exp = 0;
+    progress.currentSet = 0;
+    progress.completedQuests = [];
+
+    await progress.save();
+    return { success: true };
+  } catch (error) {
+    console.error("Rollover failed:", error);
+    return { success: false, error: "Database error during rollover" };
+  }
+}
+</file>
+
+<file path="src/components/shared/DigimonVocabmon.tsx">
+"use client";
+import React, { useEffect, useState } from 'react';
+
+interface Props {
+  level: number;
+  feedTrigger?: number;
+  attackTrigger?: number;
+  className?: string;
+}
+
+export default function PixelVocabmon({ level, feedTrigger, attackTrigger, className = "" }: Props) {
+  const safeLevel = Math.max(1, Math.min(10, level));
+  const [isEating, setIsEating] = useState(false);
+  const [isAttacking, setIsAttacking] = useState(false);
+  const [expPopups, setExpPopups] = useState<{id: number}[]>([]);
+  const [spriteMode, setSpriteMode] = useState<'idle' | 'atk'>('idle');
+  
+  // NEW: Tracks whether we need to use CSS animations because the attack GIF is missing
+  const [useCssFallback, setUseCssFallback] = useState(false);
+
+  useEffect(() => {
+    if (feedTrigger && feedTrigger > 0) {
+      setIsEating(true);
+      const newId = Date.now();
+      setExpPopups(prev => [...prev, { id: newId }]);
+      const animTimer = setTimeout(() => setIsEating(false), 600);
+      const popupTimer = setTimeout(() => {
+        setExpPopups(prev => prev.filter(p => p.id !== newId));
+      }, 1000);
+      return () => { clearTimeout(animTimer); clearTimeout(popupTimer); };
+    }
+  }, [feedTrigger]);
+
+  useEffect(() => {
+    if (attackTrigger && attackTrigger > 0) {
+      setIsAttacking(true);
+      setSpriteMode('atk');
+      setUseCssFallback(false); // Reset fallback state on new attack
+      
+      // EXTENDED TIMEOUT: Gives long GIFs 2.5 seconds to finish playing
+      const timer = setTimeout(() => {
+        setIsAttacking(false);
+        setSpriteMode('idle');
+        setUseCssFallback(false);
+      }, 2500); 
+      
+      return () => clearTimeout(timer);
+    }
+  }, [attackTrigger]);
+
+  const getAnimationClass = () => {
+    if (!isAttacking) return '';
+    // ONLY apply the wild CSS movements if the attack GIF failed to load
+    if (useCssFallback) return `anim-spc-${safeLevel}`;
+    // If it's a real attack GIF, just enlarge it slightly for impact, no sliding!
+    return 'scale-110 transition-transform duration-300';
+  };
+
+  const spriteSuffix = spriteMode === 'atk' ? '_atk' : '';
+  const spritePath = `/sprites/lvl${safeLevel}${spriteSuffix}.gif`;
+
+  return (
+    <div className={`relative flex flex-col items-center justify-end w-[140px] h-[140px] mx-auto ${className}`}>
+      <style jsx>{`
+        /* ULTRA-DYNAMIC CLASS BINDINGS */
+        .anim-atk-1 { animation: atk-1 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); } 
+        .anim-spc-1 { animation: spc-1 0.8s ease-in-out; }
+        .anim-atk-2 { animation: atk-2 0.6s cubic-bezier(0.5, -0.5, 0.5, 1.5); }    
+        .anim-spc-2 { animation: spc-2 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .anim-atk-3 { animation: atk-3 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); } 
+        .anim-spc-3 { animation: spc-3 0.9s ease-out; }
+        .anim-atk-4 { animation: atk-4 0.4s ease-in-out; } 
+        .anim-spc-4 { animation: spc-4 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .anim-atk-5 { animation: atk-5 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .anim-spc-5 { animation: spc-5 1.0s ease-out; }
+        .anim-atk-6 { animation: atk-6 0.5s cubic-bezier(0.5, -0.5, 0, 1.5); }
+        .anim-spc-6 { animation: spc-6 1.2s cubic-bezier(0.1, 0.9, 0.2, 1); }
+        .anim-atk-7 { animation: atk-7 0.4s steps(4, end); }    
+        .anim-spc-7 { animation: spc-7 1.2s cubic-bezier(0.5, 0, 0.1, 1); }
+        .anim-atk-8 { animation: atk-8 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); }
+        .anim-spc-8 { animation: spc-8 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .anim-atk-9 { animation: atk-9 0.7s ease-in-out; }      
+        .anim-spc-9 { animation: spc-9 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .anim-atk-10{ animation: atk-10 0.5s cubic-bezier(1, 0, 0, 1); }
+        .anim-spc-10{ animation: spc-10 1.2s cubic-bezier(0.1, 1, 0.1, 1); }
+
+        /* LV 1 & 2: Bouncing and Bubbles */
+        @keyframes atk-1 { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-30px) scale(0.8, 1.2); } 60% { transform: translateY(0) scale(1.2, 0.8); } }
+        @keyframes spc-1 { 0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); } 50% { filter: brightness(1.5) drop-shadow(0 0 40px #facc15); transform: scale(1.1); } }
+        @keyframes atk-2 { 0%, 100% { transform: translate(0,0) scale(1); } 30% { transform: translate(-10px, 10px) scale(1.2, 0.8); } 60% { transform: translate(50px, -20px) scale(0.9, 1.2); } }
+        @keyframes spc-2 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(50px 0 20px #0f172a); transform: scale(1.2) translateY(-10px); } }
+
+        /* LV 3 & 4: Koromon & Agumon (Fast Strikes & Fireballs) */
+        @keyframes atk-3 { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(60px) scale(1.1); filter: drop-shadow(-10px 0 5px rgba(0,0,0,0.2)); } }
+        @keyframes spc-3 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(60px -20px 20px #f472b6); transform: scale(1.2) rotate(-5deg); } }
+        @keyframes atk-4 { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(30px); } 40% { transform: translateX(10px); } 60% { transform: translateX(50px); } }
+        @keyframes spc-4 { 0%, 100% { transform: scale(1) translateX(0); filter: brightness(1); } 30% { transform: scale(0.85) translateX(-15px); filter: brightness(0.7); } 50% { transform: scale(1.3) translateX(20px); filter: brightness(2.5) drop-shadow(100px 0 40px #f97316); } }
+
+        /* LV 5 & 6: Tyrannomon & Greymon (Heavy Impacts) */
+        @keyframes atk-5 { 0%, 100% { transform: scaleX(1) translateX(0); } 50% { transform: scaleX(-1) translateX(-50px) translateY(-10px); filter: drop-shadow(10px 10px 5px rgba(0,0,0,0.3)); } }
+        @keyframes spc-5 { 0%, 100% { filter: drop-shadow(0 0 0 transparent); transform: translateY(0); } 50% { transform: translateY(-10px) scale(1.15); filter: brightness(2) drop-shadow(100px 0 50px #ef4444); } }
+        @keyframes atk-6 { 0%, 100% { transform: translate(0, 0); } 30% { transform: translate(-20px, 20px) scale(1.1, 0.9); } 60% { transform: translate(80px, -60px) scale(0.9, 1.1) rotate(15deg); } }
+        @keyframes spc-6 { 0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 0 transparent); } 30% { transform: scale(0.9) translateX(-10px); } 60% { transform: scale(1.6) translateX(10px); filter: brightness(3) drop-shadow(150px 0 80px #ea580c) drop-shadow(50px 0 30px yellow); } }
+
+        /* LV 7 & 8: SkullGreymon & MetalGreymon (Glitch & Missiles) */
+        @keyframes atk-7 { 0%, 100% { transform: translate(0,0); opacity: 1; filter: grayscale(0); } 25% { transform: translate(50px, -30px); opacity: 0.8; filter: grayscale(1) invert(1); } 50% { transform: translate(80px, 20px); filter: hue-rotate(180deg); } }
+        @keyframes spc-7 { 0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 0 transparent); } 40% { transform: translateY(-100px) scale(1.2); filter: drop-shadow(0 -50px 30px #9333ea); } 60% { transform: translateY(-100px); filter: brightness(2) drop-shadow(120px 180px 60px #7e22ce); } }
+        @keyframes atk-8 { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-20px); } 50% { transform: translateX(100px) scaleX(1.2); filter: drop-shadow(-30px 0 10px #94a3b8); } }
+        @keyframes spc-8 { 0%, 100% { transform: translateX(0); filter: drop-shadow(0 0 0 transparent); } 20% { transform: translateX(-25px); filter: brightness(2) drop-shadow(80px -40px 40px #f59e0b); } 40% { transform: translateX(-15px); filter: brightness(2.5) drop-shadow(100px 40px 50px #ef4444); } 60% { transform: translateX(15px); filter: brightness(3) drop-shadow(150px 0px 100px #ea580c); } }
+
+        /* LV 9 & 10: WarGreymon & Omnimon (God-Tier Attacks) */
+        @keyframes atk-9 { 0%, 100% { transform: translateX(0) rotate(0deg); } 20% { transform: translateX(-30px) rotate(-45deg); } 70% { transform: translateX(120px) rotate(1440deg); filter: drop-shadow(0 0 15px #facc15); } }
+        @keyframes spc-9 { 0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 transparent); } 30% { transform: translateY(-120px) scale(1.2); filter: brightness(1.5) drop-shadow(0 -60px 40px #fbbf24); } 50% { transform: translateY(-120px) scale(1.6); filter: brightness(3) drop-shadow(0 -150px 200px #f59e0b) drop-shadow(0 -50px 80px white); } 70% { transform: translate(60px, 30px) scale(1); filter: brightness(2) drop-shadow(150px 0 100px #fbbf24); } }
+        @keyframes atk-10 { 0%, 100% { transform: translateX(0); opacity: 1; filter: brightness(1); } 10% { transform: translateX(-20px); opacity: 0; } 30% { transform: translateX(180px); opacity: 1; filter: brightness(3) drop-shadow(-80px 0 5px white); } 50% { transform: translateX(180px); opacity: 1; filter: brightness(1); } 60% { transform: translateX(180px); opacity: 0; } }
+        @keyframes spc-10 { 0%, 100% { transform: scale(1) translateX(0); filter: drop-shadow(0 0 0 transparent); } 20% { transform: scale(0.8) translateX(-30px); filter: brightness(2) drop-shadow(30px 0 30px #06b6d4); } 40% { transform: scaleX(5) scaleY(0.4) translateX(40px); transform-origin: left; filter: brightness(5) drop-shadow(200px 0 80px #22d3ee) drop-shadow(0 0 40px white); } 60% { transform: scaleX(4) scaleY(0.5) translateX(30px); transform-origin: left; filter: brightness(2) drop-shadow(150px 0 30px #06b6d4); } }
+
+        /* IDLE & COMMON */
+        @keyframes squish-breathe { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 50% { transform: scaleY(0.9) scaleX(1.05) translateY(6px); } }
+        @keyframes happy-jump { 0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); } 25% { transform: scaleY(1.2) scaleX(0.8) translateY(-15px); } 50% { transform: scaleY(0.8) scaleX(1.2) translateY(5px); } 75% { transform: scaleY(1.1) scaleX(0.9) translateY(-5px); } }
+        @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
+        @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
+        
+        .animate-breathe { animation: squish-breathe 2s ease-in-out infinite; }
+        .animate-jump { animation: happy-jump 0.6s ease-in-out; }
+        .exp-float { animation: float-up 1s ease-out forwards; position: absolute; font-weight: 900; color: #f97316; text-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 50; top: -20px; }
+        .animate-float-slow { animation: float-slow 3s ease-in-out infinite; }
+      `}</style>
+
+      {expPopups.map((popup) => (
+        <div key={popup.id} className="exp-float text-xl font-black text-orange-500 drop-shadow-md">
+          +15 EXP!
+        </div>
+      ))}
+
+      {/* Notice 'animate-breathe' is removed so the GIF can handle its own idle animation naturally! */}
+      <div className={`relative z-10 w-full h-full flex items-center justify-center ${isEating ? "animate-jump" : ""}`}>
+        
+        <img
+          src={spritePath}
+          alt={`Vocabmon Level ${safeLevel}`}
+          className={`max-w-[130px] max-h-[130px] w-auto h-auto object-contain drop-shadow-2xl transition-transform ${getAnimationClass()}`}
+          style={{ 
+            imageRendering: 'pixelated', // This keeps the DS-era pixel art perfectly crisp
+          }}
+          onError={(e) => {
+            if (e.currentTarget.src.includes('_atk')) {
+              // Trigger the CSS fallback animation and swap the image source
+              setUseCssFallback(true);
+              e.currentTarget.src = `/sprites/lvl${safeLevel}.gif`;
+            } else {
+              e.currentTarget.style.display = 'none';
+              if (e.currentTarget.nextElementSibling) {
+                e.currentTarget.nextElementSibling.classList.remove('hidden');
+              }
+            }
+          }}
+        />
+        
+        {/* Helper UI if the GIF is missing */}
+        <div className="hidden text-[10px] font-black text-gray-400 text-center border-2 border-dashed border-gray-300 bg-white/50 backdrop-blur-sm p-4 rounded-xl shadow-inner">
+          Missing GIF<br/>
+          <span className="text-indigo-500">public/sprites/lvl{safeLevel}.gif</span>
+        </div>
+
+      </div>
+      
+      <div className="absolute bottom-0 w-24 h-3 bg-black/10 rounded-full blur-[2px]"></div>
+    </div>
+  );
 }
 </file>
 
@@ -6888,8 +6928,8 @@ export default function PixelVocabmon({
     <DigimonVocabmon
       className={className}
       feedTrigger={feedTrigger}
-      attackTrigger={attackTrigger}
-      specialTrigger={specialTrigger}
+      // Merge specialTrigger into attackTrigger since DigimonVocabmon consolidated them!
+      attackTrigger={attackTrigger || specialTrigger} 
       level={level}
     />
   );
@@ -6956,14 +6996,6 @@ export default function ExercisePage() {
       localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
       localStorage.setItem("quest_exercise_done", "true");
       localStorage.setItem("trigger_fireworks", "true");
-
-      // Handle the completedQuests array
-      const storedQuests = localStorage.getItem("completedQuests");
-      const completedQuests: string[] = storedQuests ? JSON.parse(storedQuests) : [];
-      if (!completedQuests.includes("exercise")) {
-        completedQuests.push("exercise");
-      }
-      localStorage.setItem("completedQuests", JSON.stringify(completedQuests));
 
       // 🚀 NEW: Silently back up to MongoDB!
       triggerSilentSync();
@@ -7150,42 +7182,22 @@ export default function ReviewPage() {
         const currentExp = parseInt(localStorage.getItem("vocabmon_exp") || "0", 10);
         localStorage.setItem("vocabmon_exp", (currentExp + 50).toString());
 
-        // 2. Sync to MongoDB (ensure DB gets the +50 before archival)
+        // 2. Set Local Storage Flags FIRST
+        if (reviewType === "midterm") localStorage.setItem("quest_midterm_done", "true");
+        if (reviewType === "final1") localStorage.setItem("quest_final1_done", "true");
+        if (reviewType === "finale") localStorage.setItem("quest_finale_done", "true");
+        
+        localStorage.setItem("trigger_fireworks", "true");
+
+        // 3. NOW sync to MongoDB so the database captures the flags
         await triggerSilentSync();
 
-        if (reviewType === "midterm")
-          localStorage.setItem("quest_midterm_done", "true");
-        if (reviewType === "final1")
-          localStorage.setItem("quest_final1_done", "true");
-        
+        // 4. Redirect after the celebration
         if (reviewType === "finale") {
-          localStorage.setItem("quest_finale_done", "true");
-          
-          // 🏆 ARCHIVE WEEK: Move current stats to Hall of Fame & Reset
-          const activeWeek = localStorage.getItem("active_week_id") || "week_1";
-          await archiveWeekProgress(activeWeek);
-
-          // Clear local progress so next week starts fresh
-          const keysToClear = [
-            "vocabmon_exp",
-            "current_word_set",
-            "quest_spelling_done",
-            "quest_exercise_done",
-            "quest_test_done",
-            "quest_midterm_done",
-            "quest_final1_done",
-            "quest_finale_done",
-            "completedQuests"
-          ];
-          keysToClear.forEach(key => localStorage.removeItem(key));
-          
-          // Redirect to Hall of Fame after fireworks
           setTimeout(() => {
-            router.push("/collection");
+            router.push("/");
           }, 3500);
         }
-
-        localStorage.setItem("trigger_fireworks", "true");
       };
 
       runArchive();
@@ -7277,6 +7289,71 @@ export default function ReviewPage() {
 }
 </file>
 
+<file path="src/data/vocab.ts">
+export type VocabWord = {
+  id: number;
+  word: string;
+  pos: string;
+  definition: string;
+  sentence?: string;
+  keywords?: string[];
+  imageUrl?: string;
+};
+
+export const vocabData: VocabWord[] = [
+  { id: 1, word: "accustomed", pos: "adj", definition: "(adj) familiar with something so that it seems normal or usual", sentence: "We have become more accustomed to their traditions and routines." },
+  { id: 2, word: "sultry", pos: "adj", definition: "(adj) very hot and humid", sentence: "It was a sultry July afternoon." },
+  { id: 3, word: "corrupt", pos: "adj", definition: "(adj) to cause someone or something to become dishonest, immoral, etc", sentence: "The corrupt mayor was not reelected." },
+  { id: 4, word: "exotic", pos: "adj", definition: "(adj) very different, strange, or unusual / not living or growing naturally in a particular area : from another part of the world", sentence: "The exotic plants come from Hawaii." },
+  { id: 5, word: "serene", pos: "adj", definition: "(adj) calm and peaceful", sentence: "The woods were reflected in the serene lake." },
+  { id: 6, word: "converse", pos: "adj", definition: "(adj) opposite or reverse", sentence: "One must also consider the converse case." },
+  { id: 7, word: "modest", pos: "adj", definition: "(adj) not very large in size or amount / not too proud or confident about yourself or your abilities", sentence: "Despite its modest size, the city has many things to offer tourists." },
+  { id: 8, word: "distinctive", pos: "adj", definition: "(adj) having a quality or characteristic that makes a person or thing different from others", sentence: "I spotted him from a distance because he has a distinctive walk." },
+  { id: 9, word: "moderate", pos: "adj", definition: "(adj) average in size or amount", sentence: "Her doctor recommended moderate exercise." },
+  { id: 10, word: "obstinate", pos: "adj", definition: "(adj) refusing to change your behavior or your ideas", sentence: "Even when he knows he's wrong, Ted is too obstinate to admit it." },
+  { id: 11, word: "superficial", pos: "adj", definition: "(adj) concerned only with what is obvious or apparent : not thorough or complete", sentence: "These superficial changes don't address the underlying problem." },
+  { id: 12, word: "numerous", pos: "adj", definition: "(adj) existing in large numbers", sentence: "She decided to leave for numerous reasons." },
+  { id: 13, word: "subjective", pos: "adj", definition: "(adj) based on feelings or opinions rather than facts", sentence: "Personal taste in clothing is very subjective." },
+  { id: 14, word: "scarce", pos: "adj", definition: "(adj) very small in amount or number : not plentiful", sentence: "Food was getting scarce during the drought." },
+  { id: 15, word: "rational", pos: "adj", definition: "(adj) based on facts or reason and not on emotions or feelings / having the ability to reason or think about things clearly", sentence: "Man is not always a rational being." },
+  { id: 16, word: "desolate", pos: "adj", definition: "(adj) lacking the people, plants, animals, etc., that make people feel welcome in a place", sentence: "She felt desolate when he went away." },
+  { id: 17, word: "sullen", pos: "adj", definition: "(adj) used to describe an angry or unhappy person who does not want to talk, smile, etc.", sentence: "The boy was sullen after being scolded." },
+  { id: 18, word: "thorough", pos: "adj", definition: "(adj) including every possible part or detail", sentence: "I gave my room a thorough cleaning." },
+  { id: 19, word: "moral", pos: "adj", definition: "(adj) considered right and good by most people : agreeing with a standard of right behavior", sentence: "Is it moral to waste food when others in the world are starving?" },
+  { id: 20, word: "fatal", pos: "adj", definition: "(adj) causing death", sentence: "He had a fatal accident on his way home." },
+  { id: 21, word: "infinite", pos: "adj", definition: "(adj) having no limits : endless", sentence: "There seemed to be an infinite number of possibilities." },
+  { id: 22, word: "frequent", pos: "adj", definition: "(adj) happening often", sentence: "We made frequent trips to town." },
+  { id: 23, word: "fundamental", pos: "adj", definition: "(adj) forming or relating to the most important part of something : basic", sentence: "The Constitution ensures our fundamental rights." },
+  { id: 24, word: "efficient", pos: "adj", definition: "(adj) capable of producing desired results without wasting materials, time, or energy", sentence: "He devoted himself to developing more efficient ways of working." },
+  { id: 25, word: "effective", pos: "adj", definition: "(adj) producing a result that is wanted : having an intended effect", sentence: "Several new drugs proved to be effective in treating serious diseases." },
+  { id: 26, word: "momentary", pos: "adj", definition: "(adj) lasting a very short time", sentence: "He experienced a momentary loss of consciousness." },
+  { id: 27, word: "momentous", pos: "adj", definition: "(adj) very important : having great or lasting importance", sentence: "My college graduation was a momentous day in my life." },
+  { id: 28, word: "peculiar", pos: "adj", definition: "(adj) not usual or normal", sentence: "It seems peculiar that he would leave town and not tell anybody." },
+  { id: 29, word: "spacious", pos: "adj", definition: "(adj) having a large amount of space", sentence: "The dining room is spacious enough to seat our whole family and several guests." },
+  { id: 30, word: "comparable", pos: "adj", definition: "(adj) used to say that two or more things are very similar and can be compared to each other", sentence: "A comparable refrigerator today would cost a lot more than the one I bought 10 years ago." },
+  { id: 31, word: "sensible", pos: "adj", definition: "(adj) having or showing good sense or judgment", sentence: "Julie is a sensible girl. She doesn't do anything foolish." },
+  { id: 32, word: "sensitive", pos: "adj", definition: "(adj) easily upset by the things that people think or say about you", sentence: "He acts like a tough guy, but he's really very sensitive to criticism." },
+  { id: 33, word: "monotonous", pos: "adj", definition: "(adj) used to describe something that is boring because it is always the same", sentence: "Students complained that the meals were monotonous." },
+  { id: 34, word: "indispensable", pos: "adj", definition: "(adj) extremely important and necessary", sentence: "A calculator is an indispensable tool for solving these problems." },
+  { id: 35, word: "inevitable", pos: "adj", definition: "(adj) sure to happen", sentence: "These days traffic delays seem inevitable everywhere in Seoul." },
+  { id: 36, word: "indifferent", pos: "adj", definition: "(adj) not interested in or concerned about something", sentence: "She was amazed that people could be so indifferent about the trial." },
+  { id: 37, word: "supreme", pos: "adj", definition: "(adj) highest in rank or authority", sentence: "She reigns supreme in the world of tennis." },
+  { id: 38, word: "marvelous", pos: "adj", definition: "(adj) extremely good or enjoyable", sentence: "We had a marvelous time at the party." },
+  { id: 39, word: "unanimous", pos: "adj", definition: "(adj) agreed to by everyone", sentence: "She was elected club president by a unanimous vote." },
+  { id: 40, word: "arrogant", pos: "adj", definition: "(adj) having or showing the insulting attitude of people who believe that they are better, smarter, or more important than other people", sentence: "She's first in her class, but she's not arrogant about it." },
+  { id: 41, word: "excessive", pos: "adj", definition: "(adj) going beyond what is usual, normal, or proper", sentence: "He drinks excessive amounts of coffee." },
+  { id: 42, word: "invaluable", pos: "adj", definition: "(adj) extremely valuable or useful", sentence: "The museum has many invaluable jewels." },
+  { id: 43, word: "enormous", pos: "adj", definition: "(adj) very great in size or amount", sentence: "The enormous building is over 100 stories high." },
+  { id: 44, word: "subtle", pos: "adj", definition: "(adj) hard to notice or see : not obvious", sentence: "They look similar, but there are subtle differences between them." },
+  { id: 45, word: "tremendous", pos: "adj", definition: "(adj) very large or great", sentence: "A meteor falls with tremendous speed." },
+  { id: 46, word: "profound", pos: "adj", definition: "(adj) having or showing great knowledge or understanding", sentence: "Her books offer profound insights into the true nature of courage." },
+  { id: 47, word: "minute", pos: "adj", definition: "(adj) very small", sentence: "There were minute particles of dust in the air." },
+  { id: 48, word: "threadbare", pos: "adj", definition: "(adj) very thin and in bad condition from too much use", sentence: "He was wearing a threadbare coat and old shoes." },
+  { id: 49, word: "eminent", pos: "adj", definition: "(adj) successful, well-known and respected", sentence: "An eminent surgeon operated on the patient." },
+  { id: 50, word: "acute", pos: "adj", definition: "(adj) very serious or dangerous : requiring serious attention or action", sentence: "I got an acute pain in my side from jogging too far." }
+];
+</file>
+
 <file path="src/app/page.tsx">
 "use client";
 
@@ -7305,6 +7382,9 @@ export default function Home() {
             dbProgress.currentSet.toString(),
           );
           localStorage.setItem("active_week_id", dbProgress.activeWeekId);
+
+          // FIX: Sync local week tracker so Dashboard doesn't wipe progress on fresh login
+          localStorage.setItem("local_activeWeekId", dbProgress.activeWeekId);
 
           const historyExp = dbProgress.history?.reduce((sum: number, week: any) => sum + week.totalExp, 0) || 0;
           localStorage.setItem("lifetime_base_exp", historyExp.toString());
@@ -7405,71 +7485,6 @@ export default function Home() {
 }
 </file>
 
-<file path="src/data/vocab.ts">
-export type VocabWord = {
-  id: number;
-  word: string;
-  pos: string;
-  definition: string;
-  sentence?: string;
-  keywords?: string[];
-  imageUrl?: string;
-};
-
-export const vocabData: VocabWord[] = [
-  { id: 1, word: "acknowledge", pos: "verb", definition: "(verb) to say that you accept or do not deny the truth or existence of something / to express thanks or appreciation for", sentence: "I acknowledge the fact that I hurt you, and for that I am sorry." },
-  { id: 2, word: "distort", pos: "verb", definition: "(verb) to change the natural, normal, or original shape, appearance, or sound of something in a way that is usually not attractive or pleasing / to change something so that it is no longer true or accurate", sentence: "The story was distorted by the press." },
-  { id: 3, word: "distract", pos: "verb", definition: "(verb) to cause someone to stop thinking about or paying attention to someone or something", sentence: "You sneak into his room while I distract him." },
-  { id: 4, word: "restrain", pos: "verb", definition: "(verb) to prevent a person or animal from doing something / to keep something under control", sentence: "He could not restrain the dog from attacking." },
-  { id: 5, word: "inhabit", pos: "verb", definition: "(verb) to live in a place : to have a home in a place", sentence: "Several hundred species of birds inhabit the island." },
-  { id: 6, word: "abandon", pos: "verb", definition: "(verb) to leave and never return to someone who needs protection or help", sentence: "The child had been abandoned by his parents as an infant." },
-  { id: 7, word: "dwell", pos: "verb", definition: "(verb) to live in a particular place", sentence: "He dwelled in the same town for years." },
-  { id: 8, word: "cease", pos: "verb", definition: "(verb) to stop happening : to end", sentence: "The fighting along the border has temporarily ceased." },
-  { id: 9, word: "occupy", pos: "verb", definition: "(verb) to fill or be in a place or space", sentence: "Someone was occupying my place at the table." },
-  { id: 10, word: "plead", pos: "verb", definition: "(verb) to ask for something in a serious and emotional way", sentence: "She pleaded for forgiveness and got her job back." },
-  { id: 11, word: "engrave", pos: "verb", definition: "(verb) to cut or carve lines, letters, designs, etc., onto or into a hard surface", sentence: "They will engrave your initials on the ring for free." },
-  { id: 12, word: "deposit", pos: "verb", definition: "(verb) to put money in a bank account/ to leave an amount of something, such as sand, snow, or mud on a surface or area especially over a period of time", sentence: "Your paycheck will be automatically deposited into your account." },
-  { id: 13, word: "correspond", pos: "verb", definition: "(verb) to be similar or equal to something / to have a direct relationship to or with something", sentence: "Each number corresponds to a location on the map." },
-  { id: 14, word: "consent", pos: "verb", definition: "(verb) to agree to do or allow something : to give permission for something to happen or be done", sentence: "Her father consented to the marriage." },
-  { id: 15, word: "perceive", pos: "verb", definition: "(verb) to notice or become aware of something", sentence: "The detective perceived a change in the suspect's attitude." },
-  { id: 16, word: "conceive", pos: "verb", definition: "(verb) to think of or create something in the mind / to become pregnant", sentence: "I cannot conceive that he would leave without saying goodbye." },
-  { id: 17, word: "derive", pos: "verb", definition: "(verb) to take or get something from something else", sentence: "The river derives its name from a Native American tribe." },
-  { id: 18, word: "discriminate", pos: "verb", definition: "(verb) to unfairly treat a person or group of people differently from other people or groups", sentence: "It is illegal to discriminate on the grounds/basis of race/sex." },
-  { id: 19, word: "perish", pos: "verb", definition: "(verb) to die or be killed / to disappear or be destroyed : to cease to exist", sentence: "The civilization perished after 500 years." },
-  { id: 20, word: "modify", pos: "verb", definition: "(verb) to change some parts of something while not changing other parts", sentence: "He modified the recipe by using oil instead of butter." },
-  { id: 21, word: "contradict", pos: "verb", definition: "(verb) to say the opposite of something that someone else has said : to deny the truth of something / to not agree with something in a way that shows or suggests that it is false, wrong, etc.", sentence: "Sally just contradicted what she said earlier." },
-  { id: 22, word: "infect", pos: "verb", definition: "(verb) to cause someone or something to become sick or affected by disease", sentence: "The virus has infected many people." },
-  { id: 23, word: "illuminate", pos: "verb", definition: "(verb) to supply something with light : to shine light on something", sentence: "Candles illuminate the church." },
-  { id: 24, word: "pierce", pos: "verb", definition: "(verb) to make a hole in or through something", sentence: "The needle pierced her skin." },
-  { id: 25, word: "prescribe", pos: "verb", definition: "(verb) to officially tell someone to use a medicine, therapy, diet, etc. as a remedy or treatment", sentence: "This drug should not be prescribed to children." },
-  { id: 26, word: "infer", pos: "verb", definition: "(verb) to form an opinion from evidence : to reach a conclusion based on known facts", sentence: "She said she was pleased, but her true feelings could be inferred from the look of disappointment on her face." },
-  { id: 27, word: "hasten", pos: "verb", definition: "(verb) to cause something to happen more quickly", sentence: "His death was hastened by alcohol abuse." },
-  { id: 28, word: "torture", pos: "verb", definition: "(verb) to cause someone to experience severe physical pain especially as a form of punishment / to cause someone to feel very worried, unhappy, etc.", sentence: "The report revealed that prisoners had been repeatedly tortured." },
-  { id: 29, word: "embody", pos: "verb", definition: "(verb) to represent something in a clear and obvious way : to be a symbol or example of something", sentence: "He is a leader who embodies courage." },
-  { id: 30, word: "discard", pos: "verb", definition: "(verb) to throw something away because it is useless or unwanted", sentence: "Many of his original theories have been discarded in recent years." },
-  { id: 31, word: "migrate", pos: "verb", definition: "(verb) to move from one country or place to live or work in another", sentence: "He migrates from New York to Florida each winter." },
-  { id: 32, word: "entitle", pos: "verb", definition: "(verb) to give a right to someone", sentence: "I'm entitled to a refund." },
-  { id: 33, word: "enrich", pos: "verb", definition: "(verb) to improve the quality of something : to make something better", sentence: "Their lives were enriched by the experience." },
-  { id: 34, word: "coincide", pos: "verb", definition: "(verb) to happen at the same time as something else/ to agree with something exactly", sentence: "The population increase coincided with rapid industrial growth." },
-  { id: 35, word: "extinguish", pos: "verb", definition: "(verb) to cause the end or death of something / to cause something to stop burning", sentence: "News of the conflict extinguished our hopes for a peaceful resolution." },
-  { id: 36, word: "convert", pos: "verb", definition: "(verb) to change something into a different form or so that it can be used in a different way", sentence: "The cells absorb light and convert it to energy." },
-  { id: 37, word: "forecast", pos: "verb", definition: "(verb) to say that something will happen in the future : to predict something, such as weather after looking at the information that is available", sentence: "They're forecasting rain for this weekend." },
-  { id: 38, word: "prosper", pos: "verb", definition: "(verb) to become very successful usually by making a lot of money", sentence: "He hopes his business will prosper." },
-  { id: 39, word: "exaggerate", pos: "verb", definition: "(verb) to think of or describe something as larger or greater than it really is", sentence: "The book exaggerates the difficulties he faced in starting his career." },
-  { id: 40, word: "prohibit", pos: "verb", definition: "(verb) to order someone not to use or do something/ to make something impossible to do", sentence: "The town prohibited teenagers from being in the streets after 10 p.m." },
-  { id: 41, word: "inquire", pos: "verb", definition: "(verb) to ask for information", sentence: "When I inquired, they told me she was not here." },
-  { id: 42, word: "prevail", pos: "verb", definition: "(verb) to be usual, common, or popular / to defeat an opponent especially in a long or difficult contest", sentence: "The house was built in the style that prevailed in the 1980s." },
-  { id: 43, word: "confirm", pos: "verb", definition: "(verb) to state or show that something is true or correct", sentence: "The tests confirmed the doctors' suspicions of cancer." },
-  { id: 44, word: "stimulate", pos: "verb", definition: "(verb) to cause or encourage something to happen or develop", sentence: "This book stimulates readers' imagination." },
-  { id: 45, word: "dominate", pos: "verb", definition: "(verb) to have control of or power over someone or something", sentence: "One company has dominated the market for years." },
-  { id: 46, word: "diminish", pos: "verb", definition: "(verb) to become or to cause something to become less in size, importance, etc.", sentence: "The passing years did nothing to diminish their friendship." },
-  { id: 47, word: "ensure", pos: "verb", definition: "(verb) to make something sure, certain, or safe", sentence: "They took steps to ensure the safety of the passengers." },
-  { id: 48, word: "omit", pos: "verb", definition: "(verb) to leave out someone or something : to not include someone or something", sentence: "They omitted your name from the list." },
-  { id: 49, word: "revive", pos: "verb", definition: "(verb) to make someone or something strong, healthy, or active again", sentence: "The doctors were trying to revive the patient." },
-  { id: 50, word: "fascinate", pos: "verb", definition: "(verb) to cause someone to be very interested in something or someone", sentence: "His strange behavior fascinated the children." }
-];
-</file>
-
 <file path="src/components/home/Dashboard.tsx">
 "use client";
 import { useState, useEffect, useRef } from "react";
@@ -7478,6 +7493,7 @@ import PixelVocabmon from "../shared/PixelVocabmon";
 import { triggerSilentSync } from "@/lib/syncHelper";
 import { logoutUser } from "@/actions/logout";
 import { getCurrentUsername } from "@/actions/auth";
+import { executeInAppRollover, startNewWeek } from "@/actions/progress";
 
 // 💥 GLOBAL SINGLETON: Absolutely guarantees only ONE audio instance exists
 let globalDashboardAudio: HTMLAudioElement | null = null;
@@ -7499,7 +7515,11 @@ export default function Dashboard() {
   const [midtermDone, setMidtermDone] = useState(false);
   const [final1Done, setFinal1Done] = useState(false);
   const [finaleDone, setFinaleDone] = useState(false);
+  const [devEvoModal, setDevEvoModal] = useState<{from: number, to: number} | null>(null);
   const activeQuestRef = useRef<HTMLDivElement>(null);
+
+  const [targetWeek, setTargetWeek] = useState("Week 6");
+  const [isRollingOver, setIsRollingOver] = useState(false);
 
   const [isMusicOn, setIsMusicOn] = useState(false);
 
@@ -7636,7 +7656,7 @@ export default function Dashboard() {
   if (!isLoaded) return <div className="w-full max-w-md min-h-[50vh]"></div>;
   const isSetComplete = spellingDone && exerciseDone && testDone;
   const activeDayIndex = weeklyPlan.findIndex((dayPlan) => dayPlan.sets.includes(currentSet)) !== -1 ? weeklyPlan.findIndex((dayPlan) => dayPlan.sets.includes(currentSet)) : weeklyPlan.length - 1;
-  const renderedPlan = isExpanded ? weeklyPlan : [weeklyPlan[activeDayIndex]];
+  const renderedPlan = (isExpanded || finaleDone) ? weeklyPlan : [weeklyPlan[activeDayIndex]];
 
   return (
     <div className="w-full max-w-md min-h-screen flex flex-col mx-auto bg-gray-50 relative animate-fade-in pb-16">
@@ -7705,28 +7725,41 @@ export default function Dashboard() {
             
             {/* DEV CHEAT MENU */}
             {username === 'dev' && (
-              <div className="absolute top-4 right-4 bg-purple-900/95 backdrop-blur-md p-3 rounded-xl shadow-2xl border-2 border-purple-400 z-50 flex flex-col gap-2 items-center animate-fade-in">
-                <span className="text-[10px] font-black text-purple-200 uppercase tracking-widest">Dev Tools</span>
-                <div className="flex gap-2">
+              <div className="absolute top-4 right-4 bg-purple-900/95 backdrop-blur-md p-4 rounded-2xl shadow-2xl border-2 border-purple-400 z-50 flex flex-col gap-3 items-center animate-fade-in w-48">
+                <span className="text-xs font-black text-purple-200 uppercase tracking-widest border-b border-purple-700 w-full text-center pb-1">Dev Tools</span>
+                
+                <div className="flex gap-2 w-full">
+                  <button onClick={() => { const cl = levelStats.level; if(cl > 1) { const nx = (cl - 2) * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); } }} className="bg-purple-600 hover:bg-purple-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">-LV</button>
+                  <button onClick={() => { const cl = levelStats.level; if(cl < 10) { const nx = cl * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); setDevEvoModal({ from: cl, to: cl + 1 }); } }} className="bg-purple-600 hover:bg-purple-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">+LV</button>
+                </div>
+                
+                <button onClick={() => { setAtkCharges(10); localStorage.setItem("atk_charges", "10"); }} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-2 rounded-lg shadow-md transition-transform active:scale-95 text-[10px] uppercase tracking-wider">Refill Energy</button>
+                
+                <div className="w-full bg-purple-950 p-2 rounded-lg border border-purple-700 mt-1">
+                  <input 
+                    type="text" 
+                    value={targetWeek} 
+                    onChange={(e) => setTargetWeek(e.target.value)}
+                    className="w-full bg-purple-900 text-white text-xs font-bold px-2 py-1 rounded border border-purple-600 mb-2 outline-none text-center"
+                  />
                   <button 
-                    onClick={() => { const cl = levelStats.level; if(cl > 1) { const nx = (cl - 2) * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); } }} 
-                    className="bg-purple-600 hover:bg-purple-500 text-white font-black w-10 h-10 rounded-lg shadow-md transition-transform active:scale-95 text-sm"
+                    disabled={isRollingOver}
+                    onClick={async () => {
+                      setIsRollingOver(true);
+                      // 1. Force RAM to save to Hard Drive
+                      await triggerSilentSync(); 
+                      // 2. Tell Hard Drive to Archive and Reset
+                      await executeInAppRollover(targetWeek);
+                      // 3. Nuke the RAM
+                      localStorage.clear();
+                      // 4. Force a clean reboot
+                      window.location.reload();
+                    }} 
+                    className="w-full bg-red-500 hover:bg-red-400 text-white font-black py-2 rounded shadow-md transition-transform active:scale-95 text-[10px] uppercase tracking-wider disabled:opacity-50"
                   >
-                    -LV
-                  </button>
-                  <button 
-                    onClick={() => { const cl = levelStats.level; if(cl < 10) { const nx = cl * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); } }} 
-                    className="bg-purple-600 hover:bg-purple-500 text-white font-black w-10 h-10 rounded-lg shadow-md transition-transform active:scale-95 text-sm"
-                  >
-                    +LV
+                    {isRollingOver ? "Syncing..." : "Archive & Reset"}
                   </button>
                 </div>
-                <button 
-                  onClick={() => { setAtkCharges(10); localStorage.setItem("atk_charges", "10"); }} 
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-2 rounded-lg shadow-md transition-transform active:scale-95 text-[10px] uppercase tracking-wider"
-                >
-                  Refill Energy
-                </button>
               </div>
             )}
 
@@ -7772,150 +7805,199 @@ export default function Dashboard() {
 
       {/* Quest List Grouped By Day */}
       <div className="px-6 pb-12 pt-4 relative z-10">
-        <div className="flex justify-between items-center mb-6 px-2">
-          <h3 className="text-2xl font-black text-gray-800">{isExpanded ? "Weekly Schedule" : "Today's Quests"}</h3>
-          {!isExpanded && <span className="text-xs font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-tighter">Active Focus</span>}
-        </div>
+        {finaleDone ? (
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-8 text-white text-center shadow-xl mb-12 animate-fade-in border-4 border-emerald-400">
+            <div className="text-6xl mb-4">🏆</div>
+            <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter">Week Conquered!</h3>
+            <p className="font-bold text-emerald-50 opacity-90 mb-6">Absolutely legendary! You mastered all 50 words and reached your potential. Your partner is proud!</p>
+            <Link href="/game" className="bg-white text-emerald-600 font-black py-4 px-8 rounded-2xl shadow-lg transition-transform active:scale-95 inline-block text-xl">
+              Play Mini-Game 🎮
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-6 px-2">
+              <h3 className="text-2xl font-black text-gray-800">{isExpanded ? "Weekly Schedule" : "Today's Quests"}</h3>
+              {!isExpanded && <span className="text-xs font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-tighter">Active Focus</span>}
+            </div>
 
-        <div className="space-y-12">
-          {renderedPlan.map((dayPlan) => (
-            <div key={dayPlan.day} className="bg-white rounded-3xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
-              <h3 className="text-xl font-black text-gray-800 border-b-2 border-gray-100 pb-3 mb-6 flex items-center gap-2">📅 {dayPlan.day}</h3>
-              <div className="space-y-10">
-                {dayPlan.sets.map((setIndex) => {
-                  const isPastSet = setIndex < currentSet; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet;
-                  const isQ1Done = isPastSet || (isActiveSet && spellingDone); const isQ2Done = isPastSet || (isActiveSet && exerciseDone); const isQ3Done = isPastSet || (isActiveSet && testDone);
-                  const isQ1Locked = isFutureSet; const isQ2Locked = isFutureSet || (isActiveSet && !spellingDone); const isQ3Locked = isFutureSet || (isActiveSet && !exerciseDone);
-                  const isQ1Active = isActiveSet && !spellingDone; const isQ2Active = isActiveSet && spellingDone && !exerciseDone; const isQ3Active = isActiveSet && exerciseDone && !testDone;
-                  const q1Num = setIndex * 3 + 1; const q2Num = setIndex * 3 + 2; const q3Num = setIndex * 3 + 3;
-                  return (
-                    <div key={setIndex} className={`relative ${isFutureSet ? "opacity-60" : ""}`}>
-                      <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 flex items-center gap-2">📍 {scheduleDays[setIndex]} <span className="text-xs font-bold text-gray-300">(Words {1 + setIndex * 5} - {5 + setIndex * 5})</span></h4>
-                      <div className="space-y-4">
-                        <div ref={isQ1Active ? activeQuestRef : null} className="relative">
-                          {isQ1Active && <div className="absolute -top-3 left-4 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
-                          <Link href={isQ1Done || isQ1Locked ? "#" : "/feed"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ1Active ? "bg-white border-2 border-indigo-400 ring-4 ring-indigo-100 scale-[1.02] shadow-lg animate-ready-indigo" : isQ1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ1Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-indigo-400 hover:border-indigo-500 shadow-md"}`}>
-                            <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ1Done || isQ1Locked ? "text-gray-500" : "text-indigo-900 group-hover:text-indigo-600"}`}>{q1Num}. Feed Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ1Done ? "text-emerald-500" : "text-indigo-400"}`}>{isQ1Done ? "Completed! ✅" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ1Done ? "bg-green-100 text-green-600" : isQ1Locked ? "text-2xl text-gray-300" : "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white"}`}>{isQ1Done ? "✓" : isQ1Locked ? "🔒" : "→"}</div></div>
-                          </Link>
-                        </div>
-                        <div ref={isQ2Active ? activeQuestRef : null} className="relative">
-                          {isQ2Active && <div className="absolute -top-3 left-4 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
-                          <Link href={isQ2Done || isQ2Locked ? "#" : "/exercise"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ2Active ? "bg-white border-2 border-green-400 ring-4 ring-green-100 scale-[1.02] shadow-lg animate-ready-green" : isQ2Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ2Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-green-400 hover:border-green-500 shadow-md cursor-pointer"}`}>
-                            <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ2Done || isQ2Locked ? "text-gray-500" : "text-green-900 group-hover:text-green-600"}`}>{q2Num}. Exercise Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ2Done ? "text-emerald-500" : isQ2Locked ? "text-gray-400" : "text-green-500"}`}>{isQ2Done ? "Completed! ✅" : isQ2Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ2Done ? "bg-green-100 text-green-600" : isQ2Locked ? "text-2xl text-gray-300" : "bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white"}`}>{isQ2Done ? "✓" : isQ2Locked ? "🔒" : "→"}</div></div>
-                          </Link>
-                        </div>
-                        <div ref={isQ3Active ? activeQuestRef : null} className="relative">
-                          {isQ3Active && <div className="absolute -top-3 left-4 bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
-                          <Link href={isQ3Done || isQ3Locked ? "#" : "/test"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ3Active ? "bg-white border-2 border-blue-400 ring-4 ring-blue-100 scale-[1.02] shadow-lg animate-ready-blue" : isQ3Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ3Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-blue-400 hover:border-blue-500 shadow-md cursor-pointer"}`}>
-                            <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ3Done || isQ3Locked ? "text-gray-500" : "text-blue-900 group-hover:text-blue-600"}`}>{q3Num}. Final Exam</h4><p className={`text-sm font-medium mt-1 ${isQ3Done ? "text-emerald-500" : isQ3Locked ? "text-gray-400" : "text-blue-500"}`}>{isQ3Done ? "Completed! ✅" : isQ3Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ3Done ? "bg-green-100 text-green-600" : isQ3Locked ? "text-2xl text-gray-300" : "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"}`}>{isQ3Done ? "✓" : isQ3Locked ? "🔒" : "→"}</div></div>
-                          </Link>
-                        </div>
-                      </div>
-                      {isActiveSet && isQ3Done && setIndex !== 4 && setIndex < totalSets - 1 && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
-                          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
-                            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
-                            <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
-                            <p className="text-gray-600 font-bold mb-6 leading-relaxed">
-                              Congratulations! You evolved<br/>
-                              <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
-                              into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
-                            </p>
-                            <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
-                              <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
-                            </div>
-                            <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
-                              Start {scheduleDays[setIndex + 1]} 🚀
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                {dayPlan.hasMidterm && (() => {
-                  const setIndex = 4; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
-                  return (
-                    <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${isFutureSet || (!isQ3Done && isActiveSet) ? "opacity-60" : ""}`}>
-                      <h4 className="text-sm font-black text-purple-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🌟 Sunday: Midterm Exam <span className="text-xs font-bold text-purple-300">(Words 1 - 25)</span></h4>
-                      {(() => {
-                        const isMidtermActive = isQ3Done && !midtermDone && isActiveSet; const isMidtermLocked = !isQ3Done;
-                        return (
-                          <div ref={isMidtermActive ? activeQuestRef : null} className="relative">
-                            {isMidtermActive && <div className="absolute -top-3 left-4 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
-                            <Link href={midtermDone || isMidtermLocked ? "#" : "/review?type=midterm"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isMidtermActive ? "bg-white border-2 border-purple-400 ring-4 ring-purple-100 scale-[1.02] shadow-lg animate-ready-purple" : midtermDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
-                              <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${midtermDone || isMidtermLocked ? "text-gray-500" : "text-purple-900 group-hover:text-purple-600"}`}>Midterm Review Boss</h4><p className={`text-sm font-medium mt-1 ${midtermDone ? "text-emerald-500" : isMidtermLocked ? "text-gray-400" : "text-purple-500"}`}>{midtermDone ? "Completed! ✅" : isMidtermLocked ? "Locked" : "Reward: Midterm Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${midtermDone ? "bg-green-100 text-green-600" : isMidtermLocked ? "text-2xl text-gray-300" : "bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"}`}>{midtermDone ? "✓" : isMidtermLocked ? "🔒" : "→"}</div></div>
-                            </Link>
-                          </div>
-                        );
-                      })()}
-                      {isActiveSet && midtermDone && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
-                          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
-                            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
-                            <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
-                            <p className="text-gray-600 font-bold mb-6 leading-relaxed">
-                              Congratulations! You evolved<br/>
-                              <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
-                              into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
-                            </p>
-                            <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
-                              <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
-                            </div>
-                            <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
-                              Start {scheduleDays[setIndex + 1]} 🚀
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-                {dayPlan.hasFinals && (() => {
-                  const setIndex = 9; const isActiveSet = setIndex === currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
-                  return (
-                    <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done ? "opacity-60" : ""}`}>
-                      <h4 className="text-sm font-black text-amber-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🔥 Wednesday: Final Part 1 <span className="text-xs font-bold text-amber-300">(Words 26 - 50)</span></h4>
-                      {(() => {
-                        const isF1Active = isQ3Done && !final1Done; const isF1Locked = !isQ3Done;
-                        return (
-                          <div ref={isF1Active ? activeQuestRef : null} className="relative mb-10">
-                            {isF1Active && <div className="absolute -top-3 left-4 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
-                            <Link href={final1Done || isF1Locked ? "#" : "/review?type=final1"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isF1Active ? "bg-white border-2 border-amber-400 ring-4 ring-amber-100 scale-[1.02] shadow-lg animate-ready-amber" : final1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
-                              <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${final1Done || isF1Locked ? "text-gray-500" : "text-amber-900 group-hover:text-amber-600"}`}>Final Review: Part 1</h4><p className={`text-sm font-medium mt-1 ${final1Done ? "text-emerald-500" : isF1Locked ? "text-gray-400" : "text-amber-500"}`}>{final1Done ? "Completed! ✅" : isF1Locked ? "Locked" : "Reward: Fire Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${final1Done ? "bg-green-100 text-green-600" : isF1Locked ? "text-2xl text-gray-300" : "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white"}`}>{final1Done ? "✓" : isF1Locked ? "🔒" : "→"}</div></div>
-                            </Link>
-                          </div>
-                        );
-                      })()}
-                      <div className={`relative ${!final1Done ? "opacity-60" : ""}`}>
-                        <h4 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">👑 Wednesday: Grand Finale <span className="text-xs font-bold text-red-300">(All 50 Words)</span></h4>
-                        {(() => {
-                          const isFinaleActive = final1Done && !finaleDone; const isFinaleLocked = !final1Done;
-                          return (
-                            <div ref={isFinaleActive ? activeQuestRef : null} className="relative">
-                              {isFinaleActive && <div className="absolute -top-3 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
-                              <Link href={finaleDone || isFinaleLocked ? "#" : "/review?type=finale"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isFinaleActive ? "bg-white border-2 border-red-400 ring-4 ring-red-100 scale-[1.02] shadow-lg animate-ready-red" : finaleDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
-                                <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${finaleDone || isFinaleLocked ? "text-gray-500" : "text-red-900 group-hover:text-red-600"}`}>Ultimate Boss Fight</h4><p className={`text-sm font-medium mt-1 ${finaleDone ? "text-emerald-500" : isFinaleLocked ? "text-gray-400" : "text-red-500"}`}>{finaleDone ? "Completed! 🎉" : isFinaleLocked ? "Locked" : "Reward: Master Badge 🏆"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${finaleDone ? "bg-green-100 text-green-600" : isFinaleLocked ? "text-2xl text-gray-300" : "bg-red-50 text-red-600 group-hover:bg-red-600 group-hover:text-white"}`}>{finaleDone ? "✓" : isFinaleLocked ? "🔒" : "→"}</div></div>
+            <div className="space-y-12">
+              {renderedPlan.map((dayPlan) => (
+                <div key={dayPlan.day} className="bg-white rounded-3xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
+                  <h3 className="text-xl font-black text-gray-800 border-b-2 border-gray-100 pb-3 mb-6 flex items-center gap-2">📅 {dayPlan.day}</h3>
+                  <div className="space-y-10">
+                    {dayPlan.sets.map((setIndex) => {
+                      const isPastSet = setIndex < currentSet; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet;
+                      const isQ1Done = isPastSet || (isActiveSet && spellingDone); const isQ2Done = isPastSet || (isActiveSet && exerciseDone); const isQ3Done = isPastSet || (isActiveSet && testDone);
+                      const isQ1Locked = isFutureSet; const isQ2Locked = isFutureSet || (isActiveSet && !spellingDone); const isQ3Locked = isFutureSet || (isActiveSet && !exerciseDone);
+                      const isQ1Active = isActiveSet && !spellingDone; const isQ2Active = isActiveSet && spellingDone && !exerciseDone; const isQ3Active = isActiveSet && exerciseDone && !testDone;
+                      const q1Num = setIndex * 3 + 1; const q2Num = setIndex * 3 + 2; const q3Num = setIndex * 3 + 3;
+                      return (
+                        <div key={setIndex} className={`relative ${isFutureSet ? "opacity-60" : ""}`}>
+                          <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 flex items-center gap-2">📍 {scheduleDays[setIndex]} <span className="text-xs font-bold text-gray-300">(Words {1 + setIndex * 5} - {5 + setIndex * 5})</span></h4>
+                          <div className="space-y-4">
+                            <div ref={isQ1Active ? activeQuestRef : null} className="relative">
+                              {isQ1Active && <div className="absolute -top-3 left-4 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
+                              <Link href={isQ1Done || isQ1Locked ? "#" : "/feed"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ1Active ? "bg-white border-2 border-indigo-400 ring-4 ring-indigo-100 scale-[1.02] shadow-lg animate-ready-indigo" : isQ1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ1Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-indigo-400 hover:border-indigo-500 shadow-md"}`}>
+                                <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ1Done || isQ1Locked ? "text-gray-500" : "text-indigo-900 group-hover:text-indigo-600"}`}>{q1Num}. Feed Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ1Done ? "text-emerald-500" : "text-indigo-400"}`}>{isQ1Done ? "Completed! ✅" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ1Done ? "bg-green-100 text-green-600" : isQ1Locked ? "text-2xl text-gray-300" : "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white"}`}>{isQ1Done ? "✓" : isQ1Locked ? "🔒" : "→"}</div></div>
                               </Link>
                             </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
+                            <div ref={isQ2Active ? activeQuestRef : null} className="relative">
+                              {isQ2Active && <div className="absolute -top-3 left-4 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
+                              <Link href={isQ2Done || isQ2Locked ? "#" : "/exercise"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ2Active ? "bg-white border-2 border-green-400 ring-4 ring-green-100 scale-[1.02] shadow-lg animate-ready-green" : isQ2Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ2Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-green-400 hover:border-green-500 shadow-md cursor-pointer"}`}>
+                                <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ2Done || isQ2Locked ? "text-gray-500" : "text-green-900 group-hover:text-green-600"}`}>{q2Num}. Exercise Vocabmon</h4><p className={`text-sm font-medium mt-1 ${isQ2Done ? "text-emerald-500" : isQ2Locked ? "text-gray-400" : "text-green-500"}`}>{isQ2Done ? "Completed! ✅" : isQ2Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ2Done ? "bg-green-100 text-green-600" : isQ2Locked ? "text-2xl text-gray-300" : "bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white"}`}>{isQ2Done ? "✓" : isQ2Locked ? "🔒" : "→"}</div></div>
+                              </Link>
+                            </div>
+                            <div ref={isQ3Active ? activeQuestRef : null} className="relative">
+                              {isQ3Active && <div className="absolute -top-3 left-4 bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Quest</div>}
+                              <Link href={isQ3Done || isQ3Locked ? "#" : "/test"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isQ3Active ? "bg-white border-2 border-blue-400 ring-4 ring-blue-100 scale-[1.02] shadow-lg animate-ready-blue" : isQ3Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : isQ3Locked ? "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default" : "bg-white border-2 border-blue-400 hover:border-blue-500 shadow-md cursor-pointer"}`}>
+                                <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${isQ3Done || isQ3Locked ? "text-gray-500" : "text-blue-900 group-hover:text-blue-600"}`}>{q3Num}. Final Exam</h4><p className={`text-sm font-medium mt-1 ${isQ3Done ? "text-emerald-500" : isQ3Locked ? "text-gray-400" : "text-blue-500"}`}>{isQ3Done ? "Completed! ✅" : isQ3Locked ? "Locked" : "Reward: +50 EXP"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${isQ3Done ? "bg-green-100 text-green-600" : isQ3Locked ? "text-2xl text-gray-300" : "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"}`}>{isQ3Done ? "✓" : isQ3Locked ? "🔒" : "→"}</div></div>
+                              </Link>
+                            </div>
+                          </div>
+                          {isActiveSet && isQ3Done && setIndex !== 4 && setIndex < totalSets - 1 && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+                              <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
+                                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
+                                <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
+                                <p className="text-gray-600 font-bold mb-6 leading-relaxed">
+                                  Congratulations! You evolved<br/>
+                                  <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
+                                  into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
+                                </p>
+                                <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
+                                  <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
+                                </div>
+                                <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
+                                  Start {scheduleDays[setIndex + 1]} 🚀
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {dayPlan.hasMidterm && (() => {
+                      const setIndex = 4; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                      return (
+                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${isFutureSet || (!isQ3Done && isActiveSet) ? "opacity-60" : ""}`}>
+                          <h4 className="text-sm font-black text-purple-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🌟 Sunday: Midterm Exam <span className="text-xs font-bold text-purple-300">(Words 1 - 25)</span></h4>
+                          {(() => {
+                            const isMidtermActive = isQ3Done && !midtermDone && isActiveSet; const isMidtermLocked = !isQ3Done;
+                            return (
+                              <div ref={isMidtermActive ? activeQuestRef : null} className="relative">
+                                {isMidtermActive && <div className="absolute -top-3 left-4 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
+                                <Link href={midtermDone || isMidtermLocked ? "#" : "/review?type=midterm"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isMidtermActive ? "bg-white border-2 border-purple-400 ring-4 ring-purple-100 scale-[1.02] shadow-lg animate-ready-purple" : midtermDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
+                                  <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${midtermDone || isMidtermLocked ? "text-gray-500" : "text-purple-900 group-hover:text-purple-600"}`}>Midterm Review Boss</h4><p className={`text-sm font-medium mt-1 ${midtermDone ? "text-emerald-500" : isMidtermLocked ? "text-gray-400" : "text-purple-500"}`}>{midtermDone ? "Completed! ✅" : isMidtermLocked ? "Locked" : "Reward: Midterm Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${midtermDone ? "bg-green-100 text-green-600" : isMidtermLocked ? "text-2xl text-gray-300" : "bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"}`}>{midtermDone ? "✓" : isMidtermLocked ? "🔒" : "→"}</div></div>
+                                </Link>
+                              </div>
+                            );
+                          })()}
+                          {isActiveSet && midtermDone && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+                              <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl relative">
+                                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
+                                <h3 className="text-3xl font-black text-emerald-500 mb-2 uppercase italic tracking-wider mt-4">Evolution!</h3>
+                                <p className="text-gray-600 font-bold mb-6 leading-relaxed">
+                                  Congratulations! You evolved<br/>
+                                  <span className="text-indigo-400 text-lg">{digimonNames[levelStats.level - 1]}</span><br/>
+                                  into <span className="text-emerald-600 text-2xl font-black">{digimonNames[levelStats.level]}</span>!
+                                </p>
+                                <div className="bg-gradient-to-b from-emerald-50 to-teal-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-emerald-100 shadow-inner h-48 justify-end relative overflow-hidden">
+                                  <PixelVocabmon level={levelStats.level} className="scale-125 origin-bottom relative z-10" />
+                                </div>
+                                <button onClick={advanceToNextSet} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
+                                  Start {scheduleDays[setIndex + 1]} 🚀
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    {dayPlan.hasFinals && (() => {
+                      const setIndex = 9; const isActiveSet = setIndex === currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                      return (
+                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done ? "opacity-60" : ""}`}>
+                          <h4 className="text-sm font-black text-amber-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🔥 Wednesday: Final Part 1 <span className="text-xs font-bold text-amber-300">(Words 26 - 50)</span></h4>
+                          {(() => {
+                            const isF1Active = isQ3Done && !final1Done; const isF1Locked = !isQ3Done;
+                            return (
+                              <div ref={isF1Active ? activeQuestRef : null} className="relative mb-10">
+                                {isF1Active && <div className="absolute -top-3 left-4 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
+                                <Link href={final1Done || isF1Locked ? "#" : "/review?type=final1"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isF1Active ? "bg-white border-2 border-amber-400 ring-4 ring-amber-100 scale-[1.02] shadow-lg animate-ready-amber" : final1Done ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
+                                  <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${final1Done || isF1Locked ? "text-gray-500" : "text-amber-900 group-hover:text-amber-600"}`}>Final Review: Part 1</h4><p className={`text-sm font-medium mt-1 ${final1Done ? "text-emerald-500" : isF1Locked ? "text-gray-400" : "text-amber-500"}`}>{final1Done ? "Completed! ✅" : isF1Locked ? "Locked" : "Reward: Fire Badge 🏅"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${final1Done ? "bg-green-100 text-green-600" : isF1Locked ? "text-2xl text-gray-300" : "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white"}`}>{final1Done ? "✓" : isF1Locked ? "🔒" : "→"}</div></div>
+                                </Link>
+                              </div>
+                            );
+                          })()}
+                          <div className={`relative ${!final1Done ? "opacity-60" : ""}`}>
+                            <h4 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">👑 Wednesday: Grand Finale <span className="text-xs font-bold text-red-300">(All 50 Words)</span></h4>
+                            {(() => {
+                              const isFinaleActive = final1Done && !finaleDone; const isFinaleLocked = !final1Done;
+                              return (
+                                <div ref={isFinaleActive ? activeQuestRef : null} className="relative">
+                                  {isFinaleActive && <div className="absolute -top-3 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
+                                  <Link href={finaleDone || isFinaleLocked ? "#" : "/review?type=finale"} className={`block p-5 rounded-2xl transition-all relative overflow-hidden group ${isFinaleActive ? "bg-white border-2 border-red-400 ring-4 ring-red-100 scale-[1.02] shadow-lg animate-ready-red" : finaleDone ? "bg-white border-2 border-gray-100 cursor-default shadow-sm opacity-70" : "bg-gray-50 border-2 border-dashed border-gray-200 cursor-default"}`}>
+                                    <div className="flex items-center justify-between relative z-10"><div><h4 className={`font-bold text-lg ${finaleDone || isFinaleLocked ? "text-gray-500" : "text-red-900 group-hover:text-red-600"}`}>Ultimate Boss Fight</h4><p className={`text-sm font-medium mt-1 ${finaleDone ? "text-emerald-500" : isFinaleLocked ? "text-gray-400" : "text-red-500"}`}>{finaleDone ? "Completed! 🎉" : isFinaleLocked ? "Locked" : "Reward: Master Badge 🏆"}</p></div><div className={`w-10 h-10 flex items-center justify-center rounded-full font-black transition-colors ${finaleDone ? "bg-green-100 text-green-600" : isFinaleLocked ? "text-2xl text-gray-300" : "bg-red-50 text-red-600 group-hover:bg-red-600 group-hover:text-white"}`}>{finaleDone ? "✓" : isFinaleLocked ? "🔒" : "→"}</div></div>
+                                  </Link>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="mt-8 flex justify-center">
-          <button onClick={() => setIsExpanded(!isExpanded)} className="bg-white border-2 border-gray-200 hover:border-indigo-400 text-gray-600 hover:text-indigo-600 font-black py-4 px-8 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center gap-3 group"><span className="text-xl transition-transform group-hover:scale-125">${isExpanded ? "🎯" : "📅"}</span>{isExpanded ? "Hide Future Quests" : "Show Full Week"}</button>
-        </div>
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <button onClick={() => setIsExpanded(!isExpanded)} className="bg-white border-2 border-gray-200 hover:border-indigo-400 text-gray-600 hover:text-indigo-600 font-black py-4 px-8 rounded-2xl shadow-sm transition-all transform active:scale-95 flex items-center gap-3 group">
+                <span className="text-xl transition-transform group-hover:scale-125">{isExpanded ? "🎯" : "📅"}</span>{isExpanded ? "Hide Future Quests" : "Show Full Week"}
+              </button>
+              
+              <button 
+                onClick={async () => {
+                  if (confirm("Teacher Override: Archive this week to the Hall of Fame and start Week 6?")) {
+                    await startNewWeek(username, "week_6");
+                    localStorage.clear();
+                    window.location.reload();
+                  }
+                }} 
+                className="text-[10px] font-black text-gray-300 hover:text-red-500 uppercase tracking-widest transition-colors mt-8 cursor-pointer"
+              >
+                ⚠️ Force Rollover to Week 6
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {showEnergyAlert && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 animate-fade-in p-4"><div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-red-400 shadow-2xl"><div className="text-5xl mb-4 animate-bounce">💤</div><h3 className="text-2xl font-black text-gray-800 mb-2">Out of Energy!</h3><p className="text-gray-500 font-medium mb-8 leading-relaxed">Your partner needs to rest. Complete a quest to gain EXP and recharge their energy!</p><button onClick={() => setShowEnergyAlert(false)} className="w-full bg-red-500 hover:bg-red-600 text-white text-lg font-black py-4 rounded-xl shadow-md active:scale-95 transition-all">I&apos;ll go train! 🏃</button></div></div>
+      )}
+
+      {/* DEV EVOLUTION PREVIEW MODAL */}
+      {devEvoModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-purple-500 shadow-2xl relative">
+            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-6xl animate-bounce">✨</div>
+            <h3 className="text-3xl font-black text-purple-600 mb-2 uppercase italic tracking-wider mt-4">Evolution Preview!</h3>
+            <p className="text-gray-600 font-bold mb-6 leading-relaxed">
+              Dev Test: You evolved<br/>
+              <span className="text-indigo-400 text-lg">{digimonNames[devEvoModal.from]}</span><br/>
+              into <span className="text-purple-600 text-2xl font-black">{digimonNames[devEvoModal.to]}</span>!
+            </p>
+            <div className="bg-gradient-to-b from-purple-50 to-indigo-50 rounded-2xl pt-8 pb-4 px-6 flex flex-col items-center mb-8 border border-purple-100 shadow-inner h-48 justify-end relative overflow-hidden">
+              <PixelVocabmon level={devEvoModal.to} className="scale-125 origin-bottom relative z-10" />
+            </div>
+            <button onClick={() => setDevEvoModal(null)} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black py-4 px-4 rounded-xl text-xl transition-transform active:scale-95 shadow-md">
+              Close Preview 🛠️
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

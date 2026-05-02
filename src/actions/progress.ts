@@ -94,7 +94,7 @@ export async function startNewWeek(username: string, newWeekId: string) {
     const progress = await Progress.findOne({ username });
     if (!progress) return { success: false, error: "No progress found" };
 
-    // B) Archive the current week
+    // Archive the current week
     const finalLevel = Math.min(Math.floor(progress.exp / 150) + 1, 10);
     progress.history.push({
       weekId: progress.activeWeekId,
@@ -103,17 +103,52 @@ export async function startNewWeek(username: string, newWeekId: string) {
       completedAt: new Date(),
     });
 
-    // C) Reset the state for the new week
+    // Reset the state for the new week (Including EXP!)
     progress.activeWeekId = newWeekId;
     progress.currentSet = 0;
     progress.completedQuests = [];
+    progress.exp = 0; // CRITICAL FIX: Reset EXP to 0 for the new egg!
 
-    // CRITICAL: Do not modify the exp, unlockedStickers, or hideStickerPopupUntil fields.
     await progress.save();
-
     return { success: true };
   } catch (error) {
     console.error("Failed to start new week:", error);
     return { success: false, error: "Failed to start new week" };
+  }
+}
+
+export async function executeInAppRollover(newWeekId: string) {
+  try {
+    const cookieStore = await cookies();
+    const username = cookieStore.get("vocabmon_session")?.value;
+    if (!username) return { success: false, error: "Not logged in" };
+
+    await connectToDatabase();
+    const progress = await Progress.findOne({ username });
+    if (!progress) return { success: false, error: "No progress found" };
+
+    // 1. Calculate final level based on the MOST RECENT synced EXP
+    const rawLevel = Math.floor(progress.exp / 150) + 1;
+    const finalLevel = Math.min(rawLevel, 10);
+
+    // 2. Archive the current state into the Hall of Fame
+    progress.history.push({
+      weekId: progress.activeWeekId,
+      finalLevel,
+      totalExp: progress.exp,
+      completedAt: new Date(),
+    });
+
+    // 3. Reset the DB for the new week
+    progress.activeWeekId = newWeekId;
+    progress.exp = 0;
+    progress.currentSet = 0;
+    progress.completedQuests = [];
+
+    await progress.save();
+    return { success: true };
+  } catch (error) {
+    console.error("Rollover failed:", error);
+    return { success: false, error: "Database error during rollover" };
   }
 }
