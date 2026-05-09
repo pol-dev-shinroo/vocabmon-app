@@ -245,6 +245,11 @@ export default function Dashboard() {
                   <button onClick={() => { const cl = levelStats.level; if(cl < 10) { const nx = cl * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); setDevEvoModal({ from: cl, to: cl + 1 }); } }} className="bg-purple-600 hover:bg-purple-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">+LV</button>
                 </div>
                 
+                <div className="flex gap-2 w-full mt-1">
+                  <button onClick={() => { if(currentSet > 0) { const ns = currentSet - 1; setCurrentSet(ns); localStorage.setItem("current_word_set", ns.toString()); triggerSilentSync(); } }} className="bg-blue-600 hover:bg-blue-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">-SET</button>
+                  <button onClick={() => { if(currentSet < 9) { const ns = currentSet + 1; setCurrentSet(ns); localStorage.setItem("current_word_set", ns.toString()); triggerSilentSync(); } }} className="bg-blue-600 hover:bg-blue-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">+SET</button>
+                </div>
+                
                 <button onClick={() => { setAtkCharges(10); localStorage.setItem("atk_charges", "10"); }} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-2 rounded-lg shadow-md transition-transform active:scale-95 text-[10px] uppercase tracking-wider">Refill Energy</button>
                 
                 <div className="w-full bg-purple-950 p-2 rounded-lg border border-purple-700 mt-1">
@@ -339,13 +344,14 @@ export default function Dashboard() {
                   <h3 className="text-xl font-black text-gray-800 border-b-2 border-gray-100 pb-3 mb-6 flex items-center gap-2">📅 {dayPlan.day}</h3>
                   <div className="space-y-10">
                     {dayPlan.sets.map((setIndex) => {
+                      const isDev = username === 'dev';
                       const isPastSet = setIndex < currentSet; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet;
                       const isQ1Done = isPastSet || (isActiveSet && spellingDone); const isQ2Done = isPastSet || (isActiveSet && exerciseDone); const isQ3Done = isPastSet || (isActiveSet && testDone);
-                      const isQ1Locked = isFutureSet; const isQ2Locked = isFutureSet || (isActiveSet && !spellingDone); const isQ3Locked = isFutureSet || (isActiveSet && !exerciseDone);
+                      const isQ1Locked = isDev ? false : isFutureSet; const isQ2Locked = isDev ? false : isFutureSet || (isActiveSet && !spellingDone); const isQ3Locked = isDev ? false : isFutureSet || (isActiveSet && !exerciseDone);
                       const isQ1Active = isActiveSet && !spellingDone; const isQ2Active = isActiveSet && spellingDone && !exerciseDone; const isQ3Active = isActiveSet && exerciseDone && !testDone;
                       const q1Num = setIndex * 3 + 1; const q2Num = setIndex * 3 + 2; const q3Num = setIndex * 3 + 3;
                       return (
-                        <div key={setIndex} className={`relative ${isFutureSet ? "opacity-60" : ""}`}>
+                        <div key={setIndex} className={`relative ${(isFutureSet && !isDev) ? "opacity-60" : ""}`}>
                           <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 flex items-center gap-2">📍 {scheduleDays[setIndex]} <span className="text-xs font-bold text-gray-300">(Words {1 + setIndex * 5} - {5 + setIndex * 5})</span></h4>
                           <div className="space-y-4">
                             <div ref={isQ1Active ? activeQuestRef : null} className="relative">
@@ -391,11 +397,12 @@ export default function Dashboard() {
                     })}
                     {dayPlan.hasMidterm && (() => {
                       const setIndex = 4; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                      const isDev = username === 'dev';
                       return (
-                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${isFutureSet || (!isQ3Done && isActiveSet) ? "opacity-60" : ""}`}>
+                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${(isFutureSet || (!isQ3Done && isActiveSet)) && !isDev ? "opacity-60" : ""}`}>
                           <h4 className="text-sm font-black text-purple-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🌟 Sunday: Midterm Exam <span className="text-xs font-bold text-purple-300">(Words 1 - 25)</span></h4>
                           {(() => {
-                            const isMidtermActive = isQ3Done && !midtermDone && isActiveSet; const isMidtermLocked = !isQ3Done;
+                            const isMidtermActive = isQ3Done && !midtermDone && isActiveSet; const isMidtermLocked = isDev ? false : !isQ3Done;
                             return (
                               <div ref={isMidtermActive ? activeQuestRef : null} className="relative">
                                 {isMidtermActive && <div className="absolute -top-3 left-4 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
@@ -429,11 +436,12 @@ export default function Dashboard() {
                     })()}
                     {dayPlan.hasFinals && (() => {
                       const setIndex = 9; const isActiveSet = setIndex === currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                      const isDev = username === 'dev';
                       return (
-                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done ? "opacity-60" : ""}`}>
+                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done && !isDev ? "opacity-60" : ""}`}>
                           <h4 className="text-sm font-black text-amber-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🔥 Wednesday: Final Part 1 <span className="text-xs font-bold text-amber-300">(Words 26 - 50)</span></h4>
                           {(() => {
-                            const isF1Active = isQ3Done && !final1Done; const isF1Locked = !isQ3Done;
+                            const isF1Active = isQ3Done && !final1Done; const isF1Locked = isDev ? false : !isQ3Done;
                             return (
                               <div ref={isF1Active ? activeQuestRef : null} className="relative mb-10">
                                 {isF1Active && <div className="absolute -top-3 left-4 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
@@ -443,10 +451,10 @@ export default function Dashboard() {
                               </div>
                             );
                           })()}
-                          <div className={`relative ${!final1Done ? "opacity-60" : ""}`}>
+                          <div className={`relative ${!final1Done && !isDev ? "opacity-60" : ""}`}>
                             <h4 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">👑 Wednesday: Grand Finale <span className="text-xs font-bold text-red-300">(All 50 Words)</span></h4>
                             {(() => {
-                              const isFinaleActive = final1Done && !finaleDone; const isFinaleLocked = !final1Done;
+                              const isFinaleActive = final1Done && !finaleDone; const isFinaleLocked = isDev ? false : !final1Done;
                               return (
                                 <div ref={isFinaleActive ? activeQuestRef : null} className="relative">
                                   {isFinaleActive && <div className="absolute -top-3 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}

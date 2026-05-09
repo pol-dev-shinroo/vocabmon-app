@@ -40,11 +40,13 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+.github/workflows/playwright.yml
 .gitignore
 developer_log.md
 eslint.config.mjs
 next.config.ts
 package.json
+playwright.config.ts
 postcss.config.mjs
 public/exciting.mp3
 public/file.svg
@@ -125,54 +127,41 @@ src/lib/syncHelper.ts
 src/models/Progress.ts
 src/models/User.ts
 src/proxy.ts
+tests/example.spec.ts
 tsconfig.json
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
 
-<file path=".gitignore">
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+<file path=".github/workflows/playwright.yml">
+name: Playwright Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Run Playwright tests
+      run: npx playwright test
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
 </file>
 
 <file path="developer_log.md">
@@ -231,6 +220,88 @@ const eslintConfig = defineConfig([
 ]);
 
 export default eslintConfig;
+</file>
+
+<file path="playwright.config.ts">
+import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Read environment variables from file.
+ * https://github.com/motdotla/dotenv
+ */
+// import dotenv from 'dotenv';
+// import path from 'path';
+// dotenv.config({ path: path.resolve(__dirname, '.env') });
+
+/**
+ * See https://playwright.dev/docs/test-configuration.
+ */
+export default defineConfig({
+  testDir: './tests',
+  /* Run tests in files in parallel */
+  fullyParallel: true,
+  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  forbidOnly: !!process.env.CI,
+  /* Retry on CI only */
+  retries: process.env.CI ? 2 : 0,
+  /* Opt out of parallel tests on CI. */
+  workers: process.env.CI ? 1 : undefined,
+  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  reporter: 'html',
+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  use: {
+    /* Base URL to use in actions like `await page.goto('')`. */
+    // baseURL: 'http://localhost:3000',
+
+    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    trace: 'on-first-retry',
+  },
+
+  /* Configure projects for major browsers */
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+
+    /* Test against mobile viewports. */
+    // {
+    //   name: 'Mobile Chrome',
+    //   use: { ...devices['Pixel 5'] },
+    // },
+    // {
+    //   name: 'Mobile Safari',
+    //   use: { ...devices['iPhone 12'] },
+    // },
+
+    /* Test against branded browsers. */
+    // {
+    //   name: 'Microsoft Edge',
+    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
+    // },
+    // {
+    //   name: 'Google Chrome',
+    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    // },
+  ],
+
+  /* Run your local dev server before starting the tests */
+  // webServer: {
+  //   command: 'npm run start',
+  //   url: 'http://localhost:3000',
+  //   reuseExistingServer: !process.env.CI,
+  // },
+});
 </file>
 
 <file path="postcss.config.mjs">
@@ -1853,6 +1924,27 @@ export async function connectToDatabase() {
 }
 </file>
 
+<file path="tests/example.spec.ts">
+import { test, expect } from '@playwright/test';
+
+test('has title', async ({ page }) => {
+  await page.goto('https://playwright.dev/');
+
+  // Expect a title "to contain" a substring.
+  await expect(page).toHaveTitle(/Playwright/);
+});
+
+test('get started link', async ({ page }) => {
+  await page.goto('https://playwright.dev/');
+
+  // Click the get started link.
+  await page.getByRole('link', { name: 'Get started' }).click();
+
+  // Expects page to have a heading with the name of Installation.
+  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+});
+</file>
+
 <file path="tsconfig.json">
 {
   "compilerOptions": {
@@ -1888,6 +1980,58 @@ export async function connectToDatabase() {
   ],
   "exclude": ["node_modules"]
 }
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
 </file>
 
 <file path="src/app/collection/page.tsx">
@@ -3001,6 +3145,7 @@ test
 
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
+import Progress from "@/models/Progress";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -3022,13 +3167,27 @@ export async function loginUser(
   try {
     await connectToDatabase();
 
-    // 1. SMART SEEDING: Auto-create the dev account
+    // 1. SMART SEEDING: Auto-create the dev account & MAX OUT PROGRESS
     if (username === "dev") {
       const devExists = await User.findOne({ username: "dev" });
       if (!devExists) {
         console.log("🛠️ Dev account missing! Auto-creating...");
         await User.create({ username: "dev", passwordHash: "dev123", role: "dev" });
       }
+
+      // Force unlock all quests, max level (1500 EXP), and all stickers for dev testing
+      await Progress.findOneAndUpdate(
+        { username: "dev" },
+        {
+          $set: {
+            exp: 1500,
+            currentSet: 0,
+            completedQuests: [],
+            unlockedStickers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          }
+        },
+        { upsert: true, new: true }
+      );
     }
 
     // 2. SMART SEEDING: Auto-create Jay's account if empty
@@ -5112,200 +5271,6 @@ export async function triggerSilentSync() {
 }
 </file>
 
-<file path="package.json">
-{
-  "name": "vocab-mvp",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.6.0",
-    "@types/three": "^0.184.0",
-    "mongoose": "^9.3.3",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "three": "^0.184.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "babel-plugin-react-compiler": "1.0.0",
-    "dotenv": "^17.4.2",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4",
-    "tsx": "^4.21.0",
-    "typescript": "^5"
-  }
-}
-</file>
-
-<file path="src/actions/progress.ts">
-"use server";
-
-import { connectToDatabase } from "@/lib/mongodb";
-import Progress from "@/models/Progress";
-import { cookies } from "next/headers";
-
-// This function silently saves the current state to the database
-export async function syncProgressToDB(
-  exp: number,
-  currentSet: number,
-  completedQuests: string[],
-  unlockedStickers: number[] = [],
-  hideStickerPopupUntil: Date | null = null,
-) {
-  try {
-    // 1. Figure out who is logged in
-    const cookieStore = await cookies();
-    const username = cookieStore.get("vocabmon_session")?.value;
-
-    if (!username) return { success: false, error: "Not logged in" };
-
-    // 2. Connect to the database
-    await connectToDatabase();
-
-    // 3. Update their progress file (using $set so we don't accidentally erase his history!)
-    await Progress.findOneAndUpdate(
-      { username }, // Find Jay
-      {
-        $set: {
-          exp,
-          currentSet,
-          completedQuests,
-          unlockedStickers,
-          hideStickerPopupUntil,
-        },
-      },
-      { upsert: true, new: true }, // If he doesn't have a save file yet, make one!
-    );
-
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to sync progress:", error);
-    return { success: false, error: "Database sync failed" };
-  }
-}
-
-// NEW: This function archives the current week into the History array and resets stats
-export async function archiveWeekProgress(weekId: string) {
-  try {
-    // 1. Authenticate the user
-    const cookieStore = await cookies();
-    const username = cookieStore.get("vocabmon_session")?.value;
-
-    if (!username) return { success: false, error: "Not logged in" };
-
-    // 2. Connect to the database
-    await connectToDatabase();
-
-    // 3. Find the user's current progress
-    const progress = await Progress.findOne({ username });
-    if (!progress) return { success: false, error: "No progress found to archive" };
-
-    // 4. Calculate their final level (matching the frontend logic: 150 EXP per level, max 10)
-    const rawLevel = Math.floor(progress.exp / 150) + 1;
-    const finalLevel = Math.min(rawLevel, 10);
-
-    // 5. Push the new snapshot into the history array
-    progress.history.push({
-      weekId,
-      finalLevel,
-      totalExp: progress.exp,
-      completedAt: new Date(),
-    });
-
-    // 6. Reset their active stats for the next week
-    progress.exp = 0;
-    progress.currentSet = 0;
-    progress.completedQuests = [];
-    // Optional: We could also update progress.activeWeekId if we wanted to increment it here
-
-    // 7. Save the updated document
-    await progress.save();
-
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to archive week progress:", error);
-    return { success: false, error: "Database archive failed" };
-  }
-}
-
-export async function startNewWeek(username: string, newWeekId: string) {
-  try {
-    await connectToDatabase();
-    const progress = await Progress.findOne({ username });
-    if (!progress) return { success: false, error: "No progress found" };
-
-    // Archive the current week
-    const finalLevel = Math.min(Math.floor(progress.exp / 150) + 1, 10);
-    progress.history.push({
-      weekId: progress.activeWeekId,
-      finalLevel,
-      totalExp: progress.exp,
-      completedAt: new Date(),
-    });
-
-    // Reset the state for the new week (Including EXP!)
-    progress.activeWeekId = newWeekId;
-    progress.currentSet = 0;
-    progress.completedQuests = [];
-    progress.exp = 0; // CRITICAL FIX: Reset EXP to 0 for the new egg!
-
-    await progress.save();
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to start new week:", error);
-    return { success: false, error: "Failed to start new week" };
-  }
-}
-
-export async function executeInAppRollover(newWeekId: string) {
-  try {
-    const cookieStore = await cookies();
-    const username = cookieStore.get("vocabmon_session")?.value;
-    if (!username) return { success: false, error: "Not logged in" };
-
-    await connectToDatabase();
-    const progress = await Progress.findOne({ username });
-    if (!progress) return { success: false, error: "No progress found" };
-
-    // 1. Calculate final level based on the MOST RECENT synced EXP
-    const rawLevel = Math.floor(progress.exp / 150) + 1;
-    const finalLevel = Math.min(rawLevel, 10);
-
-    // 2. Archive the current state into the Hall of Fame
-    progress.history.push({
-      weekId: progress.activeWeekId,
-      finalLevel,
-      totalExp: progress.exp,
-      completedAt: new Date(),
-    });
-
-    // 3. Reset the DB for the new week
-    progress.activeWeekId = newWeekId;
-    progress.exp = 0;
-    progress.currentSet = 0;
-    progress.completedQuests = [];
-
-    await progress.save();
-    return { success: true };
-  } catch (error) {
-    console.error("Rollover failed:", error);
-    return { success: false, error: "Database error during rollover" };
-  }
-}
-</file>
-
 <file path="src/components/shared/DigimonVocabmon.tsx">
 "use client";
 import React, { useEffect, useState } from 'react';
@@ -6143,6 +6108,201 @@ export default function MasteryTest({
       </div>
     </div>
   );
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "vocab-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.0",
+    "@types/three": "^0.184.0",
+    "mongoose": "^9.3.3",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "dotenv": "^17.4.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}
+</file>
+
+<file path="src/actions/progress.ts">
+"use server";
+
+import { connectToDatabase } from "@/lib/mongodb";
+import Progress from "@/models/Progress";
+import { cookies } from "next/headers";
+
+// This function silently saves the current state to the database
+export async function syncProgressToDB(
+  exp: number,
+  currentSet: number,
+  completedQuests: string[],
+  unlockedStickers: number[] = [],
+  hideStickerPopupUntil: Date | null = null,
+) {
+  try {
+    // 1. Figure out who is logged in
+    const cookieStore = await cookies();
+    const username = cookieStore.get("vocabmon_session")?.value;
+
+    if (!username) return { success: false, error: "Not logged in" };
+
+    // 2. Connect to the database
+    await connectToDatabase();
+
+    // 3. Update their progress file (using $set so we don't accidentally erase his history!)
+    await Progress.findOneAndUpdate(
+      { username }, // Find Jay
+      {
+        $set: {
+          exp,
+          currentSet,
+          completedQuests,
+          unlockedStickers,
+          hideStickerPopupUntil,
+        },
+      },
+      { upsert: true, new: true }, // If he doesn't have a save file yet, make one!
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to sync progress:", error);
+    return { success: false, error: "Database sync failed" };
+  }
+}
+
+// NEW: This function archives the current week into the History array and resets stats
+export async function archiveWeekProgress(weekId: string) {
+  try {
+    // 1. Authenticate the user
+    const cookieStore = await cookies();
+    const username = cookieStore.get("vocabmon_session")?.value;
+
+    if (!username) return { success: false, error: "Not logged in" };
+
+    // 2. Connect to the database
+    await connectToDatabase();
+
+    // 3. Find the user's current progress
+    const progress = await Progress.findOne({ username });
+    if (!progress) return { success: false, error: "No progress found to archive" };
+
+    // 4. Calculate their final level (matching the frontend logic: 150 EXP per level, max 10)
+    const rawLevel = Math.floor(progress.exp / 150) + 1;
+    const finalLevel = Math.min(rawLevel, 10);
+
+    // 5. Push the new snapshot into the history array
+    progress.history.push({
+      weekId,
+      finalLevel,
+      totalExp: progress.exp,
+      completedAt: new Date(),
+    });
+
+    // 6. Reset their active stats for the next week
+    progress.exp = 0;
+    progress.currentSet = 0;
+    progress.completedQuests = [];
+    // Optional: We could also update progress.activeWeekId if we wanted to increment it here
+
+    // 7. Save the updated document
+    await progress.save();
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to archive week progress:", error);
+    return { success: false, error: "Database archive failed" };
+  }
+}
+
+export async function startNewWeek(username: string, newWeekId: string) {
+  try {
+    await connectToDatabase();
+    const progress = await Progress.findOne({ username });
+    if (!progress) return { success: false, error: "No progress found" };
+
+    // Archive the current week
+    const finalLevel = Math.min(Math.floor(progress.exp / 150) + 1, 10);
+    progress.history.push({
+      weekId: progress.activeWeekId,
+      finalLevel,
+      totalExp: progress.exp,
+      completedAt: new Date(),
+    });
+
+    // Reset the state for the new week (Including EXP!)
+    progress.activeWeekId = newWeekId;
+    progress.currentSet = 0;
+    progress.completedQuests = [];
+    progress.exp = 0; // CRITICAL FIX: Reset EXP to 0 for the new egg!
+
+    await progress.save();
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to start new week:", error);
+    return { success: false, error: "Failed to start new week" };
+  }
+}
+
+export async function executeInAppRollover(newWeekId: string) {
+  try {
+    const cookieStore = await cookies();
+    const username = cookieStore.get("vocabmon_session")?.value;
+    if (!username) return { success: false, error: "Not logged in" };
+
+    await connectToDatabase();
+    const progress = await Progress.findOne({ username });
+    if (!progress) return { success: false, error: "No progress found" };
+
+    // 1. Calculate final level based on the MOST RECENT synced EXP
+    const rawLevel = Math.floor(progress.exp / 150) + 1;
+    const finalLevel = Math.min(rawLevel, 10);
+
+    // 2. Archive the current state into the Hall of Fame
+    progress.history.push({
+      weekId: progress.activeWeekId,
+      finalLevel,
+      totalExp: progress.exp,
+      completedAt: new Date(),
+    });
+
+    // 3. Reset the DB for the new week
+    progress.activeWeekId = newWeekId;
+    progress.exp = 0;
+    progress.currentSet = 0;
+    progress.completedQuests = [];
+
+    await progress.save();
+    return { success: true };
+  } catch (error) {
+    console.error("Rollover failed:", error);
+    return { success: false, error: "Database error during rollover" };
+  }
 }
 </file>
 
@@ -7289,71 +7449,6 @@ export default function ReviewPage() {
 }
 </file>
 
-<file path="src/data/vocab.ts">
-export type VocabWord = {
-  id: number;
-  word: string;
-  pos: string;
-  definition: string;
-  sentence?: string;
-  keywords?: string[];
-  imageUrl?: string;
-};
-
-export const vocabData: VocabWord[] = [
-  { id: 1, word: "accustomed", pos: "adj", definition: "(adj) familiar with something so that it seems normal or usual", sentence: "We have become more accustomed to their traditions and routines." },
-  { id: 2, word: "sultry", pos: "adj", definition: "(adj) very hot and humid", sentence: "It was a sultry July afternoon." },
-  { id: 3, word: "corrupt", pos: "adj", definition: "(adj) to cause someone or something to become dishonest, immoral, etc", sentence: "The corrupt mayor was not reelected." },
-  { id: 4, word: "exotic", pos: "adj", definition: "(adj) very different, strange, or unusual / not living or growing naturally in a particular area : from another part of the world", sentence: "The exotic plants come from Hawaii." },
-  { id: 5, word: "serene", pos: "adj", definition: "(adj) calm and peaceful", sentence: "The woods were reflected in the serene lake." },
-  { id: 6, word: "converse", pos: "adj", definition: "(adj) opposite or reverse", sentence: "One must also consider the converse case." },
-  { id: 7, word: "modest", pos: "adj", definition: "(adj) not very large in size or amount / not too proud or confident about yourself or your abilities", sentence: "Despite its modest size, the city has many things to offer tourists." },
-  { id: 8, word: "distinctive", pos: "adj", definition: "(adj) having a quality or characteristic that makes a person or thing different from others", sentence: "I spotted him from a distance because he has a distinctive walk." },
-  { id: 9, word: "moderate", pos: "adj", definition: "(adj) average in size or amount", sentence: "Her doctor recommended moderate exercise." },
-  { id: 10, word: "obstinate", pos: "adj", definition: "(adj) refusing to change your behavior or your ideas", sentence: "Even when he knows he's wrong, Ted is too obstinate to admit it." },
-  { id: 11, word: "superficial", pos: "adj", definition: "(adj) concerned only with what is obvious or apparent : not thorough or complete", sentence: "These superficial changes don't address the underlying problem." },
-  { id: 12, word: "numerous", pos: "adj", definition: "(adj) existing in large numbers", sentence: "She decided to leave for numerous reasons." },
-  { id: 13, word: "subjective", pos: "adj", definition: "(adj) based on feelings or opinions rather than facts", sentence: "Personal taste in clothing is very subjective." },
-  { id: 14, word: "scarce", pos: "adj", definition: "(adj) very small in amount or number : not plentiful", sentence: "Food was getting scarce during the drought." },
-  { id: 15, word: "rational", pos: "adj", definition: "(adj) based on facts or reason and not on emotions or feelings / having the ability to reason or think about things clearly", sentence: "Man is not always a rational being." },
-  { id: 16, word: "desolate", pos: "adj", definition: "(adj) lacking the people, plants, animals, etc., that make people feel welcome in a place", sentence: "She felt desolate when he went away." },
-  { id: 17, word: "sullen", pos: "adj", definition: "(adj) used to describe an angry or unhappy person who does not want to talk, smile, etc.", sentence: "The boy was sullen after being scolded." },
-  { id: 18, word: "thorough", pos: "adj", definition: "(adj) including every possible part or detail", sentence: "I gave my room a thorough cleaning." },
-  { id: 19, word: "moral", pos: "adj", definition: "(adj) considered right and good by most people : agreeing with a standard of right behavior", sentence: "Is it moral to waste food when others in the world are starving?" },
-  { id: 20, word: "fatal", pos: "adj", definition: "(adj) causing death", sentence: "He had a fatal accident on his way home." },
-  { id: 21, word: "infinite", pos: "adj", definition: "(adj) having no limits : endless", sentence: "There seemed to be an infinite number of possibilities." },
-  { id: 22, word: "frequent", pos: "adj", definition: "(adj) happening often", sentence: "We made frequent trips to town." },
-  { id: 23, word: "fundamental", pos: "adj", definition: "(adj) forming or relating to the most important part of something : basic", sentence: "The Constitution ensures our fundamental rights." },
-  { id: 24, word: "efficient", pos: "adj", definition: "(adj) capable of producing desired results without wasting materials, time, or energy", sentence: "He devoted himself to developing more efficient ways of working." },
-  { id: 25, word: "effective", pos: "adj", definition: "(adj) producing a result that is wanted : having an intended effect", sentence: "Several new drugs proved to be effective in treating serious diseases." },
-  { id: 26, word: "momentary", pos: "adj", definition: "(adj) lasting a very short time", sentence: "He experienced a momentary loss of consciousness." },
-  { id: 27, word: "momentous", pos: "adj", definition: "(adj) very important : having great or lasting importance", sentence: "My college graduation was a momentous day in my life." },
-  { id: 28, word: "peculiar", pos: "adj", definition: "(adj) not usual or normal", sentence: "It seems peculiar that he would leave town and not tell anybody." },
-  { id: 29, word: "spacious", pos: "adj", definition: "(adj) having a large amount of space", sentence: "The dining room is spacious enough to seat our whole family and several guests." },
-  { id: 30, word: "comparable", pos: "adj", definition: "(adj) used to say that two or more things are very similar and can be compared to each other", sentence: "A comparable refrigerator today would cost a lot more than the one I bought 10 years ago." },
-  { id: 31, word: "sensible", pos: "adj", definition: "(adj) having or showing good sense or judgment", sentence: "Julie is a sensible girl. She doesn't do anything foolish." },
-  { id: 32, word: "sensitive", pos: "adj", definition: "(adj) easily upset by the things that people think or say about you", sentence: "He acts like a tough guy, but he's really very sensitive to criticism." },
-  { id: 33, word: "monotonous", pos: "adj", definition: "(adj) used to describe something that is boring because it is always the same", sentence: "Students complained that the meals were monotonous." },
-  { id: 34, word: "indispensable", pos: "adj", definition: "(adj) extremely important and necessary", sentence: "A calculator is an indispensable tool for solving these problems." },
-  { id: 35, word: "inevitable", pos: "adj", definition: "(adj) sure to happen", sentence: "These days traffic delays seem inevitable everywhere in Seoul." },
-  { id: 36, word: "indifferent", pos: "adj", definition: "(adj) not interested in or concerned about something", sentence: "She was amazed that people could be so indifferent about the trial." },
-  { id: 37, word: "supreme", pos: "adj", definition: "(adj) highest in rank or authority", sentence: "She reigns supreme in the world of tennis." },
-  { id: 38, word: "marvelous", pos: "adj", definition: "(adj) extremely good or enjoyable", sentence: "We had a marvelous time at the party." },
-  { id: 39, word: "unanimous", pos: "adj", definition: "(adj) agreed to by everyone", sentence: "She was elected club president by a unanimous vote." },
-  { id: 40, word: "arrogant", pos: "adj", definition: "(adj) having or showing the insulting attitude of people who believe that they are better, smarter, or more important than other people", sentence: "She's first in her class, but she's not arrogant about it." },
-  { id: 41, word: "excessive", pos: "adj", definition: "(adj) going beyond what is usual, normal, or proper", sentence: "He drinks excessive amounts of coffee." },
-  { id: 42, word: "invaluable", pos: "adj", definition: "(adj) extremely valuable or useful", sentence: "The museum has many invaluable jewels." },
-  { id: 43, word: "enormous", pos: "adj", definition: "(adj) very great in size or amount", sentence: "The enormous building is over 100 stories high." },
-  { id: 44, word: "subtle", pos: "adj", definition: "(adj) hard to notice or see : not obvious", sentence: "They look similar, but there are subtle differences between them." },
-  { id: 45, word: "tremendous", pos: "adj", definition: "(adj) very large or great", sentence: "A meteor falls with tremendous speed." },
-  { id: 46, word: "profound", pos: "adj", definition: "(adj) having or showing great knowledge or understanding", sentence: "Her books offer profound insights into the true nature of courage." },
-  { id: 47, word: "minute", pos: "adj", definition: "(adj) very small", sentence: "There were minute particles of dust in the air." },
-  { id: 48, word: "threadbare", pos: "adj", definition: "(adj) very thin and in bad condition from too much use", sentence: "He was wearing a threadbare coat and old shoes." },
-  { id: 49, word: "eminent", pos: "adj", definition: "(adj) successful, well-known and respected", sentence: "An eminent surgeon operated on the patient." },
-  { id: 50, word: "acute", pos: "adj", definition: "(adj) very serious or dangerous : requiring serious attention or action", sentence: "I got an acute pain in my side from jogging too far." }
-];
-</file>
-
 <file path="src/app/page.tsx">
 "use client";
 
@@ -7483,6 +7578,71 @@ export default function Home() {
     </main>
   );
 }
+</file>
+
+<file path="src/data/vocab.ts">
+export type VocabWord = {
+  id: number;
+  word: string;
+  pos: string;
+  definition: string;
+  sentence?: string;
+  keywords?: string[];
+  imageUrl?: string;
+};
+
+export const vocabData: VocabWord[] = [
+  { id: 1, word: "accustomed", pos: "adj", definition: "(adj) familiar with something so that it seems normal or usual", sentence: "We have become more accustomed to their traditions and routines." },
+  { id: 2, word: "sultry", pos: "adj", definition: "(adj) very hot and humid", sentence: "It was a sultry July afternoon." },
+  { id: 3, word: "corrupt", pos: "adj", definition: "(adj) to cause someone or something to become dishonest, immoral, etc", sentence: "The corrupt mayor was not reelected." },
+  { id: 4, word: "exotic", pos: "adj", definition: "(adj) very different, strange, or unusual / not living or growing naturally in a particular area : from another part of the world", sentence: "The exotic plants come from Hawaii." },
+  { id: 5, word: "serene", pos: "adj", definition: "(adj) calm and peaceful", sentence: "The woods were reflected in the serene lake." },
+  { id: 6, word: "converse", pos: "adj", definition: "(adj) opposite or reverse", sentence: "One must also consider the converse case." },
+  { id: 7, word: "modest", pos: "adj", definition: "(adj) not very large in size or amount / not too proud or confident about yourself or your abilities", sentence: "Despite its modest size, the city has many things to offer tourists." },
+  { id: 8, word: "distinctive", pos: "adj", definition: "(adj) having a quality or characteristic that makes a person or thing different from others", sentence: "I spotted him from a distance because he has a distinctive walk." },
+  { id: 9, word: "moderate", pos: "adj", definition: "(adj) average in size or amount", sentence: "Her doctor recommended moderate exercise." },
+  { id: 10, word: "obstinate", pos: "adj", definition: "(adj) refusing to change your behavior or your ideas", sentence: "Even when he knows he's wrong, Ted is too obstinate to admit it." },
+  { id: 11, word: "superficial", pos: "adj", definition: "(adj) concerned only with what is obvious or apparent : not thorough or complete", sentence: "These superficial changes don't address the underlying problem." },
+  { id: 12, word: "numerous", pos: "adj", definition: "(adj) existing in large numbers", sentence: "She decided to leave for numerous reasons." },
+  { id: 13, word: "subjective", pos: "adj", definition: "(adj) based on feelings or opinions rather than facts", sentence: "Personal taste in clothing is very subjective." },
+  { id: 14, word: "scarce", pos: "adj", definition: "(adj) very small in amount or number : not plentiful", sentence: "Food was getting scarce during the drought." },
+  { id: 15, word: "rational", pos: "adj", definition: "(adj) based on facts or reason and not on emotions or feelings / having the ability to reason or think about things clearly", sentence: "Man is not always a rational being." },
+  { id: 16, word: "desolate", pos: "adj", definition: "(adj) lacking the people, plants, animals, etc., that make people feel welcome in a place", sentence: "She felt desolate when he went away." },
+  { id: 17, word: "sullen", pos: "adj", definition: "(adj) used to describe an angry or unhappy person who does not want to talk, smile, etc.", sentence: "The boy was sullen after being scolded." },
+  { id: 18, word: "thorough", pos: "adj", definition: "(adj) including every possible part or detail", sentence: "I gave my room a thorough cleaning." },
+  { id: 19, word: "moral", pos: "adj", definition: "(adj) considered right and good by most people : agreeing with a standard of right behavior", sentence: "Is it moral to waste food when others in the world are starving?" },
+  { id: 20, word: "fatal", pos: "adj", definition: "(adj) causing death", sentence: "He had a fatal accident on his way home." },
+  { id: 21, word: "infinite", pos: "adj", definition: "(adj) having no limits : endless", sentence: "There seemed to be an infinite number of possibilities." },
+  { id: 22, word: "frequent", pos: "adj", definition: "(adj) happening often", sentence: "We made frequent trips to town." },
+  { id: 23, word: "fundamental", pos: "adj", definition: "(adj) forming or relating to the most important part of something : basic", sentence: "The Constitution ensures our fundamental rights." },
+  { id: 24, word: "efficient", pos: "adj", definition: "(adj) capable of producing desired results without wasting materials, time, or energy", sentence: "He devoted himself to developing more efficient ways of working." },
+  { id: 25, word: "effective", pos: "adj", definition: "(adj) producing a result that is wanted : having an intended effect", sentence: "Several new drugs proved to be effective in treating serious diseases." },
+  { id: 26, word: "momentary", pos: "adj", definition: "(adj) lasting a very short time", sentence: "He experienced a momentary loss of consciousness." },
+  { id: 27, word: "momentous", pos: "adj", definition: "(adj) very important : having great or lasting importance", sentence: "My college graduation was a momentous day in my life." },
+  { id: 28, word: "peculiar", pos: "adj", definition: "(adj) not usual or normal", sentence: "It seems peculiar that he would leave town and not tell anybody." },
+  { id: 29, word: "spacious", pos: "adj", definition: "(adj) having a large amount of space", sentence: "The dining room is spacious enough to seat our whole family and several guests." },
+  { id: 30, word: "comparable", pos: "adj", definition: "(adj) used to say that two or more things are very similar and can be compared to each other", sentence: "A comparable refrigerator today would cost a lot more than the one I bought 10 years ago." },
+  { id: 31, word: "sensible", pos: "adj", definition: "(adj) having or showing good sense or judgment", sentence: "Julie is a sensible girl. She doesn't do anything foolish." },
+  { id: 32, word: "sensitive", pos: "adj", definition: "(adj) easily upset by the things that people think or say about you", sentence: "He acts like a tough guy, but he's really very sensitive to criticism." },
+  { id: 33, word: "monotonous", pos: "adj", definition: "(adj) used to describe something that is boring because it is always the same", sentence: "Students complained that the meals were monotonous." },
+  { id: 34, word: "indispensable", pos: "adj", definition: "(adj) extremely important and necessary", sentence: "A calculator is an indispensable tool for solving these problems." },
+  { id: 35, word: "inevitable", pos: "adj", definition: "(adj) sure to happen", sentence: "These days traffic delays seem inevitable everywhere in Seoul." },
+  { id: 36, word: "indifferent", pos: "adj", definition: "(adj) not interested in or concerned about something", sentence: "She was amazed that people could be so indifferent about the trial." },
+  { id: 37, word: "supreme", pos: "adj", definition: "(adj) highest in rank or authority", sentence: "She reigns supreme in the world of tennis." },
+  { id: 38, word: "marvelous", pos: "adj", definition: "(adj) extremely good or enjoyable", sentence: "We had a marvelous time at the party." },
+  { id: 39, word: "unanimous", pos: "adj", definition: "(adj) agreed to by everyone", sentence: "She was elected club president by a unanimous vote." },
+  { id: 40, word: "arrogant", pos: "adj", definition: "(adj) having or showing the insulting attitude of people who believe that they are better, smarter, or more important than other people", sentence: "She's first in her class, but she's not arrogant about it." },
+  { id: 41, word: "excessive", pos: "adj", definition: "(adj) going beyond what is usual, normal, or proper", sentence: "He drinks excessive amounts of coffee." },
+  { id: 42, word: "invaluable", pos: "adj", definition: "(adj) extremely valuable or useful", sentence: "The museum has many invaluable jewels." },
+  { id: 43, word: "enormous", pos: "adj", definition: "(adj) very great in size or amount", sentence: "The enormous building is over 100 stories high." },
+  { id: 44, word: "subtle", pos: "adj", definition: "(adj) hard to notice or see : not obvious", sentence: "They look similar, but there are subtle differences between them." },
+  { id: 45, word: "tremendous", pos: "adj", definition: "(adj) very large or great", sentence: "A meteor falls with tremendous speed." },
+  { id: 46, word: "profound", pos: "adj", definition: "(adj) having or showing great knowledge or understanding", sentence: "Her books offer profound insights into the true nature of courage." },
+  { id: 47, word: "minute", pos: "adj", definition: "(adj) very small", sentence: "There were minute particles of dust in the air." },
+  { id: 48, word: "threadbare", pos: "adj", definition: "(adj) very thin and in bad condition from too much use", sentence: "He was wearing a threadbare coat and old shoes." },
+  { id: 49, word: "eminent", pos: "adj", definition: "(adj) successful, well-known and respected", sentence: "An eminent surgeon operated on the patient." },
+  { id: 50, word: "acute", pos: "adj", definition: "(adj) very serious or dangerous : requiring serious attention or action", sentence: "I got an acute pain in my side from jogging too far." }
+];
 </file>
 
 <file path="src/components/home/Dashboard.tsx">
@@ -7733,6 +7893,11 @@ export default function Dashboard() {
                   <button onClick={() => { const cl = levelStats.level; if(cl < 10) { const nx = cl * 150; setExp(nx); localStorage.setItem("vocabmon_exp", nx.toString()); setDevEvoModal({ from: cl, to: cl + 1 }); } }} className="bg-purple-600 hover:bg-purple-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">+LV</button>
                 </div>
                 
+                <div className="flex gap-2 w-full mt-1">
+                  <button onClick={() => { if(currentSet > 0) { const ns = currentSet - 1; setCurrentSet(ns); localStorage.setItem("current_word_set", ns.toString()); triggerSilentSync(); } }} className="bg-blue-600 hover:bg-blue-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">-SET</button>
+                  <button onClick={() => { if(currentSet < 9) { const ns = currentSet + 1; setCurrentSet(ns); localStorage.setItem("current_word_set", ns.toString()); triggerSilentSync(); } }} className="bg-blue-600 hover:bg-blue-500 text-white font-black flex-1 py-2 rounded-lg shadow-md transition-transform active:scale-95 text-sm">+SET</button>
+                </div>
+                
                 <button onClick={() => { setAtkCharges(10); localStorage.setItem("atk_charges", "10"); }} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-2 rounded-lg shadow-md transition-transform active:scale-95 text-[10px] uppercase tracking-wider">Refill Energy</button>
                 
                 <div className="w-full bg-purple-950 p-2 rounded-lg border border-purple-700 mt-1">
@@ -7827,13 +7992,14 @@ export default function Dashboard() {
                   <h3 className="text-xl font-black text-gray-800 border-b-2 border-gray-100 pb-3 mb-6 flex items-center gap-2">📅 {dayPlan.day}</h3>
                   <div className="space-y-10">
                     {dayPlan.sets.map((setIndex) => {
+                      const isDev = username === 'dev';
                       const isPastSet = setIndex < currentSet; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet;
                       const isQ1Done = isPastSet || (isActiveSet && spellingDone); const isQ2Done = isPastSet || (isActiveSet && exerciseDone); const isQ3Done = isPastSet || (isActiveSet && testDone);
-                      const isQ1Locked = isFutureSet; const isQ2Locked = isFutureSet || (isActiveSet && !spellingDone); const isQ3Locked = isFutureSet || (isActiveSet && !exerciseDone);
+                      const isQ1Locked = isDev ? false : isFutureSet; const isQ2Locked = isDev ? false : isFutureSet || (isActiveSet && !spellingDone); const isQ3Locked = isDev ? false : isFutureSet || (isActiveSet && !exerciseDone);
                       const isQ1Active = isActiveSet && !spellingDone; const isQ2Active = isActiveSet && spellingDone && !exerciseDone; const isQ3Active = isActiveSet && exerciseDone && !testDone;
                       const q1Num = setIndex * 3 + 1; const q2Num = setIndex * 3 + 2; const q3Num = setIndex * 3 + 3;
                       return (
-                        <div key={setIndex} className={`relative ${isFutureSet ? "opacity-60" : ""}`}>
+                        <div key={setIndex} className={`relative ${(isFutureSet && !isDev) ? "opacity-60" : ""}`}>
                           <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 flex items-center gap-2">📍 {scheduleDays[setIndex]} <span className="text-xs font-bold text-gray-300">(Words {1 + setIndex * 5} - {5 + setIndex * 5})</span></h4>
                           <div className="space-y-4">
                             <div ref={isQ1Active ? activeQuestRef : null} className="relative">
@@ -7879,11 +8045,12 @@ export default function Dashboard() {
                     })}
                     {dayPlan.hasMidterm && (() => {
                       const setIndex = 4; const isActiveSet = setIndex === currentSet; const isFutureSet = setIndex > currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                      const isDev = username === 'dev';
                       return (
-                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${isFutureSet || (!isQ3Done && isActiveSet) ? "opacity-60" : ""}`}>
+                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${(isFutureSet || (!isQ3Done && isActiveSet)) && !isDev ? "opacity-60" : ""}`}>
                           <h4 className="text-sm font-black text-purple-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🌟 Sunday: Midterm Exam <span className="text-xs font-bold text-purple-300">(Words 1 - 25)</span></h4>
                           {(() => {
-                            const isMidtermActive = isQ3Done && !midtermDone && isActiveSet; const isMidtermLocked = !isQ3Done;
+                            const isMidtermActive = isQ3Done && !midtermDone && isActiveSet; const isMidtermLocked = isDev ? false : !isQ3Done;
                             return (
                               <div ref={isMidtermActive ? activeQuestRef : null} className="relative">
                                 {isMidtermActive && <div className="absolute -top-3 left-4 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
@@ -7917,11 +8084,12 @@ export default function Dashboard() {
                     })()}
                     {dayPlan.hasFinals && (() => {
                       const setIndex = 9; const isActiveSet = setIndex === currentSet; const isQ3Done = setIndex < currentSet || (isActiveSet && testDone);
+                      const isDev = username === 'dev';
                       return (
-                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done ? "opacity-60" : ""}`}>
+                        <div className={`pt-8 border-t-2 border-dashed border-gray-200 relative ${!isQ3Done && !isDev ? "opacity-60" : ""}`}>
                           <h4 className="text-sm font-black text-amber-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">🔥 Wednesday: Final Part 1 <span className="text-xs font-bold text-amber-300">(Words 26 - 50)</span></h4>
                           {(() => {
-                            const isF1Active = isQ3Done && !final1Done; const isF1Locked = !isQ3Done;
+                            const isF1Active = isQ3Done && !final1Done; const isF1Locked = isDev ? false : !isQ3Done;
                             return (
                               <div ref={isF1Active ? activeQuestRef : null} className="relative mb-10">
                                 {isF1Active && <div className="absolute -top-3 left-4 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}
@@ -7931,10 +8099,10 @@ export default function Dashboard() {
                               </div>
                             );
                           })()}
-                          <div className={`relative ${!final1Done ? "opacity-60" : ""}`}>
+                          <div className={`relative ${!final1Done && !isDev ? "opacity-60" : ""}`}>
                             <h4 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">👑 Wednesday: Grand Finale <span className="text-xs font-bold text-red-300">(All 50 Words)</span></h4>
                             {(() => {
-                              const isFinaleActive = final1Done && !finaleDone; const isFinaleLocked = !final1Done;
+                              const isFinaleActive = final1Done && !finaleDone; const isFinaleLocked = isDev ? false : !final1Done;
                               return (
                                 <div ref={isFinaleActive ? activeQuestRef : null} className="relative">
                                   {isFinaleActive && <div className="absolute -top-3 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full z-20 shadow-md">📍 Current Boss</div>}

@@ -2,6 +2,7 @@
 
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
+import Progress from "@/models/Progress";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -23,13 +24,27 @@ export async function loginUser(
   try {
     await connectToDatabase();
 
-    // 1. SMART SEEDING: Auto-create the dev account
+    // 1. SMART SEEDING: Auto-create the dev account & MAX OUT PROGRESS
     if (username === "dev") {
       const devExists = await User.findOne({ username: "dev" });
       if (!devExists) {
         console.log("🛠️ Dev account missing! Auto-creating...");
         await User.create({ username: "dev", passwordHash: "dev123", role: "dev" });
       }
+
+      // Force unlock all quests, max level (1500 EXP), and all stickers for dev testing
+      await Progress.findOneAndUpdate(
+        { username: "dev" },
+        {
+          $set: {
+            exp: 1500,
+            currentSet: 0,
+            completedQuests: [],
+            unlockedStickers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          }
+        },
+        { upsert: true, new: true }
+      );
     }
 
     // 2. SMART SEEDING: Auto-create Jay's account if empty
