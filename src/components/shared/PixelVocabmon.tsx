@@ -1,5 +1,6 @@
 import FireVocabmon from "./FireVocabmon";
 import DigimonVocabmon from "./DigimonVocabmon";
+import LegacyPixelVocabmon from "./LegacyPixelVocabmon";
 
 export default function PixelVocabmon({
   className = "",
@@ -14,7 +15,7 @@ export default function PixelVocabmon({
   attackTrigger?: number;
   specialTrigger?: number;
   level?: number;
-  variant?: "fire" | "digimon";
+  variant?: "fire" | "digimon" | "jane";
 }) {
   if (variant === "fire") {
     return (
@@ -27,11 +28,19 @@ export default function PixelVocabmon({
       />
     );
   }
+  if (variant === "jane") {
+    return (
+      <LegacyPixelVocabmon 
+        className={className} 
+        feedTrigger={feedTrigger} 
+        level={level} 
+      />
+    );
+  }
   return (
     <DigimonVocabmon
       className={className}
       feedTrigger={feedTrigger}
-      // Merge specialTrigger into attackTrigger since DigimonVocabmon consolidated them!
       attackTrigger={attackTrigger || specialTrigger} 
       level={level}
     />

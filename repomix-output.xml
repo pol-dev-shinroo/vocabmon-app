@@ -54,13 +54,10 @@ public/globe.svg
 public/next.svg
 public/piano.mp3
 public/sprites/lvl1.gif
-public/sprites/lvl10_atk.gif
 public/sprites/lvl10.gif
 public/sprites/lvl2.gif
 public/sprites/lvl3.gif
-public/sprites/lvl4_atk.gif
 public/sprites/lvl4.gif
-public/sprites/lvl5_atk.gif
 public/sprites/lvl5.gif
 public/sprites/lvl6.gif
 public/sprites/lvl7.gif
@@ -3140,85 +3137,6 @@ npx repomix --style xml
 test
 </file>
 
-<file path="src/actions/auth.ts">
-"use server";
-
-import { connectToDatabase } from "@/lib/mongodb";
-import User from "@/models/User";
-import Progress from "@/models/Progress";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
-// NEW: Safely get the current logged-in username
-export async function getCurrentUsername() {
-  const cookieStore = await cookies();
-  return cookieStore.get("vocabmon_session")?.value || null;
-}
-
-export async function loginUser(
-  prevState: { error?: string } | null,
-  formData: FormData,
-) {
-  const username = formData.get("username") as string | null;
-  const password = formData.get("password") as string | null;
-
-  if (!username || !password) return { error: "Please fill out both fields." };
-
-  try {
-    await connectToDatabase();
-
-    // 1. SMART SEEDING: Auto-create the dev account & MAX OUT PROGRESS
-    if (username === "dev") {
-      const devExists = await User.findOne({ username: "dev" });
-      if (!devExists) {
-        console.log("🛠️ Dev account missing! Auto-creating...");
-        await User.create({ username: "dev", passwordHash: "dev123", role: "dev" });
-      }
-
-      // Force unlock all quests, max level (1500 EXP), and all stickers for dev testing
-      await Progress.findOneAndUpdate(
-        { username: "dev" },
-        {
-          $set: {
-            exp: 1500,
-            currentSet: 0,
-            completedQuests: [],
-            unlockedStickers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-          }
-        },
-        { upsert: true, new: true }
-      );
-    }
-
-    // 2. SMART SEEDING: Auto-create Jay's account if empty
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-      console.log("Database is empty! Creating Jay's account...");
-      await User.create({ username: "jay", passwordHash: "vocab123", role: "student" });
-    }
-
-    const user = await User.findOne({ username });
-
-    if (!user || user.passwordHash !== password) {
-      return { error: "Invalid username or password!" };
-    }
-
-    const cookieStore = await cookies();
-    cookieStore.set("vocabmon_session", user.username, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: "/",
-    });
-  } catch (error) {
-    console.error("Database error:", error);
-    return { error: "Database connection failed. Check your console." };
-  }
-
-  redirect("/");
-}
-</file>
-
 <file path="src/app/login/page.tsx">
 "use client";
 
@@ -5268,6 +5186,85 @@ export async function triggerSilentSync() {
   } catch (error) {
     console.error("Failed to sync:", error);
   }
+}
+</file>
+
+<file path="src/actions/auth.ts">
+"use server";
+
+import { connectToDatabase } from "@/lib/mongodb";
+import User from "@/models/User";
+import Progress from "@/models/Progress";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+// NEW: Safely get the current logged-in username
+export async function getCurrentUsername() {
+  const cookieStore = await cookies();
+  return cookieStore.get("vocabmon_session")?.value || null;
+}
+
+export async function loginUser(
+  prevState: { error?: string } | null,
+  formData: FormData,
+) {
+  const username = formData.get("username") as string | null;
+  const password = formData.get("password") as string | null;
+
+  if (!username || !password) return { error: "Please fill out both fields." };
+
+  try {
+    await connectToDatabase();
+
+    // 1. SMART SEEDING: Auto-create the dev account & MAX OUT PROGRESS
+    if (username === "dev") {
+      const devExists = await User.findOne({ username: "dev" });
+      if (!devExists) {
+        console.log("🛠️ Dev account missing! Auto-creating...");
+        await User.create({ username: "dev", passwordHash: "dev123", role: "dev" });
+      }
+
+      // Force unlock all quests, max level (1500 EXP), and all stickers for dev testing
+      await Progress.findOneAndUpdate(
+        { username: "dev" },
+        {
+          $set: {
+            exp: 1500,
+            currentSet: 0,
+            completedQuests: [],
+            unlockedStickers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          }
+        },
+        { upsert: true, new: true }
+      );
+    }
+
+    // 2. SMART SEEDING: Auto-create Jay's account if empty
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log("Database is empty! Creating Jay's account...");
+      await User.create({ username: "jay", passwordHash: "vocab123", role: "student" });
+    }
+
+    const user = await User.findOne({ username });
+
+    if (!user || user.passwordHash !== password) {
+      return { error: "Invalid username or password!" };
+    }
+
+    const cookieStore = await cookies();
+    cookieStore.set("vocabmon_session", user.username, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: "/",
+    });
+  } catch (error) {
+    console.error("Database error:", error);
+    return { error: "Database connection failed. Check your console." };
+  }
+
+  redirect("/");
 }
 </file>
 
@@ -7592,56 +7589,56 @@ export type VocabWord = {
 };
 
 export const vocabData: VocabWord[] = [
-  { id: 1, word: "accustomed", pos: "adj", definition: "(adj) familiar with something so that it seems normal or usual", sentence: "We have become more accustomed to their traditions and routines." },
-  { id: 2, word: "sultry", pos: "adj", definition: "(adj) very hot and humid", sentence: "It was a sultry July afternoon." },
-  { id: 3, word: "corrupt", pos: "adj", definition: "(adj) to cause someone or something to become dishonest, immoral, etc", sentence: "The corrupt mayor was not reelected." },
-  { id: 4, word: "exotic", pos: "adj", definition: "(adj) very different, strange, or unusual / not living or growing naturally in a particular area : from another part of the world", sentence: "The exotic plants come from Hawaii." },
-  { id: 5, word: "serene", pos: "adj", definition: "(adj) calm and peaceful", sentence: "The woods were reflected in the serene lake." },
-  { id: 6, word: "converse", pos: "adj", definition: "(adj) opposite or reverse", sentence: "One must also consider the converse case." },
-  { id: 7, word: "modest", pos: "adj", definition: "(adj) not very large in size or amount / not too proud or confident about yourself or your abilities", sentence: "Despite its modest size, the city has many things to offer tourists." },
-  { id: 8, word: "distinctive", pos: "adj", definition: "(adj) having a quality or characteristic that makes a person or thing different from others", sentence: "I spotted him from a distance because he has a distinctive walk." },
-  { id: 9, word: "moderate", pos: "adj", definition: "(adj) average in size or amount", sentence: "Her doctor recommended moderate exercise." },
-  { id: 10, word: "obstinate", pos: "adj", definition: "(adj) refusing to change your behavior or your ideas", sentence: "Even when he knows he's wrong, Ted is too obstinate to admit it." },
-  { id: 11, word: "superficial", pos: "adj", definition: "(adj) concerned only with what is obvious or apparent : not thorough or complete", sentence: "These superficial changes don't address the underlying problem." },
-  { id: 12, word: "numerous", pos: "adj", definition: "(adj) existing in large numbers", sentence: "She decided to leave for numerous reasons." },
-  { id: 13, word: "subjective", pos: "adj", definition: "(adj) based on feelings or opinions rather than facts", sentence: "Personal taste in clothing is very subjective." },
-  { id: 14, word: "scarce", pos: "adj", definition: "(adj) very small in amount or number : not plentiful", sentence: "Food was getting scarce during the drought." },
-  { id: 15, word: "rational", pos: "adj", definition: "(adj) based on facts or reason and not on emotions or feelings / having the ability to reason or think about things clearly", sentence: "Man is not always a rational being." },
-  { id: 16, word: "desolate", pos: "adj", definition: "(adj) lacking the people, plants, animals, etc., that make people feel welcome in a place", sentence: "She felt desolate when he went away." },
-  { id: 17, word: "sullen", pos: "adj", definition: "(adj) used to describe an angry or unhappy person who does not want to talk, smile, etc.", sentence: "The boy was sullen after being scolded." },
-  { id: 18, word: "thorough", pos: "adj", definition: "(adj) including every possible part or detail", sentence: "I gave my room a thorough cleaning." },
-  { id: 19, word: "moral", pos: "adj", definition: "(adj) considered right and good by most people : agreeing with a standard of right behavior", sentence: "Is it moral to waste food when others in the world are starving?" },
-  { id: 20, word: "fatal", pos: "adj", definition: "(adj) causing death", sentence: "He had a fatal accident on his way home." },
-  { id: 21, word: "infinite", pos: "adj", definition: "(adj) having no limits : endless", sentence: "There seemed to be an infinite number of possibilities." },
-  { id: 22, word: "frequent", pos: "adj", definition: "(adj) happening often", sentence: "We made frequent trips to town." },
-  { id: 23, word: "fundamental", pos: "adj", definition: "(adj) forming or relating to the most important part of something : basic", sentence: "The Constitution ensures our fundamental rights." },
-  { id: 24, word: "efficient", pos: "adj", definition: "(adj) capable of producing desired results without wasting materials, time, or energy", sentence: "He devoted himself to developing more efficient ways of working." },
-  { id: 25, word: "effective", pos: "adj", definition: "(adj) producing a result that is wanted : having an intended effect", sentence: "Several new drugs proved to be effective in treating serious diseases." },
-  { id: 26, word: "momentary", pos: "adj", definition: "(adj) lasting a very short time", sentence: "He experienced a momentary loss of consciousness." },
-  { id: 27, word: "momentous", pos: "adj", definition: "(adj) very important : having great or lasting importance", sentence: "My college graduation was a momentous day in my life." },
-  { id: 28, word: "peculiar", pos: "adj", definition: "(adj) not usual or normal", sentence: "It seems peculiar that he would leave town and not tell anybody." },
-  { id: 29, word: "spacious", pos: "adj", definition: "(adj) having a large amount of space", sentence: "The dining room is spacious enough to seat our whole family and several guests." },
-  { id: 30, word: "comparable", pos: "adj", definition: "(adj) used to say that two or more things are very similar and can be compared to each other", sentence: "A comparable refrigerator today would cost a lot more than the one I bought 10 years ago." },
-  { id: 31, word: "sensible", pos: "adj", definition: "(adj) having or showing good sense or judgment", sentence: "Julie is a sensible girl. She doesn't do anything foolish." },
-  { id: 32, word: "sensitive", pos: "adj", definition: "(adj) easily upset by the things that people think or say about you", sentence: "He acts like a tough guy, but he's really very sensitive to criticism." },
-  { id: 33, word: "monotonous", pos: "adj", definition: "(adj) used to describe something that is boring because it is always the same", sentence: "Students complained that the meals were monotonous." },
-  { id: 34, word: "indispensable", pos: "adj", definition: "(adj) extremely important and necessary", sentence: "A calculator is an indispensable tool for solving these problems." },
-  { id: 35, word: "inevitable", pos: "adj", definition: "(adj) sure to happen", sentence: "These days traffic delays seem inevitable everywhere in Seoul." },
-  { id: 36, word: "indifferent", pos: "adj", definition: "(adj) not interested in or concerned about something", sentence: "She was amazed that people could be so indifferent about the trial." },
-  { id: 37, word: "supreme", pos: "adj", definition: "(adj) highest in rank or authority", sentence: "She reigns supreme in the world of tennis." },
-  { id: 38, word: "marvelous", pos: "adj", definition: "(adj) extremely good or enjoyable", sentence: "We had a marvelous time at the party." },
-  { id: 39, word: "unanimous", pos: "adj", definition: "(adj) agreed to by everyone", sentence: "She was elected club president by a unanimous vote." },
-  { id: 40, word: "arrogant", pos: "adj", definition: "(adj) having or showing the insulting attitude of people who believe that they are better, smarter, or more important than other people", sentence: "She's first in her class, but she's not arrogant about it." },
-  { id: 41, word: "excessive", pos: "adj", definition: "(adj) going beyond what is usual, normal, or proper", sentence: "He drinks excessive amounts of coffee." },
-  { id: 42, word: "invaluable", pos: "adj", definition: "(adj) extremely valuable or useful", sentence: "The museum has many invaluable jewels." },
-  { id: 43, word: "enormous", pos: "adj", definition: "(adj) very great in size or amount", sentence: "The enormous building is over 100 stories high." },
-  { id: 44, word: "subtle", pos: "adj", definition: "(adj) hard to notice or see : not obvious", sentence: "They look similar, but there are subtle differences between them." },
-  { id: 45, word: "tremendous", pos: "adj", definition: "(adj) very large or great", sentence: "A meteor falls with tremendous speed." },
-  { id: 46, word: "profound", pos: "adj", definition: "(adj) having or showing great knowledge or understanding", sentence: "Her books offer profound insights into the true nature of courage." },
-  { id: 47, word: "minute", pos: "adj", definition: "(adj) very small", sentence: "There were minute particles of dust in the air." },
-  { id: 48, word: "threadbare", pos: "adj", definition: "(adj) very thin and in bad condition from too much use", sentence: "He was wearing a threadbare coat and old shoes." },
-  { id: 49, word: "eminent", pos: "adj", definition: "(adj) successful, well-known and respected", sentence: "An eminent surgeon operated on the patient." },
-  { id: 50, word: "acute", pos: "adj", definition: "(adj) very serious or dangerous : requiring serious attention or action", sentence: "I got an acute pain in my side from jogging too far." }
+  { id: 1, word: "stern", pos: "adj", definition: "(adj) very serious especially in an unfriendly way", sentence: "Journalists received a stern warning not to go anywhere near the battleship." },
+  { id: 2, word: "ambiguous", pos: "adj", definition: "(adj) able to be understood in more than one way : having more than one possible meaning", sentence: "We were confused by the ambiguous wording of the message." },
+  { id: 3, word: "transient", pos: "adj", definition: "(adj) not lasting long", sentence: "Youthful beauty is transient." },
+  { id: 4, word: "dominant", pos: "adj", definition: "(adj) more important, powerful, or successful than most or all others", sentence: "The university plays a dominant role in the local economy." },
+  { id: 5, word: "unprecedented", pos: "adj", definition: "(adj) not done or experienced before", sentence: "The team has enjoyed unprecedented success this year." },
+  { id: 6, word: "akin", pos: "adj", definition: "(adj) similar or related", sentence: "The two languages are closely akin to one another." },
+  { id: 7, word: "frugal", pos: "adj", definition: "(adj) careful about spending money or using things when you do not need to : using money or supplies in a very careful way", sentence: "She's very frugal with her money." },
+  { id: 8, word: "prudent", pos: "adj", definition: "(adj) having or showing careful good judgment", sentence: "He always listened to her prudent advice." },
+  { id: 9, word: "incredulous", pos: "adj", definition: "(adj) not able or willing to believe something : feeling or showing a lack of belief", sentence: "Many people were incredulous that such a small fire could have caused so much damage." },
+  { id: 10, word: "ironic", pos: "adj", definition: "(adj) using words that mean the opposite of what you really think especially in order to be funny", sentence: "She has an ironic sense of humor." },
+  { id: 11, word: "satirical", pos: "adj", definition: "(adj) using humor to show that someone or something is foolish, weak, bad, etc. : humor that shows the weaknesses or bad qualities of a person, government, society, etc.", sentence: "The historical piece delivers a striking satirical message." },
+  { id: 12, word: "skeptical", pos: "adj", definition: "(adj) having or expressing doubt about something", sentence: "When I said I'd finished my homework early, Mom looked skeptical." },
+  { id: 13, word: "audible", pos: "adj", definition: "(adj) heard or able to be heard", sentence: "Her voice was barely audible over the noise." },
+  { id: 14, word: "edible", pos: "adj", definition: "(adj) suitable or safe to eat", sentence: "All of the decorations on the gingerbread house were edible." },
+  { id: 15, word: "perpetual", pos: "adj", definition: "(adj) continuing forever or for a very long time without stopping", sentence: "The region is in a state of perpetual war." },
+  { id: 16, word: "staple", pos: "adj", definition: "(adj) used, needed, or enjoyed constantly by many people", sentence: "That's a staple plot in mystery novels." },
+  { id: 17, word: "spontaneous", pos: "adj", definition: "(adj) done or said in a natural and often sudden way and without a lot of thought or planning", sentence: "His jokes seemed spontaneous, but were in fact carefully prepared beforehand." },
+  { id: 18, word: "reckless", pos: "adj", definition: "(adj) not showing proper concern about the possible bad results of your actions", sentence: "She has gotten two tickets for reckless driving." },
+  { id: 19, word: "scanty", pos: "adj", definition: "(adj) very small in size or amount", sentence: "The cheerleaders wore scanty outfits." },
+  { id: 20, word: "immense", pos: "adj", definition: "(adj) very great in size or amount", sentence: "He inherited an immense fortune." },
+  { id: 21, word: "wretched", pos: "adj", definition: "(adj) very unhappy, ill, etc.", sentence: "I don't know what's wrong with her, but she looks wretched." },
+  { id: 22, word: "extravagant", pos: "adj", definition: "(adj) more than is usual, necessary, or proper", sentence: "The company has been making extravagant claims about the drug's effectiveness." },
+  { id: 23, word: "Antarctic", pos: "adj", definition: "(adj) Antarctica and the ocean around it", sentence: "The group is involved in Antarctic exploration." },
+  { id: 24, word: "feudal", pos: "adj", definition: "(adj) relating to a social system that existed in Europe during the Middle Ages in which people worked and fought for nobles who gave them protection and the use of land in return", sentence: "Peasants made up the greatest portion in the feudal system." },
+  { id: 25, word: "tranquil", pos: "adj", definition: "(adj) quiet and peaceful", sentence: "She stared at the tranquil surface of the water." },
+  { id: 26, word: "inherent", pos: "adj", definition: "(adj) belonging to the basic nature of someone or something", sentence: "She believes that goodness is inherent in all people." },
+  { id: 27, word: "manual", pos: "adj", definition: "(adj) doing or involving hard physical work", sentence: "She spent the summer doing manual labor on her uncle's farm." },
+  { id: 28, word: "cynical", pos: "adj", definition: "(adj) believing that people are generally selfish and dishonest", sentence: "Cynical people say there is no such thing as true love." },
+  { id: 29, word: "fragile", pos: "adj", definition: "(adj) easily broken or damaged", sentence: "The glass dish is very fragile." },
+  { id: 30, word: "elastic", pos: "adj", definition: "(adj) able to return to an original shape or size after being stretched, squeezed, etc.", sentence: "A lot of sportswear is made of very elastic material." },
+  { id: 31, word: "plausible", pos: "adj", definition: "(adj) possibly true : believable or realistic", sentence: "I thought her explanation was completely plausible." },
+  { id: 32, word: "conservative", pos: "adj", definition: "(adj) believing in the value of established and traditional practices in politics and society : relating to or supporting political conservatism", sentence: "Older people tend to be more conservative and a bit suspicious of anything new." },
+  { id: 33, word: "static", pos: "adj", definition: "(adj) showing little or no change, action, or progress", sentence: "The computer program can turn static images into movies." },
+  { id: 34, word: "manifest", pos: "adj", definition: "(adj) able to be seen : clearly shown or visible", sentence: "His love for literature is manifest in his large library." },
+  { id: 35, word: "legitimate", pos: "adj", definition: "(adj) allowed according to rules or laws", sentence: "Who is the legitimate heir to the throne?" },
+  { id: 36, word: "virtuous", pos: "adj", definition: "(adj) morally good : having or showing virtue", sentence: "She felt that she had made a virtuous decision by donating the money to charity." },
+  { id: 37, word: "obsolete", pos: "adj", definition: "(adj) no longer used because something newer exists", sentence: "The system was made obsolete by their invention." },
+  { id: 38, word: "relevant", pos: "adj", definition: "(adj) relating to a subject in an appropriate way", sentence: "Her comments were not relevant to the discussion." },
+  { id: 39, word: "notorious", pos: "adj", definition: "(adj) well-known or famous especially for something bad", sentence: "The coach is notorious for his violent outbursts." },
+  { id: 40, word: "strenuous", pos: "adj", definition: "(adj) requiring or showing great energy and effort", sentence: "Avoid all strenuous exercise until the sprain heals." },
+  { id: 41, word: "solemn", pos: "adj", definition: "(adj) very serious or formal in manner, behavior, or expression", sentence: "He recited the poem in a solemn voice." },
+  { id: 42, word: "intricate", pos: "adj", definition: "(adj) having many parts", sentence: "The movie has an intricate plot." },
+  { id: 43, word: "pessimistic", pos: "adj", definition: "(adj) having or showing a lack of hope for the future : expecting bad things to happen", sentence: "Most doctors were pessimistic that a cure could be found." },
+  { id: 44, word: "tedious", pos: "adj", definition: "(adj) boring and too slow or long", sentence: "He made a tedious 45-minute speech." },
+  { id: 45, word: "aggressive", pos: "adj", definition: "(adj) ready and willing to fight, argue, etc. : feeling or showing aggression", sentence: "He started to get aggressive and began to shout." },
+  { id: 46, word: "compulsory", pos: "adj", definition: "(adj) required by a law or rule", sentence: "Attendance is compulsory for all students." },
+  { id: 47, word: "radical", pos: "adj", definition: "(adj) very new and different from what is traditional or ordinary", sentence: "The computer has introduced radical innovations." },
+  { id: 48, word: "eccentric", pos: "adj", definition: "(adj) tending to act in strange or unusual ways", sentence: "She had an eccentric habit of collecting stray cats." },
+  { id: 49, word: "crucial", pos: "adj", definition: "(adj) extremely important", sentence: "It is crucial that the report should be on time." },
+  { id: 50, word: "respectable", pos: "adj", definition: "(adj) considered to be good, correct, or acceptable : decent or correct in character, behavior, or appearance", sentence: "His parents are poor but respectable people." }
 ];
 </file>
 

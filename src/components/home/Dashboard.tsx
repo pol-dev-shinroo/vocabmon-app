@@ -208,11 +208,6 @@ export default function Dashboard() {
 
       {/* Logout button */}
       <div className="w-full flex justify-end px-6 pt-6 z-20 relative gap-3">
-        {username === 'dev' && (
-          <Link href="/design" className="bg-purple-600 hover:bg-purple-700 text-white font-black py-2 px-4 rounded-full shadow-sm transition-all flex items-center gap-2">
-            <span>🎨</span> Design Lab
-          </Link>
-        )}
         <button onClick={() => logoutUser()} className="text-sm font-bold text-gray-400 hover:text-gray-700 transition-colors flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
           Log Out
         </button>
@@ -280,34 +275,36 @@ export default function Dashboard() {
               </div>
             )}
 
-            <div className="mb-6"><PixelVocabmon feedTrigger={showFireworks ? 1 : 0} attackTrigger={atkTrigger} level={levelStats.level} className={isSetComplete && currentSet < totalSets - 1 ? "animate-evo-glow" : ""} /></div>
-            <div className="w-full flex justify-center z-20">
-              <button 
-                onClick={() => { 
-                  // 🔊 Play Sound Effect
-                  try {
-                    const sfx = new Audio('/attack.mp3'); // Change filename if needed!
-                    sfx.volume = 0.6;
-                    sfx.play().catch(e => console.log('SFX blocked'));
-                  } catch (e) {}
+            <div className="mb-6"><PixelVocabmon variant={username === 'jane' ? 'jane' : 'digimon'} feedTrigger={showFireworks ? 1 : 0} attackTrigger={atkTrigger} level={levelStats.level} className={isSetComplete && currentSet < totalSets - 1 ? "animate-evo-glow" : ""} /></div>
+            {username !== 'jane' && (
+              <div className="w-full flex justify-center z-20">
+                <button 
+                  onClick={() => { 
+                    // 🔊 Play Sound Effect
+                    try {
+                      const sfx = new Audio('/attack.mp3'); // Change filename if needed!
+                      sfx.volume = 0.6;
+                      sfx.play().catch(e => console.log('SFX blocked'));
+                    } catch (e) {}
 
-                  // ⚔️ Trigger Attack Logic
-                  if (atkCharges > 0) { 
-                    setAtkCharges((p) => { 
-                      const newVal = p - 1; 
-                      localStorage.setItem("atk_charges", newVal.toString()); 
-                      return newVal; 
-                    }); 
-                    setAtkTrigger((p) => p + 1); 
-                  } else { 
-                    setShowEnergyAlert(true); 
-                  } 
-                }} 
-                className="bg-white/90 backdrop-blur-sm border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-black px-6 py-3 rounded-xl shadow-sm transition-transform active:scale-95 w-full flex items-center justify-center gap-2 text-lg"
-              >
-                ⚔️ Attack ({atkCharges}/10)
-              </button>
-            </div>
+                    // ⚔️ Trigger Attack Logic
+                    if (atkCharges > 0) { 
+                      setAtkCharges((p) => { 
+                        const newVal = p - 1; 
+                        localStorage.setItem("atk_charges", newVal.toString()); 
+                        return newVal; 
+                      }); 
+                      setAtkTrigger((p) => p + 1); 
+                    } else { 
+                      setShowEnergyAlert(true); 
+                    } 
+                  }} 
+                  className="bg-white/90 backdrop-blur-sm border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-black px-6 py-3 rounded-xl shadow-sm transition-transform active:scale-95 w-full flex items-center justify-center gap-2 text-lg"
+                >
+                  ⚔️ Attack ({atkCharges}/10)
+                </button>
+              </div>
+            )}
           </div>
 
           <div>
