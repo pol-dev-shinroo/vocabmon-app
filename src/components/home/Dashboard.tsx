@@ -218,7 +218,9 @@ export default function Dashboard() {
         <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100 relative">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="text-2xl font-black text-gray-800 mb-2">Jay&apos;s Partner</h2>
+              <h2 className="text-2xl font-black text-gray-800 mb-2">
+                {username ? `${username.charAt(0).toUpperCase() + username.slice(1)}'s Partner` : "Your Partner"}
+              </h2>
               <span className="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-sm">Lv. {levelStats.level}</span>
             </div>
             <div className="flex gap-2">
